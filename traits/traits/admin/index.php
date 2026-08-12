@@ -1,0 +1,24 @@
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
+
+load_trait('admin/book');
+load_trait('admin/broadcastpartner');
+load_trait('admin/certificate');
+load_trait('admin/common');
+load_trait('admin/design');
+load_trait('admin/dropshipper');
+load_trait('admin/dump');
+load_trait('admin/event');
+load_trait('admin/lead');
+load_trait('admin/marketing');
+load_trait('admin/medallion');
+load_trait('admin/order');
+load_trait('admin/report');
+load_trait('admin/review');
+load_trait('admin/royalty');
+load_trait('admin/setting');
+load_trait('admin/site');
+load_trait('admin/subscription');
+load_trait('admin/template');
+load_trait('admin/ticket');
+load_trait('admin/user');
+load_trait('admin/brisharks');
