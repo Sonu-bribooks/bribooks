@@ -223,7 +223,7 @@ $(function () {
 
 <script>
 const firebaseConfig = {
-	apiKey: "AIzaSyBGp_2oBETiMjZbDXuV8PuFJb-dkoQbi7I",
+	apiKey: "",
 	authDomain: "youbooksi.firebaseapp.com",
 	projectId: "youbooksi",
 	storageBucket: "youbooksi.appspot.com",

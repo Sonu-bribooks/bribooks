@@ -807,6 +807,10 @@ trait CommunicationKit {
 							'label'	=> _l('coupon_used'),
 							'value'	=> 'coupon_used',
 						],
+						[
+							'label'	=> _l('parent_kit'),
+							'value'	=> 'parent_kit',
+						],
 					],
 				],
 				[

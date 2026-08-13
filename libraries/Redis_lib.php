@@ -60,6 +60,9 @@ final class Redis_lib {
 	}
 
 	public function get($key) {
+		 if (!$this->_redis) {
+			return false;
+		}
 		$value = $this->_redis->get($key);
 
 		if ($value !== FALSE && $this->_redis->sIsMember('_ci_redis_serialized', $key)) {
@@ -70,6 +73,9 @@ final class Redis_lib {
 	}
 
 	public function save($id, $data, $ttl = 60, $raw = FALSE) {
+		if (!$this->_redis) {
+			return FALSE;
+		}
 		if (is_array($data) OR is_object($data)) {
 			if (!$this->_redis->sIsMember('_ci_redis_serialized', $id) && !$this->_redis->sAdd('_ci_redis_serialized', $id)) {
 				return FALSE;
@@ -134,6 +140,9 @@ final class Redis_lib {
 	}
 
 	public function getRank($key = NULL, $value = NULL) {
+		if (!$this->_redis) {
+			return;
+		}
 		return $this->_redis->zRank($key, $value);
 	}
 

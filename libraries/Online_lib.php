@@ -67,19 +67,45 @@ final class Online_lib {
 	}
 
 	public function save($user_id = NULL, $data = [], $ttl = 300) {
-		if (empty($user_id)) return;
+		// if (empty($user_id)) return;
+
+		// $data['time'] = time();
+
+		// $this->_redis->setex($this->_key . $user_id, $ttl, json_encode($data));
+
+		if (empty($user_id) || !$this->_redis) {
+			return;
+		}
 
 		$data['time'] = time();
 
-		$this->_redis->setex($this->_key . $user_id, $ttl, json_encode($data));
+		$this->_redis->setex(
+			$this->_key . $user_id,
+			$ttl,
+			json_encode($data)
+		);
 	}
 
 	public function get() {
+		// $results = $this->_redis->keys($this->_key . '*');
+
+		// $onlines = [];
+
+		// foreach ($results as $key => $item) {
+		// 	$onlines[] = json_decode($this->_redis->get($item), true);
+		// }
+
+		// return $onlines;
+
+		 if (!$this->_redis) {
+			return [];
+		}
+
 		$results = $this->_redis->keys($this->_key . '*');
 
 		$onlines = [];
 
-		foreach ($results as $key => $item) {
+		foreach ($results as $item) {
 			$onlines[] = json_decode($this->_redis->get($item), true);
 		}
 
@@ -87,10 +113,18 @@ final class Online_lib {
 	}
 
 	public function total() {
-		if (!$this->_redis) {
-			return 0;   
-		}    //added by sonu for test environment
+		// if (!$this->_redis) {
+		// 	return 0;   
+		// }    //added by sonu for test environment
+		// $keys = $this->_redis->keys($this->_key . '*');
+		// return !empty($keys) ? count($keys) : 0;
+
+		 if (!$this->_redis) {
+			return 0;
+		}
+
 		$keys = $this->_redis->keys($this->_key . '*');
+
 		return !empty($keys) ? count($keys) : 0;
 	}
 

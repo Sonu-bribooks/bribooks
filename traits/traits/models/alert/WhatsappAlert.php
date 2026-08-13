@@ -227,7 +227,7 @@ trait WhatsappAlert {
 
 			if ($ordered_author_copies > 0) return;
 
-			$path_parts = pathinfo($data['image']);
+			$path_parts = pathinfo($data['image'] ?? '');
 
 			$data['title']			= self::formatEmailSubject($template, $site_id, [
 					'author_name'	  	=> $info['author_name'],

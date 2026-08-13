@@ -575,7 +575,7 @@ trait BookAlert {
 			'duration'	  			=> $kit_info['coupon_duration'] ?? 24,
 			'coupon'	  			=> $coupon_info['code'],
 			'date'	  				=> date('M j, Y'),
-			'duration_time'	  		=> $coupon_info['date_end'],
+			'duration_time'	  		=> $coupon_info['date_end'] ?? '',
 			'event_id'	  			=> $event_id,
 			'book_id'	  			=> $book_id,
 			'user_id'	  			=> $user_info['id'],

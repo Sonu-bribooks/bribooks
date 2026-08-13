@@ -193,6 +193,7 @@ trait EventChallengeGeneral {
 			'key'		=> 'book_sold',
 			'label'		=> _l('book_sold'),
 			'value'		=> $info['book_sold'] ?? '',
+			'required'  => false,
 		];
 
 		$data['fields'][] = [
@@ -200,6 +201,7 @@ trait EventChallengeGeneral {
 			'key'		=> 'max_book_sold',
 			'label'		=> _l('max_book_sold'),
 			'value'		=> $info['max_book_sold'] ?? '',
+			'required'  => false,
 		];
 
 		$data['fields'][] = [
@@ -207,6 +209,7 @@ trait EventChallengeGeneral {
 			'key'		=> 'min_published',
 			'label'		=> _l('min_published(school/teacher)'),
 			'value'		=> $info['min_published'] ?? '',
+			'required'  => false,
 		];
 
 		$data['fields'][] = [
@@ -214,6 +217,7 @@ trait EventChallengeGeneral {
 			'key'		=> 'max_published',
 			'label'		=> _l('max_published(school/teacher)'),
 			'value'		=> $info['max_published'] ?? '',
+			'required'  => false,
 		];
 
 		$data['fields'][] = [
@@ -298,6 +302,7 @@ trait EventChallengeGeneral {
 			'label'		=> _l('limit'),
 			'required'	=> false,
 			'value'		=> $info['limit'] ?? 0,
+			'required'  => false,
 		];
 
 		$data['fields'][] = [

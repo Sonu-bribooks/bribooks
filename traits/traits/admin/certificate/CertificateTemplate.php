@@ -269,6 +269,24 @@ trait CertificateTemplates {
 
 		$data['fields'][] = [
 			'type'		=> 'select',
+			'key'		=> 'user_type',
+			'label'		=> _l('user_type'),
+			'required'	=> true,
+			'value'	 	=> $template_info['user_type'] ?? 'user',
+			'options'	=> [
+				[
+					'label'	=> _l('user'),
+					'value'	=> 'user',
+				],
+				[
+					'label'	=> _l('school'),
+					'value'	=> 'school',
+				],
+			],
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'select',
 			'key'		=> 'status',
 			'label'		=> _l('select_status'),
 			'required'	=> true,

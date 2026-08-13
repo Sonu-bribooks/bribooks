@@ -297,7 +297,7 @@ trait AutoLeagueClosingAlert {
 
 	public function generateLeagueCertificateCron($data = []) {
 		log_kb([
-			'generateLeagueCertificateCron' => $data
+			'generateLeagueCertificateCron::function' => $data
 		]);
 
 		$this->load->model('certificate/Certificate_model', 'certificate_model');
@@ -314,6 +314,9 @@ trait AutoLeagueClosingAlert {
 
 		$model_file_path = sprintf(APPPATH . 'models/ranking/Ranking%s_model.php', ucwords($data['type']));
 
+		log_kb([
+				'generateLeagueCertificateCron::filePath' => $model_file_path
+			]);
 		$ranks = [];
 
 		if (file_exists($model_file_path)) {
@@ -377,6 +380,9 @@ trait AutoLeagueClosingAlert {
 				}
 			}
 		}
+		log_kb([
+				'generateLeagueCertificateCron::exit'
+			]);
 	}
 
 	public function sendLeagueMessageCron($data = []) {
