@@ -45,3 +45,4 @@ uploads/bluedart_ship_token_file_briboo_kb_tok_file.php
 /config/payment_sms_gateway.php
 /logs
 /cache
+/bb_sessions

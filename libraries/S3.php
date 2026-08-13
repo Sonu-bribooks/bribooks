@@ -1409,6 +1409,29 @@ class S3
 
 	public static function amazonS3Upload($image_name, $fileTempName, $upload_folder)
 	{
+		log_kb(['amazonS3Upload::S3'=>[$image_name, $fileTempName, $upload_folder]]);
+
+		// Local environment
+		if (ENVIRONMENT === 'development') {
+
+			$folder = FCPATH . 'uploads/' . $upload_folder . '/';
+
+			if (!is_dir($folder)) {
+				mkdir($folder, 0777, true);
+			}
+
+			$destination = $folder . $image_name;
+
+			if (copy($fileTempName, $destination)) {
+				return [
+					'image_url'  => base_url('uploads/' . $upload_folder . '/' . $image_name),
+					'image_name' => $image_name
+				];
+			}
+
+			return false;
+		}
+		
 		S3::putBucket(self::$bucket_name);
 
 		//move the file

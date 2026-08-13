@@ -952,19 +952,42 @@ if (!function_exists('generateQrCode')) {
 		$qr_img_width = imagesx($qr_img);
 		$qr_img_height = imagesy($qr_img);
 
+		// imagecopyresampled(
+		// 	$qr_img,
+		// 	$logo,
+		// 	($qr_img_width / 2 - $logo_width / ($logo_size * 2)),
+		// 	($qr_img_height / 2 - $logo_height / ($logo_size * 2)),
+		// 	0,
+		// 	0,
+		// 	$logo_width / $logo_size,
+		// 	$logo_height / $logo_size,
+		// 	$logo_width,
+		// 	$logo_height
+		// );
+		log_kb([
+			'qr_img_width' => $qr_img_width,
+			'qr_img_height' => $qr_img_height,
+			'logo_width' => $logo_width,
+			'logo_height' => $logo_height,
+			'logo_size' => $logo_size,
+			'dst_x' => $qr_img_width / 2 - $logo_width / ($logo_size * 2),
+			'dst_y' => $qr_img_height / 2 - $logo_height / ($logo_size * 2),
+			'dst_width' => $logo_width / $logo_size,
+			'dst_height' => $logo_height / $logo_size,
+		]);
+
 		imagecopyresampled(
 			$qr_img,
 			$logo,
-			($qr_img_width / 2 - $logo_width / ($logo_size * 2)),
-			($qr_img_height / 2 - $logo_height / ($logo_size * 2)),
+			(int)round($qr_img_width / 2 - $logo_width / ($logo_size * 2)),
+			(int)round($qr_img_height / 2 - $logo_height / ($logo_size * 2)),
 			0,
 			0,
-			$logo_width / $logo_size,
-			$logo_height / $logo_size,
-			$logo_width,
-			$logo_height
+			(int)round($logo_width / $logo_size),
+			(int)round($logo_height / $logo_size),
+			(int)round($logo_width),
+			(int)round($logo_height)
 		);
-
 		imagepng($qr_img, $file);
 
 		is_file($qr_code_file) && unlink($qr_code_file);

@@ -190,6 +190,7 @@ trait Certificate {
 						'has_isbn' 		=> $template['has_isbn'],
 						'has_rank' 		=> $template['has_rank'],
 						'rank_x_axis' 	=> $template['rank_x_axis'],
+						'rank_y_axis' 	=> $template['rank_y_axis'],
 						'book_id' 		=> $book_info['id'] ?? 0,
 						'book_name' 	=> $this->input->post('achievement') == 2 ? $school_name : ($book_info['name'] ?? ''),
 						'book_isbn' 	=> $book_info['isbn'] ?? '',
@@ -247,6 +248,8 @@ trait Certificate {
 			$this->load->model('certificate/CertificateTemplate_model', 'certificate_template_model');
 			$certificate_info = $this->certificate_model->getByCode($certificate_code);
 
+			log_kb(['downloadAuthorCertfifcate::certificateInfo' => $certificate_info]);
+
 			if (!empty($certificate_info)) {
 				$author_info 	= $this->student_model->get($certificate_info['user_id']);
 
@@ -261,20 +264,21 @@ trait Certificate {
 				}
 
 				$book_info 		= $this->book_model->get($certificate_info['book_id']);
-
+				log_kb(['downloadAuthorCertfifcate::book_info' => $book_info]);
 				$certificate_template_info = $this->certificate_template_model->get($certificate_info['certificate_template_id']);
-
+				log_kb(['downloadAuthorCertfifcate::certificate_template_info' => $certificate_template_info]);
 				self::_genCertificatePdf([
 					'event_id'		=> $certificate_template_info['event_id'],
 					'image' 		=> $certificate_template_info['image'],
 					'has_isbn' 		=> $certificate_template_info['has_isbn'],
 					'has_rank' 		=> $certificate_template_info['has_rank'],
 					'rank_x_axis' 	=> $certificate_template_info['rank_x_axis'],
+					'rank_y_axis' 	=> $certificate_template_info['rank_y_axis'],
 					'book_id' 		=> $book_info['id'],
 					'book_name' 	=> $certificate_info['achievement'] == 2 ? $school_name : $book_info['name'],
 					'book_isbn' 	=> $book_info['isbn'],
 					'author_name' 	=> $certificate_info['achievement'] == 2 ? ucwords($author_info['first_name'] . ' ' . $author_info['last_name']) : $book_info['author_name'],
-					'author_id' 	=> $book_info['author_id'],
+					'author_id' 	=> $book_info['author_id'] ?? '',
 					'date' 			=> $certificate_info['date_added'],
 					'cert_unique_id'=> $certificate_info['unique_id'],
 					'image_name'    => $certificate_info['image'],
@@ -314,6 +318,8 @@ trait Certificate {
 		$qr_file 	= generateQrCode('http://www.bribooks.com/verifycertificate/' . $data['cert_unique_id'], 20, 2);
 		$qr_image 	= imagecreatefrompng(FCPATH . $qr_file);
 
+		log_kb(['generatecertiPdf::Qrfile' => $qr_file,'QrImage'=>$qr_image]);
+
 		$darkgrey 	= imagecolorallocate($image, 70, 70, 70);
 		$grey 		= imagecolorallocate($image, 110, 110, 110);
 		$black 		= imagecolorallocate($image, 0, 0, 0);
@@ -348,7 +354,8 @@ trait Certificate {
 
 		if (!empty($data['has_rank']) && !empty($data['rank'])) {
 			$rank_x_axis = !empty($data['rank_x_axis']) ? $data['rank_x_axis'] : 1000;
-			imagettftext($image, 22, 0, $rank_x_axis, 922, $black, $font_path, sprintf('%02d', strtoupper($data['rank'])));
+			$rank_y_axis = !empty($data['rank_y_axis']) ? $data['rank_y_axis'] : 922;
+			imagettftext($image, 22, 0, $rank_x_axis, $rank_y_axis, $black, $font_path, sprintf('%02d', strtoupper($data['rank'])));
 		}
 
 		if (in_array($data['event_id'], [10, 11, 12])) {
@@ -375,17 +382,30 @@ trait Certificate {
 				$qr_image_height
 			);
 		} else {
+			// imagecopyresampled(
+			// 	$image,
+			// 	$qr_image,
+			// 	($image_width - $qr_image_width / $zoom - 207),
+			// 	($image_height - $qr_image_height / $zoom - 262),
+			// 	0,
+			// 	0,
+			// 	$qr_image_width / $zoom,
+			// 	$qr_image_height / $zoom,
+			// 	$qr_image_width,
+			// 	$qr_image_height
+			// );
+
 			imagecopyresampled(
 				$image,
 				$qr_image,
-				($image_width - $qr_image_width / $zoom - 207),
-				($image_height - $qr_image_height / $zoom - 262),
+				(int)round($image_width - $qr_image_width / $zoom - 207),
+				(int)round($image_height - $qr_image_height / $zoom - 262),
 				0,
 				0,
-				$qr_image_width / $zoom,
-				$qr_image_height / $zoom,
-				$qr_image_width,
-				$qr_image_height
+				(int)round($qr_image_width / $zoom),
+				(int)round($qr_image_height / $zoom),
+				(int)round($qr_image_width),
+				(int)round($qr_image_height)
 			);
 		}
 
@@ -395,7 +415,7 @@ trait Certificate {
 		imagedestroy($image);
 
 		// upload to s3 bucket and share the cloudfront url
-		log_kb(['GenerareCertififcate::' => $this->s3->amazonS3Upload(
+		log_kb(['GenerareCertififcate::AmazonS3' => $this->s3->amazonS3Upload(
 			$data['image_name'] . '.png',
 			$filename,
 			rtrim($this->config->item('s3_author_certificates'), '/')
