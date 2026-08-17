@@ -30,7 +30,7 @@ $config['password_salt']  = '';
 
 $config['bb_secret_jwt_token']  = ENVIRONMENT === 'production'
 	? ''
-	: '';
+	: 'SonuTestSecretkey_bb_secret_jwt_token';
 
 // no of days to keep log files
 define('LOG_TIME', 7);
@@ -62,12 +62,14 @@ define('TESTING_MOBILES', [
 	'918112237758',
 	'917303234240',
 	'919534086239',
+	'919572894967'
 ]);
 
 define('TESTING_EMAILS', [
 	'abhishek@youbooks.co',
 	'deepak789456123@gmail.com',
-	'publishing@bribooks.com'
+	'publishing@bribooks.com',
+	'sonu@bribooks.com'
 ]);
 
 define('REVIEWER_EMAILS', [
@@ -307,7 +309,7 @@ if (ENVIRONMENT === 'production') {
 	define('RECAPTCHA_SECRET', '');
 }
 
-define('EMAIL_SERVICE', 'ses');
+define('EMAIL_SERVICE', 'test');
 define('EMAIL_ACCOUNTS', [
 	'ses' => [
 		'host'		=> 'email-smtp.us-east-1.amazonaws.com',
@@ -329,5 +331,29 @@ define('EMAIL_ACCOUNTS', [
 		'password'	=> '',
 		'sender'	=> 'no-reply@bribooks.info',
 		'webhook'	=> false,
-	]
+	],
+	'test' => [
+		'host'		=> 'sandbox.smtp.mailtrap.io',
+		'username'	=> '2be2fb43d54c2a',
+		'password'	=> 'ac16275c21e17d',
+		'sender'	=> 'no-reply@bribooks.shop',
+		'webhook'	=> false,
+	],
 ]);
+
+
+$config['site_base_price'] = 10;
+$config['site_ebook_price'] = 10;
+$config['site_audio_book_price'] = 20;
+$config['site_black_white_price'] = 2;
+
+$config['site_free_page_limit'] = 10;
+$config['site_price_per_page'] = 2;
+
+$config['site_black_white_price_per_page'] = 1;
+$config['site_black_white_free_limit'] = 5;
+$config['site_country_code'] = 'IN';
+$config['site_currency_code'] = 'INR';
+$config['site_currency_symbol'] = '₹';
+$config['site_currency_id'] = 47;
+$config['site_payment_gateway'] = 'stripe-test';

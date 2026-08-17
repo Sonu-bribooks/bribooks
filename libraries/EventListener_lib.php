@@ -435,7 +435,8 @@ final class EventListener_lib {
 
 		$CI->Alert_model->genericMessageTemplate([
 			'id'			  	=> $order_info['id'],
-			'code'				=> 'order_out_for_delivery',
+			// 'code'				=> 'order_out_for_delivery',
+			'code'				=> 'order_undelivered',
 			'site_id'			=> $site_id,
 			'email'		   		=> $user_info['email'],
 			'mobile'		  	=> $user_info['mobile'],

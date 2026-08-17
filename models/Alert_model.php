@@ -142,6 +142,7 @@ class Alert_model extends CI_Model {
 			$mail->SMTPSecure 	= get_settings('smtp_crypto') ?? 'tls';
 			$mail->Port	   		= get_settings('smtp_port');
 
+			
 			//Recipients
 			$mail->setFrom($sender, ($sender_name ?? get_settings('system_name')));
 			$mail->addAddress($to);
@@ -202,6 +203,7 @@ class Alert_model extends CI_Model {
 			$mail->Body		= $message;
 			$mail->AltBody 	= $subject;
 
+			log_kb(['AlertModel::Email' => $mail]);
 			$mail->send();
 
 			update_thirdparty_status(EMAIL_SERVICE, true, '');

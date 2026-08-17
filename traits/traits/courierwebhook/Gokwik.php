@@ -31,7 +31,35 @@ trait Gokwik {
 		'CANCELLED',
 	];
 
-	public $gokwik_scan_status = [];
+	public $gokwik_scan_status = [
+		'PICKUP COMPLETED',
+		'IN TRANSIT',
+		'REACHED AT DESTINATION CENTER',
+		'MISROUTED',
+		'OUT FOR DELIVERY',
+		'DELIVERED',
+		'UNDELIVERED',
+		'RTO INITIATED',
+		'RTO IN TRANSIT',
+		'RTO OUT FOR DELIVERY',
+		'RTO DELIVERED',
+		'RTO UNDELIVERED',
+		'RETURN PICKUP INITIATED',
+		'RETURN PICKUP COMPLETED',
+		'RETURN IN TRANSIT',
+		'RETURN OUT FOR DELIVERY',
+		'RETURN DELIVERED',
+		'RETURN UNDELIVERED',
+		'RETURN CANCELLED',
+		'RETURN PICKUP FAILED',
+		'PICKUP ERROR',
+		'PICKUP FAILED',
+		'LOST',
+		'DAMAGED',
+		'DISPOSED OFF',
+		'QC FAILED',
+		'CANCELLED',
+	];
 
 	protected $gokwik_status_mapping = [];
 
@@ -97,8 +125,6 @@ trait Gokwik {
 		if (empty($data['order_id'])) exit(_li('order_not_found'));
 
 		$order_info = $this->order_model->getOrderByCode($data['order_id']);
-
-		if (empty($order_info)) return;
 
 		if (!empty($order_info)) {
 			self::_updateOrder($data, $order_info, 'gokwik');

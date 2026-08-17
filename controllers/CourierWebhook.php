@@ -53,7 +53,7 @@ class CourierWebhook extends CI_Controller {
 		}
 
 		$shipment_info = json_decode($order_info['shipping_tracking_info'], true);
-
+		
 		if (!empty($data['scans'])) {
 			foreach ($data['scans'] ?? [] as $value) {
 				if (in_array($value['sr-status'], $this->{$vendor . '_scan_status'})) {
@@ -110,7 +110,7 @@ class CourierWebhook extends CI_Controller {
 				]);
 			}
 		}
-
+		
 		if ($data['order_current_status_id'] == ORDER_STATUS['shipped']) {
 			CI_Events::trigger('order_shipped', [
 				'order_id'	=> $order_info['id']

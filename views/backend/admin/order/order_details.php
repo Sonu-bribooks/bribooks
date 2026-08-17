@@ -32,9 +32,9 @@
 							<td><?php echo $order_info['weight'] ?><?=_l('gm') ?></td>
 							<td>
 								<?php
-								$courier_data = json_decode($order_info['shipping_tracking_info'], true);
+								$courier_data = json_decode($order_info['shipping_tracking_info'] ?? '', true);
 								$courier_info = json_decode($order_info['shipping_info'], true);
-								echo '<p>Courier : ' . $courier_info['courier_name'] . '</p>';
+								echo '<p>Courier : ' . $courier_info['courier_name'] ?? ''. '</p>';
 								echo '<p>AWB : ' . (!empty($courier_data['awb_code']) ? '<a href="https://shiprocket.co/tracking/'.$courier_data['awb_code'].'" target="_blank">'.$courier_data['awb_code'].'</a>' : '') . '</p>';
 								?>
 								<?=_l('shipping_charge')?>::<?=$order_info['currency_symbol']?><?=$order_info['shipping_cost']?>

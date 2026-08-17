@@ -195,6 +195,69 @@ class Authentication {
 		}
 	}
 
+	// private function _initUserSession($suppress = false)
+	// {
+	// 	try {
+	// 		$secret_key = $this->config->item('bb_secret_jwt_token');
+	// 		log_kb([
+	// 			'DECODE_JWT_SECRET_LENGTH' => strlen((string)$secret_key),
+	// 			'DECODE_JWT_SECRET_HASH' => hash('sha256', (string)$secret_key),
+	// 		]);
+
+	// 		$authorization = trim(
+	// 			$this->input->get_request_header('Authorization')
+	// 		);
+
+	// 		$headers = preg_split('/\s+/', $authorization);
+
+	// 		$token = $headers[1] ?? '';
+
+	// 		log_kb([
+	// 			'DECODE_TOKEN_HASH' => hash('sha256', $token),
+	// 			'DECODE_TOKEN_LENGTH' => strlen($token),
+	// 		]);
+
+	// 		log_kb([
+	// 			'jwt_debug' => [
+	// 				'authorization_exists' => !empty($authorization),
+	// 				'header_count' => count($headers),
+	// 				'has_token' => !empty($token),
+	// 				'token_length' => strlen($token),
+	// 				'token_parts' => count(explode('.', $token)),
+	// 				'secret_length' => strlen((string)$secret_key),
+	// 			]
+	// 		]);
+
+	// 		$decoded = JWT::decode(
+	// 			$token,
+	// 			$secret_key,
+	// 			['HS256']
+	// 		);
+
+	// 		$decoded = (array)$decoded;
+
+	// 		print_r([
+	// 			'decoded' => $decoded
+	// 		]);
+	// 		exit('decode success');
+
+	// 	} catch (Exception $e) {
+
+	// 		log_kb([
+	// 			'JWT_EXCEPTION_CLASS'   => get_class($e),
+	// 			'JWT_EXCEPTION_MESSAGE' => $e->getMessage(),
+	// 			'JWT_EXCEPTION_CODE'    => $e->getCode(),
+	// 		]);
+
+	// 		echo '<pre>';
+	// 		print_r([
+	// 			'exception_class' => get_class($e),
+	// 			'exception_message' => $e->getMessage(),
+	// 		]);
+	// 		exit('JWT decode error');
+	// 	}
+	// }
+
 	private function _removeUserSession() {
 		$this->session->unset_userdata([
 			'user_id',

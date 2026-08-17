@@ -405,7 +405,7 @@ trait Order {
 	}
 
 	private function _getPaymentProvider() {
-		if ($this->config->item('site_payment_gateway') == 'stripe') {
+		if ($this->config->item('site_payment_gateway') === 'stripe') {
 			return get_settings('payment_provider') ?? 'stripe';
 		} else {
 			return $this->config->item('site_payment_gateway');

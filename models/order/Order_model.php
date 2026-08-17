@@ -914,6 +914,10 @@ class Order_model extends CI_Model {
 	}
 
 	public function verifyOrder($data = []) {
+		// for testing only
+		if ($this->config->item('site_payment_gateway') === 'stripe-test') {
+			return self::verifyStripeTestOrder($data);
+		}
 		if ($this->config->item('site_payment_gateway') === 'stripe') {
 			return self::verifyStripeOrder($data);
 		}
@@ -944,6 +948,19 @@ class Order_model extends CI_Model {
 			log_kb(['verifyStripeOrder::Error::' => $e->getMessage()]);
 		}
 	}
+
+	//create for test order only 
+	public function verifyStripeTestOrder($data = []) {
+		try {
+			log_kb(['Stripe Data::' => $data]);
+			if($data['order_info']['provider'] == 'stripe-test') {
+				return true;
+			}
+		} catch (Exception $e) {
+			log_kb(['verifyStripeOrder::Error::' => $e->getMessage()]);
+		}
+	}
+	
 
 	private function _verifyPhonepeOrder($data = []) {
 		try {

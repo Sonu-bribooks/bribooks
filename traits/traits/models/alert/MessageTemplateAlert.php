@@ -11,6 +11,7 @@ trait MessageTemplateAlert {
 
 		$site_id			= $data['site_id'] ?? 1;
 		$template_info 		= $this->message_template_model->getByCode($data['code'], $site_id);
+		log_kb(['genericMessageTemplate::template_info' => $template_info]);
 		if (empty($template_info['status'])) return;
 
 		$id			 		= $data['id'] ?? 0;
@@ -19,6 +20,7 @@ trait MessageTemplateAlert {
 		$email		  		= $data['email'] ?? '';
 		$mobile		 		= $data['mobile'] ?? '';
 		$template_id		= $template_info['id'] ?? '';
+		
 
 		if ($schedule_time == 0) {
 			$this->genericMessageTemplateCron([
@@ -30,6 +32,7 @@ trait MessageTemplateAlert {
 				'data'			=> $data['data'],
 			]);
 		} else {
+			
 			$this->cron_model->add([
 				'code'			=> sprintf('genericMessageTemplateCron_%s_%s', $code, $id),
 				'action'		=> 'alert_model->genericMessageTemplateCron',
@@ -48,12 +51,13 @@ trait MessageTemplateAlert {
 	}
 
 	public function genericMessageTemplateCron($data = []) {
+		log_kb(['genericMessageTemplateCron::data'=>$data]);
 		if (empty($data['template_id']) || empty($data['data'])) return;
 
 		$this->load->model('common/MessageTemplate_model', 'message_template_model');
-
+		
 		if (empty($template_info = $this->message_template_model->get($data['template_id']))) return;
-
+		log_kb(['genericMessageTemplateCron::data::template_info'=>$template_info]);
 		$includes = !empty($data['includes']) ? $data['includes'] : ['email', 'sms', 'whatsapp'];
 
 		$email_template_info	= json_decode($template_info['email'], true);
@@ -63,6 +67,17 @@ trait MessageTemplateAlert {
 		$email				  	= $data['email'];
 		$mobile				 	= $data['mobile'];
 
+
+		log_kb([
+			'genericMessageTemplateCron::EMAIL_CHECK' => [
+				'email' => $email,
+				'includes' => $includes,
+				'template_id' => $data['template_id'],
+				'email_template_info' => $email_template_info,
+				'subject' => $email_template_info['subject'] ?? '',
+				'message' => $email_template_info['message'] ?? '',
+			]
+		]);
 		// Email part
 		if (
 			!empty($email_template_info['subject'] ?? '') &&

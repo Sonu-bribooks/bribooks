@@ -119,7 +119,7 @@
 				name="<?= $field['key'] ?>"
 				id="<?= $id ?>"
 				data-value="<?= is_array($field['value']) ? implode(',', $field['value']) : $field['value'] ?>"
-				data-ajax-options="<?= $field['ajax_options'] ?>"
+				data-ajax-options="<?= $field['ajax_options']?? '' ?>"
 				<?= $field['required'] ? ' required' : '' ?>
 			>
 				<option value=""><?= $field['label'] ?></option>
