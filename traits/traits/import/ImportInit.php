@@ -42,6 +42,7 @@ trait ImportInit {
 			'event_vote_book',
 			'event_certificate',
 			'event_literary_leader',
+			'relationship_manager'
 		];
 
 		$this->columns['author'] = [
@@ -367,6 +368,14 @@ trait ImportInit {
 			'literary_leader_challenge_id',
 			'site_id',
 			'rank',
+		];
+
+		$this->columns['relationship_manager'] = [
+			'school_id',
+			'name',
+			'email',
+			'mobile',
+			'manager_id',
 		];
 
 		$this->default_values['student'] = [
@@ -695,6 +704,7 @@ trait ImportInit {
 			'0(required)',
 			'0(required)',
 		];
+
 		$this->default_values['event_literary_leader'] = [
 			'0(required)',
 			'0(required)',
@@ -702,6 +712,15 @@ trait ImportInit {
 			'0(required)',
 			'0(required)',
 		];
+
+		$this->default_values['relationship_manager'] = [
+			'0(required)',
+			'0(required)',
+			'0(required)',
+			'0(required)',
+			'0',
+		];
+
 
 		$this->debug = true;
 	}

@@ -18,7 +18,8 @@ class Import extends CI_Controller {
 		ImportAuthorWall,
 		ImportEventExhibition,
 		ImportEventCertificate,
-		ImportEventLiteraryLeader
+		ImportEventLiteraryLeader,
+		ImportRelationshipManager
 	;
 
 	public function __construct() {

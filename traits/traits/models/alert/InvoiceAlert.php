@@ -187,13 +187,15 @@ trait InvoiceAlert {
 			($info = $this->order_model->get($id)) &&
 			($user_info = $this->user_model->get($info['user_id']))
 		) {
-			$data['title']			= _li('Thank you for purchasing at BriBooks');
-			$data['heading']		= _li('Thank you for purchasing at BriBooks');
+			// $data['title']			= _li('Thank you for purchasing at BriBooks');
+			// $data['heading']		= _li('Thank you for purchasing at BriBooks');
 
 			$info['shipping_info'] = json_decode($info['shipping_info'], true);
 
 			$products = $this->order_model->getProducts($id);
-
+			log_kb([
+				'invoiceordercron::Product' => [$products]
+			]);
 			$has_printed_copies = array_filter($products, function($item) {
 				$option = json_decode($item['option'], true);
 				return (!in_array(mb_strtolower($option['name']), ['ebook', 'audio book']));
@@ -206,71 +208,90 @@ trait InvoiceAlert {
 
 			$has_printed_copies && self::cron($id, 'orderProcessingAlertCron');
 
-			$has_my_order = array_filter($products, function($item) {
-				$book_id = $item['product_id'];
-				return $book_id == $item['user_id'] ?? 0;
-			});
+			log_kb([
+				'invoiceordercron::' => [$has_audiobook_copies, $has_printed_copies]
+			]);
+
+			
+			// $has_my_order = array_filter($products, function($item) {
+			// 	$book_id = $item['product_id'];
+			// 	return $book_id == $item['user_id'] ?? 0;
+			// });
 
 			$address_info = $this->address_model->getByID($info['address_id']);
 
-			$data['content']		= $this->load->view('common/mail/part/invoice_order', [
-				'products'			=> $products,
-				'has_printed_copies'=> $has_printed_copies,
-				'has_my_order'		=> $has_my_order,
-				'user'				=> [
-					'name'			=> $user_info['first_name'],
-					'location'		=> $user_info['location']
-				],
-				'order'				=> $info,
-				'address'			=> $address_info,
-			], true);
+			// $data['content']		= $this->load->view('common/mail/part/invoice_order', [
+			// 	'products'			=> $products,
+			// 	'has_printed_copies'=> $has_printed_copies,
+			// 	'has_my_order'		=> $has_my_order,
+			// 	'user'				=> [
+			// 		'name'			=> $user_info['first_name'],
+			// 		'location'		=> $user_info['location']
+			// 	],
+			// 	'order'				=> $info,
+			// 	'address'			=> $address_info,
+			// ], true);
 
-			$message 				= $this->load->view('common/mail/templates/' . (strpos($user_info['source'], 'NYAFIND') !== false ? 3 : 2) . '/general', $data, true);
+			//$message 				= $this->load->view('common/mail/templates/' . (strpos($user_info['source'], 'NYAFIND') !== false ? 3 : 2) . '/general', $data, true);
 
 			// $attachment 			= FCPATH . 'uploads/pdfs/order_invoice_' . $info['id'] . '.pdf';
 			// file_put_contents($attachment, self::_orderInvoice($id, true));
 
-			$email && self::email(
-				$user_info['email'],
-				$data['title'],
-				$message,
-				[],
-				$this->admin_emails,
-				// $attachment
-			);
+			// $email && self::email(
+			// 	$user_info['email'],
+			// 	$data['title'],
+			// 	$message,
+			// 	[],
+			// 	$this->admin_emails,
+			// 	// $attachment
+			// );
+
+			//******New code by Sonu****** */
+
+			$email && CI_Events::trigger('order_confirmation_paperback', [
+				'order_id'	=> $info['id']
+			]);
+
 
 			if (!empty($has_audiobook_copies)) {
 				foreach ($has_audiobook_copies as $value) {
 					if (!empty($book_info = $this->book_model->get($value['product_id']))) {
 
-						$subject 						= _li('Getting_Started_with_Your_Audiobook');
+						// $subject 						= _li('Getting_Started_with_Your_Audiobook');
 
-						$message						= $this->load->view('common/mail/part/audio_purchase_mail', [
-							'buyer_name' 	=> ucwords($user_info['first_name']),
+						// $message						= $this->load->view('common/mail/part/audio_purchase_mail', [
+						// 	'buyer_name' 	=> ucwords($user_info['first_name']),
+						// 	'book_name' 	=> $book_info['name'],
+						// 	'audio_book_url' => 'https://www.bribooks.com/audiobookpreview/' . $book_info['slug'],
+						// ], true);
+
+						// $this->alert_model->email(
+						// 	$user_info['email'],
+						// 	$subject,
+						// 	$message,
+						// 	[],
+						// 	[],
+						// 	[]
+						// );
+
+						// !empty($user_info['mobile']) && self::sendOnextelWhatsappMessage(
+						// 	$user_info['mobile'],
+						// 	[
+						// 		'template_id'	=> '01kevknzzwkjd5xac4n4cq10wa',
+						// 		'parameters'	=> [
+						// 			ucwords($user_info['first_name']),
+						// 			'https://www.bribooks.com/audiobookpreview/' . $book_info['slug'],
+						// 			$book_info['name'],
+						// 		]
+						// 	]
+						// );
+
+						//******New code by Sonu****** */
+						$email && CI_Events::trigger('order_confirmation_audiobook', [
+							'order_id'	=> $info['id'],
 							'book_name' 	=> $book_info['name'],
 							'audio_book_url' => 'https://www.bribooks.com/audiobookpreview/' . $book_info['slug'],
-						], true);
-
-						$this->alert_model->email(
-							$user_info['email'],
-							$subject,
-							$message,
-							[],
-							[],
-							[]
-						);
-
-						!empty($user_info['mobile']) && self::sendOnextelWhatsappMessage(
-							$user_info['mobile'],
-							[
-								'template_id'	=> '01kevknzzwkjd5xac4n4cq10wa',
-								'parameters'	=> [
-									ucwords($user_info['first_name']),
-									'https://www.bribooks.com/audiobookpreview/' . $book_info['slug'],
-									$book_info['name'],
-								]
-							]
-						);
+						]);
 					}
 				}
 			}
@@ -396,4 +417,6 @@ trait InvoiceAlert {
 			}
 		}
 	}
+
+	
 }

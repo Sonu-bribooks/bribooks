@@ -1319,5 +1319,20 @@
     "pickup_completed": "Pickup Completed",
     "comments": "Comments",
     "your_order_is_successfully_delivered": "Your order is successfully delivered",
-    "assigned_printer_successfully": "Assigned printer successfully"
+    "assigned_printer_successfully": "Assigned printer successfully",
+    "plan_name": "Plan name",
+    "plan_price": "Plan price",
+    "paid_amount": "Paid amount",
+    "paid_on": "Paid on",
+    "test_code": "Test code",
+    "add_message_template_type": "Add message template type",
+    "message_template_type_added_successfully": "Message template type added successfully",
+    "add_message_template": "Add message template",
+    "order_confirmation_paperback": "Order confirmation paperback",
+    "order_confirmation_ebook": "Order confirmation ebook",
+    "order_confirmation_audiobook": "Order confirmation audiobook",
+    "message_template_added_successfully": "Message template added successfully",
+    "counter": "Counter",
+    "skipped": "Skipped",
+    "execute_thread": "Execute thread"
 }

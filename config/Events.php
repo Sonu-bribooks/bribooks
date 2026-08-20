@@ -24,6 +24,10 @@ CI_Events::on('order_undelivered', 'EventListener_lib::orderUndelivered');
 CI_Events::on('order_returned', 'EventListener_lib::orderReturned');
 CI_Events::on('order_canceled', 'EventListener_lib::orderCanceled');
 
+CI_Events::on('order_confirmation_paperback', 'EventListener_lib::orderConfirmationPaperback');
+CI_Events::on('order_confirmation_ebook', 'EventListener_lib::orderConfirmationEbook');
+CI_Events::on('order_confirmation_audiobook', 'EventListener_lib::orderConfirmationAudiobook');
+
 // Subscription
 CI_Events::on('subscription_payment_created', 'EventListener_lib::subscriptionPaymentCreated');
 
@@ -58,3 +62,5 @@ CI_Events::on('event_invite_verified', 'MessageTemplateListener_lib::eventInvite
 CI_Events::on('bm_user_otp', 'BMMessageTemplateListener_lib::bmUserOtp');
 CI_Events::on('bm_school_signup', 'BMMessageTemplateListener_lib::bmSchoolSignup');
 CI_Events::on('bm_after_school_signup', 'BMMessageTemplateListener_lib::bmAfterSchoolSignup');
+
+CI_Events::on('test_code','EventListener_lib::testCode');

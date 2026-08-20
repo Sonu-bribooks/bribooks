@@ -615,4 +615,259 @@ final class EventListener_lib {
 			'ip'		=> $CI->input->ip_address(),
 		]);
 	}
+
+	public static function orderConfirmationPaperback(...$params) {
+		list($data) = $params;
+
+		log_kb([
+			'Event::orderConfirmationPaperback' => [$params, $data]
+		]);
+
+		$CI =& get_instance();
+
+		$CI->load->model('order/Order_model', 'order_model');
+		$CI->load->model('user/User_model', 'user_model');
+		$CI->load->model('address/Address_model', 'address_model');
+
+		$CI->load->model('Alert_model');
+
+		$order_info = $CI->order_model->get($data['order_id']);
+
+		if (empty($order_info)) return;
+
+		$site_id 		= strtolower($order_info['currency_code']) != 'inr' ? 2 : 1;
+		$user_info 		= $CI->user_model->get($order_info['user_id']);
+		$address_info 	= $CI->address_model->get($order_info['address_id']);
+		$products 		= $CI->order_model->getProducts($order_info['id']);
+
+		if (empty($user_info['email']) && empty($user_info['mobile'])) return;
+
+		$has_printed_copies = array_filter($products, function($item) {
+			$option = json_decode($item['option'], true);
+			return (!in_array(mb_strtolower($option['name']), ['ebook', 'audio book']));
+		});
+
+
+		$formatData = self::_formattedInvoiceData($products,$has_printed_copies,$user_info,$order_info,$address_info);
+		log_kb([
+			'Event::orderConfirmationPaperback::data' => $formatData
+		]);
+		$CI->Alert_model->genericMessageTemplate([
+			'id'			  	=> $order_info['id'],
+			'code'				=> 'order_confirmation_paperback',
+			'site_id'			=> $site_id,
+			'email'		   		=> $user_info['email'],
+			'mobile'		  	=> $user_info['mobile'],
+			'data'				=> $formatData,
+		]);
+	}
+
+	private static function _formattedInvoiceData($products = [], $has_printed_copies = [], $user_info = [], $order = [], $address = []) {
+		$products_html = '';
+		$total_copies = 0;
+
+		$CI =& get_instance();
+		log_kb([
+            'orderConfirmationPaperback::_formattedInvoiceData' => [
+                'products' => $products,
+                'user_info' => $user_info,
+                'order_info' => $order,
+				'has_printed_copies' => $has_printed_copies,
+            ]
+        ]);
+
+		foreach ($products as $index => $item) {
+
+			$option = json_decode($item['option'], true);
+
+			$total_copies += (int) ($item['quantity'] ?? 0);
+
+			$image = $CI->config->item('s3_base_url'). 'public/'. ($item['cover_image'] ?? '');
+
+			$products_html .= '
+				<td style="vertical-align: top; padding: 10px;">
+					<img
+						src="' . $image . '"
+						width="100"
+						height="140"
+						style="margin-left: 30px;"
+					/>
+
+					<p style="
+						margin-left: 30px;
+						margin-top: 0;
+						margin-bottom: 0;
+						font-size: 12px;
+					">
+						' . htmlspecialchars($item['name'] ?? '') . '
+						<br />
+						Version ' . htmlspecialchars($item['version'] ?? '') . '
+					</p>
+
+					<p style="
+						margin-left: 30px;
+						margin-top: 0;
+						margin-bottom: 0;
+						font-size: 12px;
+					">
+						' . (int) ($item['quantity'] ?? 0) . ' copies
+					</p>
+
+					<p style="
+						color: #f99232;
+						margin-top: 0;
+						font-size: 16px;
+						margin-left: 53px;
+					">
+						' . htmlspecialchars($option['name'] ?? '') . '
+					</p>
+				</td>
+			';
+
+			if (count($products) > 1 && $index < count($products) - 1) {
+				$products_html .= '
+					<td style="vertical-align: top;">
+						<p style="
+							font-size: 50px;
+							margin-left: 10px;
+							margin-top: -20px;
+						">
+							+
+						</p>
+					</td>
+				';
+			}
+		}
+
+		$free_book_bundle = '';
+		if (!empty($order['credit_discount']) && $order['credit_discount'] > 0) {
+			$free_book_bundle = '
+				<p style="margin-top: -5px;">
+					Free book bundle applied
+				</p>
+			';
+		}
+
+		$track_delivery = '';
+		if (!empty($has_printed_copies)) {
+			$track_delivery = '
+				<div>
+					<a
+						href="' . USER_URL . 'trackdelivery/' . $order['order_code'] . '"
+						style="margin-left: 90px; color: #148108;"
+					>
+						Track Delivery
+					</a>
+				</div>
+			';
+		}
+
+		$address_html = '';
+
+		if (!empty($has_printed_copies)) {
+			$address_html = '
+				<hr style="width: 90%" />
+
+				<p>
+					<b>Address:</b><br />
+					' . htmlspecialchars($address['address'] ?? '') . ',
+					' . htmlspecialchars($address['landmark'] ?? '') . '<br />
+
+					' . htmlspecialchars($address['city'] ?? '') . ',
+					' . htmlspecialchars($address['state'] ?? '') . ',<br />
+
+					' . htmlspecialchars($address['country'] ?? '') . '-
+					' . htmlspecialchars($address['zipcode'] ?? '') . '
+				</p>
+			';
+		}
+
+		$delivery_message = '';
+
+		if (!empty($has_printed_copies)) {
+			$delivery_message = '
+				<p>
+					We will be delivering your order in the next
+					21 business Days/30 calendar days
+				</p>
+			';
+		}
+
+
+		return [
+			'username'			=> sprintf('%s %s', $user_info['first_name'], $user_info['last_name']),
+			'order_code'		=> $order['order_code'],
+
+			'products_html' 	=> $products_html,
+
+			'total_books' 		=> count($products),
+
+			'total_copies'	 	=> $total_copies,
+
+			'currency' 			=> $order['currency_code'] ?? '',
+
+			'total' 			=> $order['total'] ?? 0,
+
+			'shipping_cost' 	=> $order['shipping_cost'] ?? 0,
+
+			'tax' 				=> $order['tax'] ?? 0,
+
+			'free_book_bundle' 	=> $free_book_bundle,
+
+			'track_delivery' 	=> $track_delivery,
+
+			'address_html' 		=> $address_html,
+
+			'delivery_message' 	=> $delivery_message,
+
+			'system_name'       => get_settings('system_name'),
+
+			'current_year'      => date('Y'),
+		];
+	}
+
+	public static function orderConfirmationAudiobook(...$params) {
+		list($data) = $params;
+
+		log_kb([
+			'Event::orderConfirmationAudiobook' => [$params, $data]
+		]);
+
+		if (empty($data['book_name'])) return;
+		if (empty($data['audio_book_url'])) return;
+
+		$CI =& get_instance();
+
+		$CI->load->model('order/Order_model', 'order_model');
+		$CI->load->model('user/User_model', 'user_model');
+
+		$CI->load->model('Alert_model');
+
+		$order_info = $CI->order_model->get($data['order_id']);
+
+		if (empty($order_info)) return;
+
+		$site_id 		= strtolower($order_info['currency_code']) != 'inr' ? 2 : 1;
+		$user_info 		= $CI->user_model->get($order_info['user_id']);
+
+		$data = [
+			'buyer_name'		=> sprintf('%s %s', $user_info['first_name'], $user_info['last_name']),
+			'order_code'		=> $order_info['order_code'],
+			'book_name'			=> $data['book_name'],
+			'audio_book_url'	=> $data['audio_book_url']
+		];
+
+		log_kb([
+			'Event::orderConfirmationAudiobook::data' => $data
+		]);
+
+		$CI->Alert_model->genericMessageTemplate([
+			'id'			  	=> $order_info['id'],
+			'code'				=> 'order_confirmation_audiobook',
+			'site_id'			=> $site_id,
+			'email'		   		=> $user_info['email'],
+			'mobile'		  	=> $user_info['mobile'],
+			'data'				=> $data,
+		]);
+	}
 }
