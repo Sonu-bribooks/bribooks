@@ -20,6 +20,21 @@ trait EventSignupAlert {
 
 		$this->load->model('event/EventCommunicationKit_model', 'event_communication_kit_model');
 		$this->load->model('event/EventBrochure_model', 'event_brochure_model');
+		$this->load->model('school/TelecallerSchool_model', 'telecaller_school_model');
+
+		if (empty($telecaller_info = $this->telecaller_school_model->get_all([
+			'event_id' => $event_info['id'],
+			'school_id' => $school_info['id']
+		])['rows'][0] ?? '')) {
+			$user_id = 166112;
+		} else {
+			$user_id = $telecaller_info['user_id'];
+		}
+
+		log_kb([
+			'Event::eventSignupAlert::eventSchoolSignup' => [$telecaller_info, $user_id,$school_info['id'],$event_info['id']]
+		]);
+		$user_info 		= $this->user_model->get($user_id);
 
 		$communication_kit_info = $this->event_communication_kit_model->get_all([
 			'event_id' => $lead_info['event_id']
@@ -74,10 +89,13 @@ trait EventSignupAlert {
 			'qrcode_file' 			=> sprintf('<div class="text-center"><img style="width: 100px;" src="%s" alt="Registration QR Code"></div>', $qrcode_url),
 			'student_url_link' 		=> sprintf('<a href="%s" target="_blank">%s</a>', $student_url, $student_url),
 			'school_dashboard_url' 	=> $school_dashboard_url,
-			'teacher_dashboard_url' => $teacher_dashboard_url
+			'teacher_dashboard_url' => $teacher_dashboard_url,
+			'telecaller_name'		=> sprintf('%s %s', $user_info['first_name'], $user_info['last_name']),
+			'telecaller_email'		=> $user_info['email'],
+			'telecaller_mobile' 	=> $user_info['mobile']
 		];
 
-		log_kb(['eventSchoolSignup' => $data]);
+		log_kb(['eventSchoolSignup::payload' => $data]);
 
 		$subject 		= format_message_with_data($communication_kit_info['email']['subject'], $data) ?? '';
 		$message 		= format_message_with_data($communication_kit_info['email']['message'], $data) ?? '';
