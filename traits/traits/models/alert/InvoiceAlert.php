@@ -247,9 +247,13 @@ trait InvoiceAlert {
 			// );
 
 			//******New code by Sonu****** */
-
+			$site_id 		= strtolower($info['currency_code']) != 'inr' ? 2 : 1;
 			$email && CI_Events::trigger('order_confirmation_paperback', [
 				'order_id'	=> $info['id']
+			]);
+
+			CI_Events::trigger('access_log', [
+				'module'	=> sprintf('order_confirmation_paperback_%d_%d', (int)$site_id, $info['id'])
 			]);
 
 
@@ -291,6 +295,10 @@ trait InvoiceAlert {
 							'order_id'	=> $info['id'],
 							'book_name' 	=> $book_info['name'],
 							'audio_book_url' => 'https://www.bribooks.com/audiobookpreview/' . $book_info['slug'],
+						]);
+
+						CI_Events::trigger('access_log', [
+							'module'	=> sprintf('order_confirmation_audiobook_%d_%d', (int)$site_id, $info['id'])
 						]);
 					}
 				}

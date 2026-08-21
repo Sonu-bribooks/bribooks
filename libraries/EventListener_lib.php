@@ -870,4 +870,88 @@ final class EventListener_lib {
 			'data'				=> $data,
 		]);
 	}
+
+	
+	public static function abandonCartAuthor(...$params) {
+		list($data) = $params;
+
+		log_kb([
+			'Event::abandonCartAuthor' => [$params, $data]
+		]);
+
+		if (empty($data['cart_id'])) return;
+
+		$CI =& get_instance();
+
+		$CI->load->model('user/User_model', 'user_model');
+		$CI->load->model('Alert_model');
+
+		$cart_info = $CI->db->get_where('cart', [
+				'id'			=> (int)$data['cart_id'],
+			])->row_array();
+
+		if (empty($cart_info)) return;
+
+		$user_info 		= $CI->user_model->get($cart_info['user_id']);
+
+		$data = [			
+			'author_name'		=> $data['author_name'],
+			'cart_url'			=> $data['cart_url']
+		];
+
+		log_kb([
+			'Event::abandonCartAuthor::data' => $data
+		]);
+
+		$CI->Alert_model->genericMessageTemplate([
+			'id'			  	=> $cart_info['id'],
+			'code'				=> 'abandon_cart_author',
+			'email'		   		=> $user_info['email'],
+			'mobile'		  	=> $user_info['mobile'],
+			'data'				=> $data,
+		]);
+	}
+
+	public static function abandonCartBuyer(...$params) {
+		list($data) = $params;
+
+		log_kb([
+			'Event::abandonCartBuyer' => [$params, $data]
+		]);
+
+		if (empty($data['cart_id'])) return;
+
+		$CI =& get_instance();
+
+		$CI->load->model('user/User_model', 'user_model');
+		$CI->load->model('Alert_model');
+
+		$cart_info = $CI->db->get_where('cart', [
+				'id'			=> (int)$data['cart_id'],
+			])->row_array();
+
+		if (empty($cart_info)) return;
+
+		$user_info 		= $CI->user_model->get($cart_info['user_id']);
+
+		$data = [			
+			'username'			=> ucwords($user_info['first_name'] . ' ' . $user_info['last_name']),
+			'author_name'		=> $data['author_name'],
+			'book_name'			=> $data['book_name'],
+			'cart_url'			=> $data['cart_url']
+		];
+
+		log_kb([
+			'Event::abandonCartBuyer::data' => $data
+		]);
+
+		$CI->Alert_model->genericMessageTemplate([
+			'id'			  	=> $cart_info['id'],
+			'code'				=> 'abandon_cart_buyer',
+			'email'		   		=> $user_info['email'],
+			'mobile'		  	=> $user_info['mobile'],
+			'data'				=> $data,
+		]);
+
+	}
 }

@@ -1334,5 +1334,7 @@
     "message_template_added_successfully": "Message template added successfully",
     "counter": "Counter",
     "skipped": "Skipped",
-    "execute_thread": "Execute thread"
+    "execute_thread": "Execute thread",
+    "abandon_cart_buyer": "Abandon cart buyer",
+    "abandon_cart_author": "Abandon cart author"
 }

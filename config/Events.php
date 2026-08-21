@@ -27,6 +27,8 @@ CI_Events::on('order_canceled', 'EventListener_lib::orderCanceled');
 CI_Events::on('order_confirmation_paperback', 'EventListener_lib::orderConfirmationPaperback');
 CI_Events::on('order_confirmation_ebook', 'EventListener_lib::orderConfirmationEbook');
 CI_Events::on('order_confirmation_audiobook', 'EventListener_lib::orderConfirmationAudiobook');
+CI_Events::on('abandon_cart_buyer', 'EventListener_lib::abandonCartBuyer');
+CI_Events::on('abandon_cart_author', 'EventListener_lib::abandonCartAuthor');
 
 // Subscription
 CI_Events::on('subscription_payment_created', 'EventListener_lib::subscriptionPaymentCreated');
