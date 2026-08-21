@@ -46,8 +46,8 @@ trait BookAlert {
 			$book_info['status'] == 1 &&
 			$user_info = $this->student_model->get($book_info['user_id'])
 		) {
-			$data['title']			= sprintf(_li('%s is published successfully on BriBooks bookstore.'), $book_info['name']);
-			$data['heading']		= sprintf(_li('%s is published successfully on BriBooks bookstore.'), $book_info['name']);
+			// $data['title']			= sprintf(_li('%s is published successfully on BriBooks bookstore.'), $book_info['name']);
+			// $data['heading']		= sprintf(_li('%s is published successfully on BriBooks bookstore.'), $book_info['name']);
 
 			// mobile writing patch
 			$this->load->model('user/UserCover_model', 'user_cover_model');
@@ -61,33 +61,53 @@ trait BookAlert {
 				$book_info = $this->book_model->get($book_id);
 			}
 
-			$data['content']		= $this->load->view('common/mail/part/publish_book', [
-				'book'			=> [
-					'name'		=> $book_info['name'],
-					'thumb'		=> $this->config->item('s3_base_url') . 'public/' . $book_info['cover_image'],
-					'url'		=> USER_URL . 'bookstore/' . $book_info['slug'],
-				],
-				'user'			=> [
-					'name'		=> $book_info['author_name'],
-					'city'		=> $user_info['city'] ?? 'city',
-					'state'		=> $user_info['state'] ?? 'state'
-				],
-			], true);
+			// $data['content']		= $this->load->view('common/mail/part/publish_book', [
+			// 	'book'			=> [
+			// 		'name'		=> $book_info['name'],
+			// 		'thumb'		=> $this->config->item('s3_base_url') . 'public/' . $book_info['cover_image'],
+			// 		'url'		=> USER_URL . 'bookstore/' . $book_info['slug'],
+			// 	],
+			// 	'user'			=> [
+			// 		'name'		=> $book_info['author_name'],
+			// 		'city'		=> $user_info['city'] ?? 'city',
+			// 		'state'		=> $user_info['state'] ?? 'state'
+			// 	],
+			// ], true);
 
-			$data['unsubscribe_url']= gen_unsubscribe_url($user_info['email']);
+			// $data['unsubscribe_url']= gen_unsubscribe_url($user_info['email']);
 
-			$message 				= $this->load->view('common/mail/templates/' . (strpos($user_info['source'], 'NYAFIND') !== false ? 3 : 1) . '/general', $data, true);
+			// $message 				= $this->load->view('common/mail/templates/' . (strpos($user_info['source'], 'NYAFIND') !== false ? 3 : 1) . '/general', $data, true);
 
-			$mobile = $user_info['mobile'];
-			$email 	= $user_info['email'];
+			// $mobile = $user_info['mobile'];
+			// $email 	= $user_info['email'];
 
-			self::email(
-				$email,
-				$data['title'],
-				$message,
-				[],
-				['communication@bribooks.com']
-			);
+			// self::email(
+			// 	$email,
+			// 	$data['title'],
+			// 	$message,
+			// 	[],
+			// 	['communication@bribooks.com']
+			// );
+
+			//*****new message template code by sonu************* */
+			$data['book_name'] 		= $book_info['name'];
+			$data['book_thumb']		= $this->config->item('s3_base_url') . 'public/' . $book_info['cover_image'];
+			$data['book_url']		= USER_URL . 'bookstore/' . $book_info['slug'];
+			$data['author_name']	= $book_info['author_name'];
+			$data['author_city']	= $user_info['city'] ?? 'city';
+			$data['author_state']	= $user_info['state'] ?? 'state';
+			$data['mobile']			= $user_info['mobile'];
+			$data['email']			= $user_info['email'];
+
+			CI_Events::trigger('publish_book_on_bookstore', [
+				'book_id'	=> $book_info['id'],
+				'data'		=> $data
+			]);
+
+			CI_Events::trigger('access_log', [
+				'module'	=> sprintf('user_publish_book_on_bookstore_%d_%d', (int)$user_info['id'], (int)$book_info['id'])
+			]);
+
 
 			self::_resetBookCaches($book_info);
 		}

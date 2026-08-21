@@ -675,7 +675,7 @@ final class EventListener_lib {
 				'has_printed_copies' => $has_printed_copies,
             ]
         ]);
-
+		$products_html = '';
 		foreach ($products as $index => $item) {
 
 			$option = json_decode($item['option'], true);
@@ -685,58 +685,44 @@ final class EventListener_lib {
 			$image = $CI->config->item('s3_base_url'). 'public/'. ($item['cover_image'] ?? '');
 
 			$products_html .= '
-				<td style="vertical-align: top; padding: 10px;">
+				<div style="
+					display:inline-block;
+					width:220px;
+					vertical-align:top;
+					margin:10px;
+					text-align:center;
+				">
+
 					<img
-						src="' . $image . '"
+						src="' . htmlspecialchars($image, ENT_QUOTES, 'UTF-8') . '"
 						width="100"
 						height="140"
-						style="margin-left: 30px;"
-					/>
+						style="object-fit:cover;"
+					>
 
-					<p style="
-						margin-left: 30px;
-						margin-top: 0;
-						margin-bottom: 0;
-						font-size: 12px;
-					">
+					<div style="font-size:14px; margin-top:8px;">
 						' . htmlspecialchars($item['name'] ?? '') . '
-						<br />
+					</div>
+
+					<div style="font-size:12px;">
 						Version ' . htmlspecialchars($item['version'] ?? '') . '
-					</p>
+					</div>
 
-					<p style="
-						margin-left: 30px;
-						margin-top: 0;
-						margin-bottom: 0;
-						font-size: 12px;
-					">
-						' . (int) ($item['quantity'] ?? 0) . ' copies
-					</p>
+					<div style="font-size:12px;">
+						' . (int)($item['quantity'] ?? 0) . ' copies
+					</div>
 
-					<p style="
-						color: #f99232;
-						margin-top: 0;
-						font-size: 16px;
-						margin-left: 53px;
+					<div style="
+						color:#f99232;
+						font-size:14px;
+						margin-top:5px;
 					">
 						' . htmlspecialchars($option['name'] ?? '') . '
-					</p>
-				</td>
-			';
+					</div>
 
-			if (count($products) > 1 && $index < count($products) - 1) {
-				$products_html .= '
-					<td style="vertical-align: top;">
-						<p style="
-							font-size: 50px;
-							margin-left: 10px;
-							margin-top: -20px;
-						">
-							+
-						</p>
-					</td>
-				';
-			}
+				</div>
+			';
+			
 		}
 
 		$free_book_bundle = '';
@@ -1076,6 +1062,76 @@ final class EventListener_lib {
 		$CI->Alert_model->genericMessageTemplate([
 			'id'			  	=> $user_info['id'],
 			'code'				=> 'referral_signup',
+			'email'		   		=> $user_info['email'],
+			'mobile'		  	=> $user_info['mobile'],
+			'site_id'			=> $user_info['site_id'] ?? 1,
+			'data'				=> $data['data'],
+		]);
+	}
+
+	public static function publishBookOnBookstore(...$params) {
+		list($data) = $params;
+
+		log_kb([
+			'Event::publishBookOnBookstore' => [$params, $data]
+		]);
+
+		if (empty($data['book_id'])) return;
+
+		$CI =& get_instance();
+
+		$CI->load->model('book/Book_model');
+		$CI->load->model('user/User_model', 'user_model');
+
+		$book_info = $CI->Book_model->get($data['book_id']);
+		$user_info = $CI->user_model->get($book_info['user_id']);
+
+		if (empty($user_info)) return;
+
+		$CI->load->model('Alert_model');
+
+		log_kb([
+			'Event::publishBookOnBookstore::data' => $data
+		]);
+
+		$CI->Alert_model->genericMessageTemplate([
+			'id'			  	=> $book_info['id'],
+			'code'				=> 'publish_book_on_bookstore',
+			'email'		   		=> $user_info['email'],
+			'mobile'		  	=> $user_info['mobile'],
+			'site_id'			=> $user_info['site_id'] ?? 1,
+			'data'				=> $data['data'],
+		]);
+	}
+
+	public static function publishBookWithoutOrder(...$params) {
+		list($data) = $params;
+
+		log_kb([
+			'Event::publishBookWithoutOrder' => [$params, $data]
+		]);
+
+		if (empty($data['book_id'])) return;
+
+		$CI =& get_instance();
+
+		$CI->load->model('book/Book_model');
+		$CI->load->model('user/User_model', 'user_model');
+
+		$book_info = $CI->Book_model->get($data['book_id']);
+		$user_info = $CI->user_model->get($book_info['user_id']);
+
+		if (empty($user_info)) return;
+
+		$CI->load->model('Alert_model');
+
+		log_kb([
+			'Event::publishBookWithoutOrder::data' => $data
+		]);
+
+		$CI->Alert_model->genericMessageTemplate([
+			'id'			  	=> $book_info['id'],
+			'code'				=> 'publish_book_without_order',
 			'email'		   		=> $user_info['email'],
 			'mobile'		  	=> $user_info['mobile'],
 			'site_id'			=> $user_info['site_id'] ?? 1,

@@ -35,6 +35,9 @@ CI_Events::on('signup_desktop', 'EventListener_lib::signupDesktop');
 CI_Events::on('buyer_signup', 'EventListener_lib::buyerSignup');
 CI_Events::on('referral_signup', 'EventListener_lib::referralSignup');
 
+CI_Events::on('publish_book_without_order','EventListener_lib::publishBookWithoutOrder');
+CI_Events::on('publish_book_on_bookstore','EventListener_lib::publishBookOnBookstore');
+
 // Subscription
 CI_Events::on('subscription_payment_created', 'EventListener_lib::subscriptionPaymentCreated');
 
