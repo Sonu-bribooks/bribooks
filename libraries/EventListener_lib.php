@@ -954,4 +954,132 @@ final class EventListener_lib {
 		]);
 
 	}
+
+	public static function signupMobile(...$params) {
+		list($data) = $params;
+
+		log_kb([
+			'Event::signupMobile' => [$params, $data]
+		]);
+
+		if (empty($data['user_id'])) return;
+
+		$CI =& get_instance();
+
+		$CI->load->model('user/User_model', 'user_model');
+		$CI->load->model('Alert_model');
+
+		$user_info 		= $CI->user_model->get($data['user_id']);
+
+		if (empty($user_info)) return;
+
+		log_kb([
+			'Event::signupMobile::data' => $data
+		]);
+
+		$CI->Alert_model->genericMessageTemplate([
+			'id'			  	=> $user_info['id'],
+			'code'				=> 'signup_mobile',
+			'email'		   		=> $user_info['email'],
+			'mobile'		  	=> $user_info['mobile'],
+			'site_id'			=> $user_info['site_id'] ?? 1,
+			'data'				=> $data['data'],
+		]);
+	}
+
+	public static function signupDesktop(...$params) {
+		list($data) = $params;
+
+		log_kb([
+			'Event::signupDesktop' => [$params, $data]
+		]);
+
+		if (empty($data['user_id'])) return;
+
+		$CI =& get_instance();
+
+		$CI->load->model('user/User_model', 'user_model');
+		$CI->load->model('Alert_model');
+
+		$user_info 		= $CI->user_model->get($data['user_id']);
+
+		if (empty($user_info)) return;
+
+		log_kb([
+			'Event::signupDesktop::data' => $data
+		]);
+
+		$CI->Alert_model->genericMessageTemplate([
+			'id'			  	=> $user_info['id'],
+			'code'				=> 'signup_desktop',
+			'email'		   		=> $user_info['email'],
+			'mobile'		  	=> $user_info['mobile'],
+			'site_id'			=> $user_info['site_id'] ?? 1,
+			'data'				=> $data['data'],
+		]);
+	}
+
+	public static function buyerSignup(...$params) {
+		list($data) = $params;
+
+		log_kb([
+			'Event::buyerSignup' => [$params, $data]
+		]);
+
+		if (empty($data['user_id'])) return;
+
+		$CI =& get_instance();
+
+		$CI->load->model('user/User_model', 'user_model');
+		$CI->load->model('Alert_model');
+
+		$user_info 		= $CI->user_model->get($data['user_id']);
+
+		if (empty($user_info)) return;
+
+		log_kb([
+			'Event::buyerSignup::data' => $data
+		]);
+
+		$CI->Alert_model->genericMessageTemplate([
+			'id'			  	=> $user_info['id'],
+			'code'				=> 'buyer_signup',
+			'email'		   		=> $user_info['email'],
+			'mobile'		  	=> $user_info['mobile'],
+			'site_id'			=> $user_info['site_id'] ?? 1,
+			'data'				=> $data['data'],
+		]);
+	}
+
+	public static function referralSignup(...$params) {
+		list($data) = $params;
+
+		log_kb([
+			'Event::referralSignup' => [$params, $data]
+		]);
+
+		if (empty($data['user_id'])) return;
+
+		$CI =& get_instance();
+
+		$CI->load->model('user/User_model', 'user_model');
+		$CI->load->model('Alert_model');
+
+		$user_info 		= $CI->user_model->get($data['user_id']);
+
+		if (empty($user_info)) return;
+
+		log_kb([
+			'Event::referralSignup::data' => $data
+		]);
+
+		$CI->Alert_model->genericMessageTemplate([
+			'id'			  	=> $user_info['id'],
+			'code'				=> 'referral_signup',
+			'email'		   		=> $user_info['email'],
+			'mobile'		  	=> $user_info['mobile'],
+			'site_id'			=> $user_info['site_id'] ?? 1,
+			'data'				=> $data['data'],
+		]);
+	}
 }

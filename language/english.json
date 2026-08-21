@@ -1336,5 +1336,12 @@
     "skipped": "Skipped",
     "execute_thread": "Execute thread",
     "abandon_cart_buyer": "Abandon cart buyer",
-    "abandon_cart_author": "Abandon cart author"
+    "abandon_cart_author": "Abandon cart author",
+    "is_fomo": "Is fomo",
+    "mobile_signup": "Mobile signup",
+    "desktop_signup": "Desktop signup",
+    "buyer_signup": "Buyer signup",
+    "referral_signup": "Referral signup",
+    "signup_mobile": "Signup mobile",
+    "signup_desktop": "Signup desktop"
 }

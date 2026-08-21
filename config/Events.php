@@ -30,6 +30,11 @@ CI_Events::on('order_confirmation_audiobook', 'EventListener_lib::orderConfirmat
 CI_Events::on('abandon_cart_buyer', 'EventListener_lib::abandonCartBuyer');
 CI_Events::on('abandon_cart_author', 'EventListener_lib::abandonCartAuthor');
 
+CI_Events::on('signup_mobile', 'EventListener_lib::signupMobile');
+CI_Events::on('signup_desktop', 'EventListener_lib::signupDesktop');
+CI_Events::on('buyer_signup', 'EventListener_lib::buyerSignup');
+CI_Events::on('referral_signup', 'EventListener_lib::referralSignup');
+
 // Subscription
 CI_Events::on('subscription_payment_created', 'EventListener_lib::subscriptionPaymentCreated');
 

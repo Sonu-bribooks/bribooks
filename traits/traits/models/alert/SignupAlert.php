@@ -41,6 +41,7 @@ trait SignupAlert{
 
 			$book_name 			= 'This Book';
 			$book_author_name 	= 'This Author';
+			$referral_name 		= '';
 
 			$this->load->model('event/EventUser_model', 'event_user_model');
 
@@ -64,87 +65,88 @@ trait SignupAlert{
 			$encoded_password 	= sha1(md5($password . $this->config->item('password_salt')));
 			$verification_code 	= sha1(md5($info['username'] . $password . $this->config->item('password_salt')));
 
+			log_kb(['signupCron::password'=>$password]);
 			$this->student_model->edit($id, [
 				'password'			=> $encoded_password,
 				'verification_code'	=> $verification_code
 			]);
 
-			if (!empty($info['parent_referral_id']) && !empty($referral_info = $this->student_model->get($info['parent_referral_id']))) {
-				$template = 'email_referral_user_signup';
-				$referral_name = trim($referral_info['first_name'] . ' ' . $referral_info['last_name']);
-			} else {
-				if (strpos($info['source'], 'buyer') !== false) {
-					$source_id = preg_replace('/\D/', '', $info['source']);
+			// if (!empty($info['parent_referral_id']) && !empty($referral_info = $this->student_model->get($info['parent_referral_id']))) {
+			// 	$template = 'email_referral_user_signup';
+			// 	$referral_name = trim($referral_info['first_name'] . ' ' . $referral_info['last_name']);
+			// } else {
+			// 	if (strpos($info['source'], 'buyer') !== false) {
+			// 		$source_id = preg_replace('/\D/', '', $info['source']);
 
-					if (!empty($source_id) && !empty($book_info = $this->book_model->get($source_id ?? 0))){
-						$book_name 			= $book_info['name'];
-						$book_author_name 	= $book_info['author_name'];
-					}
+			// 		if (!empty($source_id) && !empty($book_info = $this->book_model->get($source_id ?? 0))){
+			// 			$book_name 			= $book_info['name'];
+			// 			$book_author_name 	= $book_info['author_name'];
+			// 		}
 
-					$template = 'email_buyer_signup';
-				} elseif ($info['source'] == 'signup_mobile') {
-					$template = 'email_user_signup_mobile';
-				} else {
-					$template = 'email_user_signup';
-				}
+			// 		$template = 'email_buyer_signup';
+			// 	} elseif ($info['source'] == 'signup_mobile') {
+			// 		$template = 'email_user_signup_mobile';
+			// 	} else {
+			// 		$template = 'email_user_signup';
+			// 	}
 
-				$referral_name = '';
-			}
+			// 	$referral_name = '';
+			// }
 
-			if ($site_info['site_type'] == 2) {
-				$template = 'email_user_signup_nursery';
-			} elseif ($site_info['site_type'] == 3) {
-				$template = 'email_user_signup_university';
-			} elseif ($site_info['site_type'] == 4) {
-				$template = 'email_user_signup_community';
-				$template_site_id = $site_info['parent_id'];
-			}
+			// if ($site_info['site_type'] == 2) {
+			// 	$template = 'email_user_signup_nursery';
+			// } elseif ($site_info['site_type'] == 3) {
+			// 	$template = 'email_user_signup_university';
+			// } elseif ($site_info['site_type'] == 4) {
+			// 	$template = 'email_user_signup_community';
+			// 	$template_site_id = $site_info['parent_id'];
+			// }
 
-			$title = vsprintf(_li('Welcome to %s, your gateway to becoming a globally published author.'), [
-				get_settings('system_name')
-			]);
+			// $title = vsprintf(_li('Welcome to %s, your gateway to becoming a globally published author.'), [
+			// 	get_settings('system_name')
+			// ]);
 
-			$title = self::formatEmailSubject($template, $template_site_id, [
-				'author_name'		=> trim($info['first_name'] . ' ' . $info['last_name']),
-				'parent_name'		=> $info['parent_name'],
-				'school_name'		=> $site_info['name'],
-			]) ?? $title;
+			// $title = self::formatEmailSubject($template, $template_site_id, [
+			// 	'author_name'		=> trim($info['first_name'] . ' ' . $info['last_name']),
+			// 	'parent_name'		=> $info['parent_name'],
+			// 	'school_name'		=> $site_info['name'],
+			// ]) ?? $title;
 
-			log_kb([
-				'template' 	=> $template,
-				'title' 	=> $title
-			]);
+			// log_kb([
+			// 	'template' 	=> $template,
+			// 	'title' 	=> $title
+			// ]);
 
-			$reset_url = vsprintf(USER_URL . 'resetpassword?uid=%s&code=%s', [
-				$info['id'],
-				$verification_code,
-			]);
+			// $reset_url = vsprintf(USER_URL . 'resetpassword?uid=%s&code=%s', [
+			// 	$info['id'],
+			// 	$verification_code,
+			// ]);
 
-			$login_url = USER_URL . 'login?tab=username';
+			// $login_url = USER_URL . 'login?tab=username';
 
-			$data['title']			= $title;
-			$data['heading']		= '';
-			$data['subheading']		= '';
-			$data['content']		= self::formatEmailMessage($template, [
-				'parent_name'		=> $info['parent_name'] ?? trim($info['first_name'] . ' ' . $info['last_name']),
-				'author_name'		=> $info['first_name'] . ' ' . $info['last_name'],
-				'username'			=> $info['username'],
-				'school_name'		=> $site_info['name'],
-				'referral_name'		=> $referral_name,
-				'password'			=> $password,
-				'url'				=> $reset_url,
-				'url_2'				=> $login_url,
-				'email'				=> $info['email'],
-				'mobile'			=> $info['mobile'],
-				'book_name' 		=> $book_name,
-				'book_author_name' 	=> $book_author_name,
-			], $site_id);
-			$data['site_id']		= $site_id;
-			$data['parent_id']		= $site_info['parent_id'];
-			$data['site_code']		= $site_info['site_code'];
-			$data['link']			= '';
-			$data['link_text']		= '';
-			$data['unsubscribe_url']= gen_unsubscribe_url($info['email']);
+			// $data['title']			= $title;
+			// $data['heading']		= '';
+			// $data['subheading']		= '';
+			// $data['content']		= self::formatEmailMessage($template, [
+			// 	'parent_name'		=> $info['parent_name'] ?? trim($info['first_name'] . ' ' . $info['last_name']),
+			// 	'author_name'		=> $info['first_name'] . ' ' . $info['last_name'],
+			// 	'username'			=> $info['username'],
+			// 	'school_name'		=> $site_info['name'],
+			// 	'referral_name'		=> $referral_name,
+			// 	'password'			=> $password,
+			// 	'url'				=> $reset_url,
+			// 	'url_2'				=> $login_url,
+			// 	'email'				=> $info['email'],
+			// 	'mobile'			=> $info['mobile'],
+			// 	'book_name' 		=> $book_name,
+			// 	'book_author_name' 	=> $book_author_name,
+			// ], $site_id);
+			// $data['site_id']		= $site_id;
+			// $data['parent_id']		= $site_info['parent_id'];
+			// $data['site_code']		= $site_info['site_code'];
+			// $data['link']			= '';
+			// $data['link_text']		= '';
+			// $data['unsubscribe_url']= gen_unsubscribe_url($info['email']);
 
 			// log_kb([
 			// 	'signupCron' 	=> 'signupCron',
@@ -154,78 +156,163 @@ trait SignupAlert{
 			// 	'message' 		=> $data['content']
 			// ]);
 
-			$message 				= $this->load->view('common/mail/templates/site/general', $data, true);
+			// $message 				= $this->load->view('common/mail/templates/site/general', $data, true);
 
-			$mobile = $info['mobile'];
-			$email 	= $info['email'];
+			// $mobile = $info['mobile'];
+			// $email 	= $info['email'];
 
-			$attachment = [];
+			// $attachment = [];
 
-			$whatsapp_temp_id 	= '';
-			$whatsapp_param 	= [];
+			// $whatsapp_temp_id 	= '';
+			// $whatsapp_param 	= [];
 
-			if ($mobile && (strpos(strtolower($site_info['site_code']), NYAF_IN_SITE_CODE) !== false)) {
+			// if ($mobile && (strpos(strtolower($site_info['site_code']), NYAF_IN_SITE_CODE) !== false)) {
+			// 	if (!empty($info['parent_referral_id']) && !empty($referral_info = $this->student_model->get($info['parent_referral_id']))) {
+
+			// 		$whatsapp_temp_id		= '672353495003506';
+			// 		$whatsapp_param	= [
+			// 			trim($info['first_name'] . ' ' . $info['last_name']),
+			// 			$info['username'],
+			// 			$password,
+			// 			$info['mobile']
+			// 		];
+			// 	}
+			// } else {
+			// 	if (strpos($info['source'], 'buyer') !== false) {
+			// 		$whatsapp_temp_id		= '01kcrsq6renp9tz6qgh2z8ec0f';
+			// 		// $whatsapp_temp_id		= '2916754095139842';
+			// 		$whatsapp_param	= [
+			// 			trim($info['first_name'] . ' ' . $info['last_name']),
+			// 			$book_name,
+			// 			$book_author_name,
+			// 		];
+			// 	} elseif ($info['source'] == 'signup_desktop') {
+			// 		$whatsapp_temp_id		= '01kcrsmsgdxqhrtcav86ya9tr6';
+			// 		// $whatsapp_temp_id		= '3773945916162458';
+			// 		$whatsapp_param	= [
+			// 			trim($info['first_name'] . ' ' . $info['last_name']),
+			// 			$info['email']
+			// 		];
+			// 	} elseif ($info['source'] == 'signup_mobile') {
+			// 		$whatsapp_temp_id		= '01kcrrrgemxm6v9am7315f3rfn';
+			// 		// $whatsapp_temp_id		= '555644803508253';
+			// 		$whatsapp_param	= [
+			// 			trim($info['first_name'] . ' ' . $info['last_name']),
+			// 			$info['email']
+			// 		];
+			// 	}
+			// }
+
+			// self::email(
+			// 	$email,
+			// 	$data['title'],
+			// 	$message,
+			// 	[],
+			// 	[],
+			// 	$attachment
+			// );
+
+			// if (!empty($mobile) && !empty($whatsapp_temp_id) && !empty($whatsapp_param)) {
+			// 	// self::_sendWhatsappText(
+			// 	// 	$mobile,
+			// 	// 	[
+			// 	// 		'template'		=> $whatsapp_temp_id,
+			// 	// 		'parameters'	=> $whatsapp_param
+			// 	// 	],
+			// 	// );
+
+			// 	self::sendOnextelWhatsappMessage(
+			// 		$mobile,
+			// 		[
+			// 			'template_id'	=> $whatsapp_temp_id,
+			// 			'parameters'	=> $whatsapp_param
+			// 		],
+			// 	);
+			// }
+
+
+			//*********new message template code by sonu**************** */
+			$reset_url = vsprintf(USER_URL . 'resetpassword?uid=%s&code=%s', [
+				$info['id'],
+				$verification_code,
+			]);
+
+			$login_url = USER_URL . 'login?tab=username';
+
+			$data['mobile'] 			= $info['mobile'];
+			$data['email'] 				= $info['email'];
+			$data['parent_name']		= $info['parent_name'] ?? trim($info['first_name'] . ' ' . $info['last_name']);
+			$data['author_name']		= $info['first_name'] . ' ' . $info['last_name'];
+			$data['username']			= $info['username'];
+			$data['school_name']		= $site_info['name'];
+			$data['referral_name']		= $referral_name;
+			$data['password']			= $password;
+			$data['reset_url']			= $reset_url;
+			$data['login_url']			= $login_url;
+			$data['email']				= $info['email'];
+			$data['mobile']				= $info['mobile'];
+			$data['book_name'] 			= $book_name;
+			$data['book_author_name'] 	= $book_author_name;
+			$data['site_id']			= $site_id;
+			$data['parent_id']			= $site_info['parent_id'];
+			$data['site_code']			= $site_info['site_code'];
+			$data['link']				= '';
+			$data['link_text']			= '';
+			$data['unsubscribe_url']	= gen_unsubscribe_url($info['email']);
+			$data['system_name']		= get_settings('system_name');
+
+			if ($info['mobile'] && (strpos(strtolower($site_info['site_code']), NYAF_IN_SITE_CODE) !== false)) {
 				if (!empty($info['parent_referral_id']) && !empty($referral_info = $this->student_model->get($info['parent_referral_id']))) {
+					$data['referral_name'] = trim($referral_info['first_name'] . ' ' . $referral_info['last_name']);
+					
+					CI_Events::trigger('referral_signup', [
+						'user_id'	=> $info['id'],
+						'data'		=> $data
+					]);
 
-					$whatsapp_temp_id		= '672353495003506';
-					$whatsapp_param	= [
-						trim($info['first_name'] . ' ' . $info['last_name']),
-						$info['username'],
-						$password,
-						$info['mobile']
-					];
+					CI_Events::trigger('access_log', [
+						'module'	=> sprintf('user_referral_signup_%d_%d', (int)$site_id, (int)$info['id'])
+					]);
 				}
 			} else {
 				if (strpos($info['source'], 'buyer') !== false) {
-					$whatsapp_temp_id		= '01kcrsq6renp9tz6qgh2z8ec0f';
-					// $whatsapp_temp_id		= '2916754095139842';
-					$whatsapp_param	= [
-						trim($info['first_name'] . ' ' . $info['last_name']),
-						$book_name,
-						$book_author_name,
-					];
+					$source_id = preg_replace('/\D/', '', $info['source']);
+
+					if (!empty($source_id) && !empty($book_info = $this->book_model->get($source_id ?? 0))){
+						$data['book_name'] 			= $book_info['name'];
+						$data['book_author_name'] 	= $book_info['author_name'];
+					}
+
+					CI_Events::trigger('buyer_signup', [
+						'user_id'	=> $info['id'],
+						'data'		=> $data
+					]);
+
+					CI_Events::trigger('access_log', [
+						'module'	=> sprintf('user_buyer_signup_%d_%d', (int)$site_id, (int)$info['id'])
+					]);
+
 				} elseif ($info['source'] == 'signup_desktop') {
-					$whatsapp_temp_id		= '01kcrsmsgdxqhrtcav86ya9tr6';
-					// $whatsapp_temp_id		= '3773945916162458';
-					$whatsapp_param	= [
-						trim($info['first_name'] . ' ' . $info['last_name']),
-						$info['email']
-					];
+					log_kb(['cronsignup_desktop::']);
+					CI_Events::trigger('signup_desktop', [
+						'user_id'	=> $info['id'],
+						'data'		=> $data
+					]);
+
+					CI_Events::trigger('access_log', [
+						'module'	=> sprintf('user_desktop_signup_%d_%d', (int)$site_id, (int)$info['id'])
+					]);
+
 				} elseif ($info['source'] == 'signup_mobile') {
-					$whatsapp_temp_id		= '01kcrrrgemxm6v9am7315f3rfn';
-					// $whatsapp_temp_id		= '555644803508253';
-					$whatsapp_param	= [
-						trim($info['first_name'] . ' ' . $info['last_name']),
-						$info['email']
-					];
+					CI_Events::trigger('signup_mobile', [
+						'user_id'	=> $info['id'],
+						'data'		=> $data
+					]);
+
+					CI_Events::trigger('access_log', [
+						'module'	=> sprintf('user_mobile_signup_%d_%d', (int)$site_id, (int)$info['id'])
+					]);
 				}
-			}
-
-			self::email(
-				$email,
-				$data['title'],
-				$message,
-				[],
-				[],
-				$attachment
-			);
-
-			if (!empty($mobile) && !empty($whatsapp_temp_id) && !empty($whatsapp_param)) {
-				// self::_sendWhatsappText(
-				// 	$mobile,
-				// 	[
-				// 		'template'		=> $whatsapp_temp_id,
-				// 		'parameters'	=> $whatsapp_param
-				// 	],
-				// );
-
-				self::sendOnextelWhatsappMessage(
-					$mobile,
-					[
-						'template_id'	=> $whatsapp_temp_id,
-						'parameters'	=> $whatsapp_param
-					],
-				);
 			}
 		}
 	}
