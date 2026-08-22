@@ -1345,5 +1345,6 @@
     "signup_mobile": "Signup mobile",
     "signup_desktop": "Signup desktop",
     "publish_book_without_order": "Publish book without order",
-    "publish_book_on_bookstore": "Publish book on bookstore"
+    "publish_book_on_bookstore": "Publish book on bookstore",
+    "isbn_allotment": "Isbn allotment"
 }

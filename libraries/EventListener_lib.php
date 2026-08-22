@@ -1138,4 +1138,84 @@ final class EventListener_lib {
 			'data'				=> $data['data'],
 		]);
 	}
+
+	
+	public static function authorRoyalty(...$params) {
+		list($data) = $params;
+
+		log_kb([
+			'Event::authorRoyalty' => [$params, $data]
+		]);
+
+		if (empty($data['user_id'])) return;
+
+		$CI =& get_instance();
+
+		$CI->load->model('user/User_model', 'user_model');
+		
+		$user_info = $CI->user_model->get($data['user_id']);
+
+		if (empty($user_info)) return;
+
+		$CI->load->model('Alert_model');
+
+		log_kb([
+			'Event::authorRoyalty::data' => $data
+		]);
+
+		$CI->Alert_model->genericMessageTemplate([
+			'id'			  	=> $user_info['id'],
+			'code'				=> 'author_royalty',
+			'email'		   		=> $user_info['email'],
+			'mobile'		  	=> $user_info['mobile'],
+			'site_id'			=> $user_info['site_id'] ?? 1,
+			'data'				=> $data['data'],
+		]);
+	}
+
+	public static function isbnAllotment(...$params) {
+		list($data) = $params;
+
+		log_kb([
+			'Event::isbnAllotment' => [$params, $data]
+		]);
+
+		if (empty($data['book_id'])) return;
+
+		$CI =& get_instance();
+
+		$CI->load->model('book/Book_model');
+		$CI->load->model('user/User_model', 'user_model');
+
+		$book_info = $CI->Book_model->get($data['book_id']);
+		$user_info = $CI->user_model->get($book_info['user_id']);
+
+		if (empty($user_info)) return;
+
+		$CI->load->model('Alert_model');
+
+		if(!$this->db->get_where('unsubscribed', [
+				'email'		=> $user_info['email'],
+				'_deleted'	=> 0
+			])->row_array()) {
+				$email = $user_info['email'];
+			} else {
+				$email = '';
+			}
+		$site_id = (!empty($user_info['location']) && strtolower($user_info['location']) === 'india') ? 1 : 2;
+
+
+		log_kb([
+			'Event::isbnAllotment::data' => $data
+		]);
+
+		$CI->Alert_model->genericMessageTemplate([
+			'id'			  	=> $book_info['id'],
+			'code'				=> 'isbn_allotment',
+			'email'		   		=> $email,
+			'mobile'		  	=> $user_info['mobile'],
+			'site_id'			=> $site_id ?? 1,
+			'data'				=> $data['data'],
+		]);
+	}
 }
