@@ -1,4 +1,5 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed');
+use Dompdf\Dompdf;
 
 trait MessageTemplateAlert {
 	public function genericMessageTemplate($data = []) {
@@ -88,14 +89,15 @@ trait MessageTemplateAlert {
 			$bcc		= !empty($email_template_info['bcc']) ? explode(',', $email_template_info['bcc']) : [];
 			$subject 	= format_message_with_data($email_template_info['subject'], $data['data']);
 			$message 	= format_message_with_data($email_template_info['message'], $data['data']);
-
+			$attachment = self::_generateEmailAttachmentPDF($email_template_info['attachment'] ?? '',$email_template_info['attachment_name'] ?? '',$data['data']);
+			
 			self::email(
 				$email,
 				$subject,
 				$message,
 				[],
 				$bcc,
-				[],
+				$attachment,
 			);
 		}
 
@@ -182,4 +184,52 @@ trait MessageTemplateAlert {
 			]);
 		}
 	}
+
+	private function _generateEmailAttachmentPDF($attachment, $attachment_name, $data = []) {
+		if (empty($attachment)) return;
+		if (empty($data)) return;
+
+		log_kb(['genericMessageTemplateCron::_generateEmailAttachmentPDF'=>['attachment_name'=>$attachment_name, 'data'=>$data]]);
+
+		$attachment = format_message_with_data($attachment, $data);
+
+		$attachment_name = !empty($attachment_name)
+			? format_message_with_data($attachment_name, $data)
+			: sprintf('document_%s_%s.pdf', date('Y_m_d'), time());
+			
+
+		if (strtolower(pathinfo($attachment_name, PATHINFO_EXTENSION)) !== 'pdf') {
+			$attachment_name .= '.pdf';
+		}
+
+		$attachment_name = preg_replace(
+			'/[^A-Za-z0-9._-]/',
+			'_',
+			$attachment_name
+		);
+
+		$dir = FCPATH . 'uploads/email_attachments/';
+
+		if (!is_dir($dir)) {
+			mkdir($dir, 0777, TRUE);
+			chmod($dir, 0777);
+			@touch($dir . '/' . 'index.html');
+		}
+
+		$file = $dir . $attachment_name;
+
+		$dompdf = new Dompdf();
+		$dompdf->loadHtml(preg_replace('/>\s+</', '><', $attachment));
+		$dompdf->set_option('isJavascriptEnabled', true);
+		$dompdf->set_option('isRemoteEnabled', true);
+		$dompdf->set_option('isHtml5ParserEnabled', true);
+		$dompdf->setPaper('A4', 'portrait');
+		$dompdf->render();
+		file_put_contents($file, $dompdf->output());
+		
+		log_kb(['genericMessageTemplateCron::Dompdf'=>['file'=>$file]]);
+
+		return $file;
+	}
+
 }

@@ -37,6 +37,7 @@ CI_Events::on('publish_book_without_order','EventListener_lib::publishBookWithou
 CI_Events::on('publish_book_on_bookstore','EventListener_lib::publishBookOnBookstore');
 CI_Events::on('author_royalty', 'EventListener_lib::authorRoyalty');
 CI_Events::on('isbn_allotment', 'EventListener_lib::isbnAllotment');
+CI_Events::on('tnc_user_image', 'EventListener_lib::tncUserImage');
 
 // Subscription
 CI_Events::on('subscription_payment_created', 'EventListener_lib::subscriptionPaymentCreated');

@@ -493,6 +493,22 @@ trait ImportSchool {
 					self::_updateCounter($job_id, true);
 					$skipped++;
                     continue;
+                } elseif (!empty($row['alternate_email_2']) && !empty($site_info = $this->site_model->get_all([
+                    'owner_email' => trim($data['alternate_email_2']),
+                ])['rows'] ?? [])) {
+					$data['site_id'] = $site_info['id'];
+                    self::saveGarbageSchoolImport($job_id, $data);
+					self::_updateCounter($job_id, true);
+					$skipped++;
+                    continue;
+                } elseif (!empty($row['alternate_mobile_2']) && !empty($site_info = $this->site_model->get_all([
+                    'owner_mobile' => trim($data['alternate_mobile_2']),
+                ])['rows'] ?? [])) {
+					$data['site_id'] = $site_info['id'];
+                    self::saveGarbageSchoolImport($job_id, $data);
+					self::_updateCounter($job_id, true);
+					$skipped++;
+                    continue;
                 }
 
 				self::_saveSchoolData($data);
@@ -569,6 +585,9 @@ trait ImportSchool {
 				'alternate_authorized_person'   => $data['alternate_authorized_person'] ?? '',
 				'alternate_owner_email' 		=> $data['alternate_email'] ?? '',
 				'alternate_owner_mobile' 	    => $data['alternate_mobile'] ?? '',
+				'alternate_authorized_person_2' => $data['alternate_authorized_person_2'] ?? '',
+				'alternate_owner_email_2'		=> $data['alternate_email_2'] ?? '',
+				'alternate_owner_mobile_2'  	=> $data['alternate_mobile_2'] ?? '',
 				'status' 			  			=> 1,
 				'license_total' 	  			=> 1000,
 				'license_used' 		  			=> 0,
@@ -670,6 +689,10 @@ trait ImportSchool {
 			'alternate_email'               => $data['alternate_email'] ?? '',
 			'alternate_mobile'              => $data['alternate_mobile'] ?? '',
 			'alternate_authorized_person'   => $data['alternate_authorized_person'] ?? '',
+
+			'alternate_authorized_person_2' => $data['alternate_authorized_person_2'] ?? '',
+			'alternate_owner_email_2'		=> $data['alternate_email_2'] ?? '',
+			'alternate_owner_mobile_2'  	=> $data['alternate_mobile_2'] ?? '',
 
 			'owner_name'                    => $data['owner_name'] ?? '',
 			'address'                       => $data['address'] ?? '',

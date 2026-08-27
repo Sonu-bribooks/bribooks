@@ -17,80 +17,78 @@ trait IsbnAssignAlert {
 				'book_id'	=> $book_info['id']
 			])['rows'][0] ?? [];
 
-			// $data['title']			= sprintf(_li('ISBN has been allotted to your book %s.'), $book_info['name']);
-			// $data['heading']		= sprintf(_li('ISBN has been allotted to your book %s.'), $book_info['name']);
+			$this->load->model('common/MessageTemplate_model', 'message_template_model');
+			$site_id = (!empty($user_info['location']) && strtolower($user_info['location']) === 'india') ? 1 : 2;
 
-			// $data['content']		= $this->load->view('common/mail/part/isbn_assign_alert', [
-			// 	'location'		=> $user_info['location'],
-			// 	'book'			=> $book_info,
-			// ], true);
+			if(!empty($this->message_template_model->getByCode('isbn_allotment', $site_id))) {
+				$data['mobile'] 			= $user_info['mobile'];
+				$data['email'] 				= $user_info['email'];
+				$data['book_name']			= $book_info['name'];
+				$data['isbn_number']		= $book_info['isbn'];
+				$data['author_name']		= $book_info['author_name'];
+				$data['location']			= $user_info['location'];
+				$data['unsubscribe_url'] 	= gen_unsubscribe_url($user_info['email']);
 
-			// $data['unsubscribe_url']= gen_unsubscribe_url($user_info['email']);
+				CI_Events::trigger('isbn_allotment', [
+					'book_id'	=> $book_info['id'],
+					'data'		=> $data
+				]);
+			} else {
+				$data['title']			= sprintf(_li('ISBN has been allotted to your book %s.'), $book_info['name']);
+				$data['heading']		= sprintf(_li('ISBN has been allotted to your book %s.'), $book_info['name']);
 
-			// $message 	= $this->load->view('common/mail/templates/2/general', $data, true);
+				$data['content']		= $this->load->view('common/mail/part/isbn_assign_alert', [
+					'location'		=> $user_info['location'],
+					'book'			=> $book_info,
+				], true);
 
-			// $mobile = $user_info['mobile'];
-			// $email 	= $user_info['email'];
+				$data['unsubscribe_url']= gen_unsubscribe_url($user_info['email']);
 
-			// if (!$this->db->get_where('unsubscribed', [
-			// 	'email'		=> $user_info['email'],
-			// 	'_deleted'	=> 0
-			// ])->row_array()) {
-			// 	self::email(
-			// 		$email,
-			// 		$data['title'],
-			// 		$message,
-			// 		[],
-			// 		[]
-			// 	);
-			// }
+				$message 	= $this->load->view('common/mail/templates/2/general', $data, true);
 
-			// if($mobile) {
-			// 	if(!empty($user_info['location']) && strtolower($user_info['location']) == 'india') {
-			// 		self::sendOnextelWhatsappMessage(
-			// 			$mobile,
-			// 			[
-			// 				'template_id'	=> '01key49zfa6phq0yg8e640ecrg',
-			// 				'parameters'	=> [
-			// 					$book_info['name'],
-			// 					$book_info['isbn'],
-			// 				]
-			// 			],
-			// 		);
-			// 	} else {
-			// 		self::_sendWhatsappText(
-			// 			$mobile,
-			// 			[
-			// 				'template_id'	=> '01kevfv6jv4572w5bk2kqgem0w',
-			// 				'parameters'	=> [
-			// 					$book_info['author_name'],
-			// 					$book_info['name'],
-			// 					$book_info['isbn'],
-			// 				]
-			// 			],
-			// 		);
-			// 	}
-			// }
+				$mobile = $user_info['mobile'];
+				$email 	= $user_info['email'];
 
-			//*****new isbn message template code by sonu********* */
-			
-			$data['mobile'] 			= $user_info['mobile'];
-			$data['email'] 				= $user_info['email'];
-			$data['book_name']			= $book_info['name'];
-			$data['isbn']				= $book_info['isbn'];
-			$data['author_name']		= $book_info['author_name'];
-			$data['location']			= $user_info['location'];
-			$data['unsubscribe_url'] 	= gen_unsubscribe_url($user_info['email']);
+				if (!$this->db->get_where('unsubscribed', [
+					'email'		=> $user_info['email'],
+					'_deleted'	=> 0
+				])->row_array()) {
+					self::email(
+						$email,
+						$data['title'],
+						$message,
+						[],
+						[]
+					);
+				}
 
-			CI_Events::trigger('isbn_allotment', [
-				'book_id'	=> $book_info['id'],
-				'data'		=> $data
-			]);
-
-			CI_Events::trigger('access_log', [
-				'module'	=> sprintf('user_isbn_allotment_%d_%d', (int)$user_info['id'], (int)$book_info['id'])
-			]);
-
+				if($mobile) {
+					if(!empty($user_info['location']) && strtolower($user_info['location']) == 'india') {
+						self::sendOnextelWhatsappMessage(
+							$mobile,
+							[
+								'template_id'	=> '01key49zfa6phq0yg8e640ecrg',
+								'parameters'	=> [
+									$book_info['name'],
+									$book_info['isbn'],
+								]
+							],
+						);
+					} else {
+						self::_sendWhatsappText(
+							$mobile,
+							[
+								'template_id'	=> '01kevfv6jv4572w5bk2kqgem0w',
+								'parameters'	=> [
+									$book_info['author_name'],
+									$book_info['name'],
+									$book_info['isbn'],
+								]
+							],
+						);
+					}
+				}
+			}
 
 		}
 	}

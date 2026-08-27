@@ -141,6 +141,14 @@ trait MessageTemplate {
 			}
 		}
 
+		$code = $info['code'] ?? '';
+
+		$variables = $this->_getTemplateVariables($code);
+
+		if (!empty($variables)) {
+			$data['info'] = sprintf('<h4>%s</h4>',_l('available_variables')).implode('<br />',array_map(fn($k, $v) => sprintf('<b>{%s}</b> : %s',$k,$v),array_keys($variables),$variables));
+		}
+
 		$data['fields'][] = [
 			'type'		=> 'select',
 			'key'		=> 'site_id',
@@ -216,6 +224,22 @@ trait MessageTemplate {
 			'label'		=> _l('email_message'),
 			'required'	=> false,
 			'value'		=> $info['email']['message'] ?? '',
+		];
+		
+		$data['fields'][] = [
+			'type'		=> 'html',
+			'key'		=> 'email[attachment]',
+			'label'		=> _l('email_attachment'),
+			'required'	=> false,
+			'value'		=> $info['email']['attachment'] ?? '',
+		];
+		
+		$data['fields'][] = [
+			'type'		=> 'text',
+			'key'		=> 'email[attachment_name]',
+			'label'		=> _l('email_attachment_name'),
+			'required'	=> false,
+			'value'		=> $info['email']['attachment_name'] ?? '',
 		];
 
 		$data['fields'][] = [
@@ -405,5 +429,213 @@ trait MessageTemplate {
 		if ($message_template_info['id'] == $id) return true;
 
 		return false;
+	}
+
+	private function _getTemplateVariables($code = '')
+	{
+		$order_variables = [
+			'buyer_name' => _l('buyer_name'),
+			'username'   => _l('username'),
+			'order_code' => _l('order_code'),
+		];
+		$variables = [
+
+			'order_confirmation_paperback' => [
+				'buyer_name'      => _l('buyer_name'),
+				'order_code'      => _l('order_code'),
+				'order_details'   => _l('order_details'),
+			],
+
+			'order_confirmation_ebook' => [
+				'buyer_name'      => _l('buyer_name'),
+				'order_code'      => _l('order_code'),
+				'order_details'   => _l('order_details'),
+				'book_name'       => _l('book_name'),
+				'ebook_url'		  => _l('ebook_url'),
+			],
+
+			'order_confirmation_audiobook' => [
+				'buyer_name'      => _l('buyer_name'),
+				'order_code'      => _l('order_code'),
+				'order_details'   => _l('order_details'),
+				'book_name'       => _l('book_name'),
+				'audio_book_url'  => _l('audio_book_url'),
+			],
+
+			'abandon_cart_buyer' => [
+				'buyer_name'   => _l('buyer_name'),
+				'author_name'  => _l('book_author_name'),
+				'book_name'    => _l('book_name'),
+				'cart_url'     => _l('cart_url'),
+			],
+
+			'abandon_cart_author' => [
+				'author_name'  => _l('book_author_name'),
+				'cart_url'     => _l('cart_url'),
+			],
+
+			'signup_mobile' => [
+				'mobile'       => _l('mobile'),
+				'email'        => _l('email'),
+				'parent_name'  => _l('parent_name'),
+				'author_name'  => _l('author_name'),
+				'username'     => _l('username'),
+				'password'     => _l('password'),
+				'school_name'  => _l('school_name'),
+				'reset_url'    => _l('reset_password_url'),
+				'login_url'    => _l('login_url'),
+			],
+			
+			'signup_desktop' => [
+				'mobile'       => _l('mobile'),
+				'email'        => _l('email'),
+				'parent_name'  => _l('parent_name'),
+				'author_name'  => _l('author_name'),
+				'username'     => _l('username'),
+				'password'     => _l('password'),
+				'school_name'  => _l('school_name'),
+				'reset_url'    => _l('reset_password_url'),
+				'login_url'    => _l('login_url'),
+			],
+
+			'buyer_signup' => [
+				'mobile'           => _l('mobile'),
+				'email'            => _l('email'),
+				'parent_name'      => _l('parent_name'),
+				'author_name'      => _l('author_name'),
+				'username'         => _l('username'),
+				'password'         => _l('password'),
+				'school_name'      => _l('school_name'),
+				'reset_url'        => _l('reset_password_url'),
+				'login_url'        => _l('login_url'),
+				'book_name'        => _l('book_name'),
+				'book_author_name' => _l('book_author_name'),
+			],
+
+			'referral_signup' => [
+				'mobile'           => _l('mobile'),
+				'email'            => _l('email'),
+				'parent_name'      => _l('parent_name'),
+				'author_name'      => _l('author_name'),
+				'username'         => _l('username'),
+				'password'         => _l('password'),
+				'school_name'      => _l('school_name'),
+				'referral_name'    => _l('referral_name'),
+				'reset_url'        => _l('reset_password_url'),
+				'login_url'        => _l('login_url'),
+				'book_name'        => _l('book_name'),
+				'book_author_name' => _l('book_author_name'),
+			],
+
+			'publish_book_on_bookstore' => [
+				'author_name' 		=> _l('book_author_name'),
+				'book_name'   		=> _l('book_name'),
+				'book_cover_image'  => _l('book_cover_image'),
+				'book_url' 			=> _l('book_store_url'),
+				'author_city'       => _l('author_city'),
+				'author_state'      => _l('author_state'),
+				'mobile'     		=> _l('mobile'),
+				'email'     		=> _l('email'),
+			],
+
+			'publish_book_without_order' => [
+				'author_name' 			=> _l('book_author_name'),
+				'book_name'   			=> _l('book_name'),
+				'school_name'  			=> _l('school_name'),
+				'book_url' 				=> _l('book_store_url'),
+				'my_certificates_url'	=> _l('my_certificates_url'),
+				'mobile'     			=> _l('mobile'),
+				'email'     			=> _l('email'),
+			],
+			'isbn_allotment' => [
+				'author_name' 	=> _l('book_author_name'),
+				'book_name' 	=> _l('book_name'),
+				'mobile'     	=> _l('mobile'),
+				'email'			=> _l('email'),
+				'isbn_number' 	=> _l('book_isbn_number'),
+				
+			],
+
+			'author_royalty' => [
+				'author_name'       => _l('book_author_name'),
+				'quantity'          => _l('quantity'),
+				'copy_text_label'   => _l('copy_text_label'),
+				'book_name'         => _l('book_name'),
+				'purchase_time'     => _l('purchase_time'),
+				'purchase_date'     => _l('purchase_date'),
+				'buyer_name'        => _l('buyer_name'),
+				'author_royalty'    => _l('author_royalty'),
+				'no_of_sold'        => _l('no_of_sold'),
+				'logo_url'          => _l('BriBoo_gif_logo_url'),
+				'earning_icon_url'  => _l('earning_icon_url'),
+				'books_icon_url'    => _l('books_icon_url'),
+			],
+
+			'tnc_user_image' => [
+				'author_name'     	=> _l('author_name'),
+				'document_date'		=> _l('document_date'),
+				'document_title'	=> _l('document_title'),
+				'document_id'		=> _l('document_id'),
+				'created_date'		=> _l('document_created_date'),
+				'signed_by'			=> _l('document_signed_author_name'),
+				'ip_address'		=> _l('author_ip_address'),
+				'signed_date'		=> _l('author_signed_date'),
+			],
+
+			'user_otp' => [
+				'mobile'     	=> _l('mobile'),
+				'email'			=> _l('email'),
+				'otp' 			=> _l('otp'),
+			],
+
+			'delivered_medallion_order' => [
+				'first_name'		=> _l('user_first_name'),
+				'date'			  	=> _l('order_deliverd_date'),
+				'order_products'	=> _l('order_product_text')
+			],
+
+			'after_delivered_medallion_order' => [
+				'first_name'		=> _l('user_first_name'),
+				'link'			  	=> _l('upload_your_moment_link'),
+			],
+
+			'medallion_feedback' => [
+				'user_name'			=> _l('user_name'),
+				'media_type'		=> _l('media_type'),
+				'date'			  	=> _l('date_added'),
+				'event'				=> _l('event_name'),
+				'medallion'			=> _l('medallion_name'),
+			],
+
+			'subscription_expiry_reminder' => [
+				'first_name'		=> _l('user_first_name'),
+				'name'				=> _l('user_full_name'),
+				'end_date'			=> _l('subscription_plan_end_date'),
+				'subscription_plan' => _l('subscription_plan_name'),
+			],
+
+			'subscription_purchase' => [
+				'name'              => _l('user_fullname'),
+				'first_name'        => _l('user_first_name'),
+				'start_date'        => _l('subscription_plan_start_date'),
+				'end_date'          => _l('subscription_plan_end_date'),
+				'subscription_plan' => _l('subscription_plan_name'),
+				'currency'          => _l('currency_symbol'),
+				'currency_code'     => _l('currency_code'),
+				'price'             => _l('price'),
+			],
+
+			'order_created'           => $order_variables,
+			'printer_assigned'        => $order_variables,
+			'order_moved_to_afs'      => $order_variables,
+			'order_shipped'           => $order_variables,
+			'order_out_for_delivery' => $order_variables,
+			'order_undelivered'       => $order_variables,
+			'order_delivered'         => $order_variables,
+
+		];
+
+		
+		return $variables[$code] ?? [];
 	}
 }

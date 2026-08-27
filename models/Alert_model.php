@@ -186,12 +186,26 @@ class Alert_model extends CI_Model {
 				}
 
 				foreach ($attachment as $key => $value) {
+					log_kb([
+						'AlertModel::Email::ATTACHMENT_FILE' => [
+							'value' => $value,
+							'exists' => file_exists($value),
+							'size' => file_exists($value) ? filesize($value) : 0,
+						]
+					]);
 					if (strpos($value, 'http') === 0) {
 						$file_content = file_get_contents($value);
 						$filename = basename(parse_url($value, PHP_URL_PATH));
 						$mail->addStringAttachment($file_content, $filename);
 					} else {
 						$mail->addAttachment($value);
+						log_kb([
+							'AlertModel::Email::ATTACHMENT_ADDED' => [
+								'file' => $value,
+								'exists' => file_exists($value),
+								'size' => filesize($value),
+							]
+						]);
 					}
 				}
 			}
@@ -205,7 +219,7 @@ class Alert_model extends CI_Model {
 
 			log_kb(['AlertModel::Email' => $mail]);
 			$mail->send();
-
+		
 			update_thirdparty_status(EMAIL_SERVICE, true, '');
 
 			return true;

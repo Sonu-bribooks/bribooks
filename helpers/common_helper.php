@@ -1132,13 +1132,30 @@ if (!function_exists('_saveCsv')) {
 
 if (!function_exists('format_whatsapp_sms_message')) {
 	function format_whatsapp_sms_message($message, $data = []) {
-		preg_match_all('/\{(.+?)\}/ims', $message, $output);
+		// preg_match_all('/\{(.+?)\}/ims', $message, $output);
+		// $message_data = [];
+
+		// foreach ($output[1] ?? [] as $key) {
+		// 	$value = isset($data[$key]) ? $data[$key] : $key;
+
+		// 	$message_data[] = (string)$value;
+		// }
+
+		// return $message_data;
+
+		preg_match_all('/\{([^{}]+)\}/ims', $message, $output);
 		$message_data = [];
 
 		foreach ($output[1] ?? [] as $key) {
-			$value = isset($data[$key]) ? $data[$key] : $key;
-
-			$message_data[] = (string)$value;
+			if (array_key_exists($key, $data)) {
+				$value = $data[$key];
+			} else {
+				$value = preg_replace_callback('/\[\[([^\[\]]+)\]\]/', function($matches) use($data) {
+					$key = trim($matches[1]);
+					return $data[$key] ?? $matches[0];
+				}, $key);
+			}
+			$message_data[] = $value;
 		}
 
 		return $message_data;
