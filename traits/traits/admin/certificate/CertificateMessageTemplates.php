@@ -262,7 +262,7 @@ trait CertificateMessageTemplates {
 				'country_code'			=> $result['country_code'],
 				'min_sold'				=> $result['min_sold'],
 				'max_sold'				=> $result['max_sold'],
-				'is_fomo'				=> _sd($result['is_fomo']),
+				'is_fomo'				=> _sd($result['is_fomo'] ?? ''),
 				'league'				=> $result['league'],
 				'sort_order'			=> $result['sort_order'],
 				'actions'				=> ['id' => $result['id'], 'status' => $result['status'] ?? 0],

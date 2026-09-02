@@ -1420,5 +1420,11 @@
     "document_date": "Document date",
     "email_attachment_name": "Email attachment name",
     "the_book_pages_have_been_sent_to_print.": "The book pages have been sent to print.",
-    "copy_of_the_signed_terms_&_conditions_for_usage_of_my_own_image_on_bribooks": "Copy of the signed Terms & Conditions for usage of My Own Image on BriBooks"
+    "copy_of_the_signed_terms_&_conditions_for_usage_of_my_own_image_on_bribooks": "Copy of the signed Terms & Conditions for usage of My Own Image on BriBooks",
+    "event_challenge_state": "Event challenge state",
+    "this_book": "This book",
+    "this_author": "This author",
+    "welcome_to_%s,_your_gateway_to_becoming_a_globally_published_author.": "Welcome to %s, your gateway to becoming a globally published author.",
+    "school_order_update_successfully": "School order update successfully",
+    "school_order_history_added_successfully": "School order history added successfully"
 }

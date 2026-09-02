@@ -8,8 +8,6 @@ trait BookAlert {
 
 		if (!self::_createEventPublishBookCommunication($book_id)) {
 			self::cron($book_id, 'publishBookCron');
-
-			publish_book_on_bookstore
 		}
 
 		$country_code 	= $this->input->cookie('user_country_code', true) ?? '';

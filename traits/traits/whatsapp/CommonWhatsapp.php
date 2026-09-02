@@ -129,6 +129,7 @@ trait CommonWhatsapp {
 	private function _sendOnextelWhatsapp($to = '', $data = [], $company = 'bribooks') {
 		if (empty($data) || empty($data['template_id']) || empty($to)) return;
 
+		log_kb(['_sendOnextelWhatsapp::data'=>$data]);
 		$to = ENVIRONMENT === 'production' ? $to : get_settings('testing_mobile');
 
 		if ($company 		== 'brisharks') {
@@ -171,6 +172,11 @@ trait CommonWhatsapp {
 				'template' 	=> $template_data
 			]
 		];
+
+		log_kb([
+			'payload'	=> $payload,
+		]);
+
 
 		$headers = [
 			'authentication-token: ' . $auth_token,

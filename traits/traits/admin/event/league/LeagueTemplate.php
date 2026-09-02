@@ -174,6 +174,25 @@ trait LeagueTemplate {
 
 		$data['fields'][] = [
 			'type'		=> 'select',
+			'key'		=> 'is_moved',
+			'label'		=> _l('is_moved'),
+			'required'	=> true,
+			'value'	 	=> $info['is_moved'] ?? 0,
+			'options'	=> [
+				[
+					'label'	=> _l('1'),
+					'value'	=> 1,
+				],
+				[
+					'label'	=> _l('0'),
+					'value'	=> 0,
+				],
+			],
+		];
+
+
+		$data['fields'][] = [
+			'type'		=> 'select',
 			'key'		=> 'status',
 			'label'		=> _l('select_status'),
 			'required'	=> true,

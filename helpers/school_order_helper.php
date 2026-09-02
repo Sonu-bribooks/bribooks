@@ -68,7 +68,7 @@ if (!function_exists('_school_order_code')) {
 			]);
 		}
 
-		$site_info = $CI->site_model->get($result['site_id']);
+		$site_info = $CI->site_model->get($result['site_id'] ?? 1);
 
 		$order_type = isset($site_info['country_code']) ? (strtolower($site_info['country_code']) === 'in') ? '' : 'international' : '';
 
@@ -99,7 +99,7 @@ if (!function_exists('_so_buttons')) {
 
 		$CI->load->model('common/Site_model', 'site_model');
 
-		$site_info = $CI->site_model->get($order_info['site_id']);
+		$site_info = $CI->site_model->get($order_info['site_id'] ?? 1);
 
 		$type = isset($site_info['country_code']) ? (strtolower($site_info['country_code']) === 'in') ? 'india' : 'international' : '';
 

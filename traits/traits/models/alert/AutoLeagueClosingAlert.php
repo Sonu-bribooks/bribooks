@@ -25,6 +25,7 @@ trait AutoLeagueClosingAlert {
 				'event_id'		=> $challenge_info['event_id'],
 				'challenge_id'	=> $challenge_info['id'],
 				'type'			=> $data['type'],
+				'is_moved'		=> $challenge_info['is_moved'] ?? 0,
 				'limit'			=> $challenge_info['rank_limit'] ?? 0,
 				'need_invite'	=> $challenge_info['need_invite'] ?? 0,
 				'need_image'	=> $challenge_info['need_image'] ?? 0,
@@ -98,40 +99,53 @@ trait AutoLeagueClosingAlert {
 
 		if (empty($rank_key = self::_getLeagueClosingRankKey($data))) return;
 
+		self::_buildLeagueRank($data, $rank_key);
+
+		if (!empty($data['is_moved'])) {
+			$rank_key = self::_getLeagueClosingLegendKey($data);
+			self::_buildLeagueRank($data, $rank_key, $data['is_moved']);
+		}
+	}
+
+	private function _buildLeagueRank($data = [], $rank_key = '', $is_moved = 0) {
 		$rows = [];
 
 		$model_file_path = sprintf(APPPATH . 'models/ranking/Ranking%s_model.php', ucwords($data['type']));
 
-		if (file_exists($model_file_path)) {
-			$this->load->model(sprintf('ranking/Ranking%s_model', ucwords($data['type'])), sprintf('ranking_%s_model', strtolower($data['type'])));
+		if (!file_exists($model_file_path)) return;
 
-			$model_name = sprintf('ranking_%s_model', strtolower($data['type']));
+		$this->load->model(sprintf('ranking/Ranking%s_model', ucwords($data['type'])), sprintf('ranking_%s_model', strtolower($data['type'])));
 
-			$filter = [
-				'event_id' 		=> (int)$data['event_id'],
-				'challenge_id' 	=> (int)$data['challenge_id'],
-				'start'			=> 0,
-				'limit'			=> (int)(($data['limit'] ?? 200) + 50),
-			];
+		$model_name = sprintf('ranking_%s_model', strtolower($data['type']));
 
-			if (!empty($data['city_id'])) {
-				$filter['city_id'] = $data['city_id'] ?? 0;
-			}
+		$filter = [
+			'event_id' 		=> (int)$data['event_id'],
+			'challenge_id' 	=> (int)$data['challenge_id'],
+			'start'			=> 0,
+			'limit'			=> (int)(($data['limit'] ?? 200) + 50),
+		];
 
-			if (!empty($data['state_id'])) {
-				$filter['state_id'] = $data['state_id'] ?? 0;
-			}
-
-			if (!empty($data['genre_id'])) {
-				$filter['genre_id'] = $data['genre_id'] ?? 0;
-			}
-
-			if (!empty($data['group_id'])) {
-				$filter['group_id'] = $data['group_id'] ?? 0;
-			}
-
-			$rows = $this->{$model_name}->get_all($filter)['rows'] ?? [];
+		if (!empty($data['city_id'])) {
+			$filter['city_id'] = $data['city_id'] ?? 0;
 		}
+
+		if (!empty($data['state_id'])) {
+			$filter['state_id'] = $data['state_id'] ?? 0;
+		}
+
+		if (!empty($data['genre_id'])) {
+			$filter['genre_id'] = $data['genre_id'] ?? 0;
+		}
+
+		if (!empty($data['group_id'])) {
+			$filter['group_id'] = $data['group_id'] ?? 0;
+		}
+
+		if (isset($data['is_moved'])) {
+			$filter['is_moved'] = $data['is_moved'] ?? 0;
+		}
+
+		$rows = $this->{$model_name}->get_all($filter)['rows'] ?? [];
 
 		if (empty($rows)) return;
 
@@ -209,6 +223,18 @@ trait AutoLeagueClosingAlert {
 				'book_sold'		=> (int)$data['score'],
 			]);
 		}
+	}
+
+	private function _getLeagueClosingLegendKey($data = []) {
+		extract($data);
+
+		return vsprintf('live_legendary_%s_ranks_%s_%s_%s_%s', [
+			(ENVIRONMENT === 'production' ? 'live' : 'test'),
+			$type,
+			$event_id,
+			$challenge_id,
+			${sprintf('%s_id', $type)} ?? 0,
+		]);
 	}
 
 	private function _getLeagueClosingRankKey($data = []) {
@@ -296,8 +322,16 @@ trait AutoLeagueClosingAlert {
 	}
 
 	public function generateLeagueCertificateCron($data = []) {
+		self::_generateLeagueCertificate($data);
+
+		if (!empty($data['is_moved'])) {
+			self::_generateLeagueCertificate($data, $data['is_moved']);
+		}
+	}
+
+	private function _generateLeagueCertificate($data = [], $is_moved = 0) {
 		log_kb([
-			'generateLeagueCertificateCron::function' => $data
+			'generateLeagueCertificateCron' => $data
 		]);
 
 		$this->load->model('certificate/Certificate_model', 'certificate_model');
@@ -314,9 +348,6 @@ trait AutoLeagueClosingAlert {
 
 		$model_file_path = sprintf(APPPATH . 'models/ranking/Ranking%s_model.php', ucwords($data['type']));
 
-		log_kb([
-				'generateLeagueCertificateCron::filePath' => $model_file_path
-			]);
 		$ranks = [];
 
 		if (file_exists($model_file_path)) {
@@ -330,6 +361,7 @@ trait AutoLeagueClosingAlert {
 				'state_id' 		=> $data['state_id'] ?? 0,
 				'city_id' 		=> $data['city_id'] ?? 0,
 				'group_id' 		=> $data['group_id'] ?? 0,
+				'is_moved' 		=> $is_moved,
 				'rank_gte'		=> 1,
 				'sort'			=> sprintf('user_rank_%s.rank', strtolower($data['type'])),
 				'order'			=> 'ASC',
@@ -346,7 +378,9 @@ trait AutoLeagueClosingAlert {
 				'event_id'		=> (int)$data['event_id'],
 				'challenge_id'	=> (int)$data['challenge_id'],
 				'challenge_type'=> $data['type'],
+				'is_moved' 		=> $is_moved,
 				'has_rank'		=> 1,
+				'is_jury'		=> 0,
 			])['rows'][0] ?? [])) return;
 
 			foreach ($ranks as $key => $rank) {
@@ -380,12 +414,17 @@ trait AutoLeagueClosingAlert {
 				}
 			}
 		}
-		log_kb([
-				'generateLeagueCertificateCron::exit'
-			]);
 	}
 
 	public function sendLeagueMessageCron($data = []) {
+		self::_sendLeagueMessage($data);
+
+		if (!empty($data['is_moved'])) {
+			self::_sendLeagueMessage($data, $data['is_moved']);
+		}
+	}
+
+	private function _sendLeagueMessage($data = [], $is_moved = 0) {
 		log_kb([
 			'sendLeagueMessageCron' => $data
 		]);
@@ -418,6 +457,7 @@ trait AutoLeagueClosingAlert {
 				'city_id' 		=> $data['city_id'] ?? 0,
 				'state_id' 		=> $data['state_id'] ?? 0,
 				'group_id' 		=> $data['group_id'] ?? 0,
+				'is_moved'		=> $is_moved,
 				'rank_gte'		=> 1,
 				'sort'			=> sprintf('user_rank_%s.rank', strtolower($data['type'])),
 				'order'			=> 'ASC',
@@ -442,6 +482,7 @@ trait AutoLeagueClosingAlert {
 		if (empty($templates = $this->league_template_model->get_all([
 			'event_id'		=> (int)$data['event_id'],
 			'challenge_id'	=> (int)$data['challenge_id'],
+			'is_moved'		=> (int)$is_moved,
 		])['rows'] ?? [])) {
 			return;
 		}

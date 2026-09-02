@@ -192,6 +192,7 @@ trait EventChallengeState {
 			'key'		=> 'book_sold',
 			'label'		=> _l('book_sold'),
 			'value'		=> $info['book_sold'] ?? '',
+			'required'	=> false,
 		];
 
 		$data['fields'][] = [
@@ -199,6 +200,7 @@ trait EventChallengeState {
 			'key'		=> 'max_book_sold',
 			'label'		=> _l('max_book_sold'),
 			'value'		=> $info['max_book_sold'] ?? '',
+			'required'	=> false,
 		];
 
 		$data['fields'][] = [
@@ -206,6 +208,7 @@ trait EventChallengeState {
 			'key'		=> 'min_published',
 			'label'		=> _l('min_published(school/teacher)'),
 			'value'		=> $info['min_published'] ?? '',
+			'required'	=> false,
 		];
 
 		$data['fields'][] = [
@@ -213,6 +216,7 @@ trait EventChallengeState {
 			'key'		=> 'max_published',
 			'label'		=> _l('max_published(school/teacher)'),
 			'value'		=> $info['max_published'] ?? '',
+			'required'	=> false,
 		];
 
 		$data['fields'][] = [

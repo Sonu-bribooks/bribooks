@@ -29,6 +29,7 @@ trait SignupAlert{
 		log_kb(['signupCron::' => ['id'		=> $id]]);
 
 		if ($info = $this->student_model->get($id)) {
+			log_kb(['signupCron:: entry' => ['info'		=> $info]]);
 			if (!empty($info['source']) && (in_array(strtolower($info['source']), ['bookstore', 'referral']))) {
 				return false;
 			}
@@ -36,7 +37,7 @@ trait SignupAlert{
 			$site_id = $template_site_id = $info['site_id'];
 
 			$book_name 			= _l('this_book');
-			$book_author_name 	= -l('this_author');
+			$book_author_name 	= _l('this_author');
 			$referral_name 		= '';
 
 			$this->load->model('event/EventUser_model', 'event_user_model');
@@ -54,7 +55,7 @@ trait SignupAlert{
 			}
 
 			$site_info = $this->site_model->get($site_id);
-
+	log_kb(['signupCron:: site_info' => ['site_info'		=> $site_info]]);
 			if (empty($site_info)) return;
 
 			// generate password and store in db
@@ -85,13 +86,13 @@ trait SignupAlert{
 				$data['mobile'] 			= $info['mobile'];
 				$data['email'] 				= $info['email'];
 				$data['parent_name']		= $info['parent_name'] ?? trim($info['first_name'] . ' ' . $info['last_name']);
-				$data['author_name']		= $info['first_name'] . ' ' . $info['last_name'];
+				$data['name']				= $info['first_name'] . ' ' . $info['last_name'];
 				$data['username']			= $info['username'];
 				$data['school_name']		= $site_info['name'];
 				$data['password']			= $password;
 				$data['login_url']			= $login_url;
 				$data['book_name'] 			= $book_name;
-				$data['book_author_name'] 	= $book_author_name;
+				$data['author_name'] 		= $book_author_name;
 				$data['unsubscribe_url']	= gen_unsubscribe_url($info['email']);
 				$data['system_name']		= get_settings('system_name');
 
@@ -135,6 +136,9 @@ trait SignupAlert{
 				}
 				
 			} else {
+				log_kb([
+					'normal messages' 	=> $info['source'],
+				]);
 
 				if (!empty($info['parent_referral_id']) && !empty($referral_info = $this->student_model->get($info['parent_referral_id']))) {
 					$template = 'email_referral_user_signup';
@@ -194,7 +198,7 @@ trait SignupAlert{
 				$data['subheading']		= '';
 				$data['content']		= self::formatEmailMessage($template, [
 					'parent_name'		=> $info['parent_name'] ?? trim($info['first_name'] . ' ' . $info['last_name']),
-					'author_name'		=> $info['first_name'] . ' ' . $info['last_name'],
+					'name'				=> $info['first_name'] . ' ' . $info['last_name'],
 					'username'			=> $info['username'],
 					'school_name'		=> $site_info['name'],
 					'referral_name'		=> $referral_name,
@@ -204,7 +208,7 @@ trait SignupAlert{
 					'email'				=> $info['email'],
 					'mobile'			=> $info['mobile'],
 					'book_name' 		=> $book_name,
-					'book_author_name' 	=> $book_author_name,
+					'author_name' 		=> $book_author_name,
 				], $site_id);
 				$data['site_id']		= $site_id;
 				$data['parent_id']		= $site_info['parent_id'];
@@ -268,14 +272,20 @@ trait SignupAlert{
 					}
 				}
 
-				self::email(
-					$email,
-					$data['title'],
-					$message,
-					[],
-					[],
-					$attachment
-				);
+				log_kb([
+					'email' => $email,
+					'title' => $data['title'],
+					'mesasge'=> $message
+				]);
+
+				// self::email(
+				// 	$email,
+				// 	$data['title'],
+				// 	$message,
+				// 	[],
+				// 	[],
+				// 	$attachment
+				// );
 
 				if (!empty($mobile) && !empty($whatsapp_temp_id) && !empty($whatsapp_param)) {
 					// self::_sendWhatsappText(
@@ -285,6 +295,11 @@ trait SignupAlert{
 					// 		'parameters'	=> $whatsapp_param
 					// 	],
 					// );
+
+					log_kb([
+						'template_id'	=> $whatsapp_temp_id,
+							'parameters'	=> $whatsapp_param
+					]);
 
 					self::sendOnextelWhatsappMessage(
 						$mobile,

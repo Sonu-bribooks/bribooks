@@ -1,9 +1,26 @@
 <div class="row ">
 	<div class="col-xl-12">
-		<div class="card">
-			<div class="card-body">
-				<h4 class="page-title"> <i class="mdi mdi-apple-keyboard-command title_icon"></i> <?php echo $page_title; ?>
-			</h4>
+		<div class="card mb-2">
+			<div class="card-body p-2">
+				<h4 class="page-title float-left"> <i class="mdi mdi-apple-keyboard-command title_icon"></i> <?php echo $page_title; ?>
+				</h4>
+				<div class="row">
+					<div class="col-sm-8"></div>
+					<div class="col-sm-4 alignToTitle text-right">
+						<div class="input-group">
+							<select name="bulk-send" id="bulk-send" class="form-control bulk-send">
+								<option value=""><?=_l('select_bulk_action')?></option>
+								<option value="4"><?=_l('complete_order')?></option>
+								<option value="15"><?=_l('mark_as_return')?></option>
+							</select>
+							<div class="input-group-append">
+								<button type="button" class="btn btn-primary" id="bulk-action">
+									<?=_l('apply')?>
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div> <!-- end card body-->
 		</div> <!-- end card -->
 	</div><!-- end col-->
@@ -275,6 +292,7 @@
 					<table id="ajax-datatable" class="table table-striped table-centered mb-0">
 						<thead>
 							<tr>
+								<th><input type="checkbox" class="select-all"></th>
 								<th><?php echo _l('sn'); ?></th>
 								<th><?php echo _l('school_id'); ?></th>
 								<th><?php echo _l('order_code'); ?></th>
@@ -307,6 +325,7 @@ $(function() {
 	let columns_length = <?=in_array($this->session->userdata('role_id'), [1]) ? json_encode([10, 20, 50, 100, 200, 500, 1000]) : json_encode([10, 20, 50])?>;
 	let columns = JSON.parse(atob('<?php echo _render_column([
 		'keys' 		=> [
+			'#',
 			'sn',
 			'school_id',
 			'order_code',
@@ -356,6 +375,60 @@ $(document).on('click', '.export-csv', function(event) {
 	var startDate = $('.start-date').val();
 	if (startDate == "") {
 		alert('Kindly Fill start date')
+	}
+});
+
+$('.select-all').click(function() {
+	if (this.checked) {
+		$(':checkbox').each(function() {
+			$(this).prop('checked', true).trigger('change');
+		});
+	} else {
+		$('.select-me').each(function() {
+			$(this).prop('checked', false).trigger('change');
+		});
+	}
+});
+
+$(document).on('click', '.select-me', function(event) {
+	if (this.checked) {
+		$(this).prop('checked', true).trigger('change');
+	} else {
+		$(this).prop('checked', false).trigger('change');
+	}
+	$('.select-all').prop('checked', false).trigger('change');
+});
+
+$('#bulk-action').on('click', function(event) {
+	event.preventDefault();
+
+	var ids = [];
+	$.each($('input[class="select-me"]:checked'), function() {
+		ids.push($(this).val());
+	});
+
+	if (ids.length == 0) {
+		error_notify('<?=_l('select_atleast_one_order')?>')
+		return false;
+	}
+
+	let status = $('#bulk-send').val();
+
+	if (confirm('<?=_l('Are you sure?')?>')) {
+		$.ajax({
+			url: '<?=base_url('admin/bulk_school_order_update')?>',
+			type: 'POST',
+			data: {
+				ids: ids,
+				status: status
+			},
+			cache: false,
+			success: function(json) {
+				table.ajax.reload(null, false);
+				json.success && success_notify(json.success)
+				json.error && error_notify(json.error)
+			}
+		});
 	}
 });
 

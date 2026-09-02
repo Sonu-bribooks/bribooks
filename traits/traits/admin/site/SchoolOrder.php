@@ -149,6 +149,7 @@ trait SchoolOrder {
 			$shipping_tracking_info = !empty($result['shipping_tracking_info']) ? json_decode($result['shipping_tracking_info'], true) : '';
 
 			$json['data'][] = [
+				'#'					=> self::_renderCheckBox($result),
 				'sn'				=> $filter_data['start'] + 1 + $key,
 				'school_id'			=> $result['school_id'],
 				'order_code'		=> _school_order_code($result, $shipping_tracking_info),
@@ -586,5 +587,49 @@ trait SchoolOrder {
 		$file_name = $school_info['name'] . '_' . time() . '.pdf';
 
 		$dompdf->stream($file_name, array('Attachment' => 1));
+	}
+
+	public function bulk_school_order_update() {
+		$json = [];
+
+		$order_ids 	= $this->input->post('ids');
+		$status 	= $this->input->post('status');
+
+		if (in_array($status, [2, 3, 4, 8, 9, 10, 15, 21])) {
+			foreach ($order_ids as $order_id) {
+				$order_info = $this->school_order_model->get($order_id);
+
+				if ($order_info['status'] == $status) continue;
+
+				if (empty($this->school_order_history_model->get_all([
+					'school_order_id' 		=> $order_info['id'],
+					'status' 				=> $status,
+					'start'					=> 0,
+					'limit'					=> 1
+				])['rows'][0])) {
+					$this->school_order_history_model->add([
+						'school_order_id' 		=> $order_info['id'],
+						'description' 			=> _order_history($status),
+						'status' 				=> $status
+					]);
+				}
+
+				$this->school_order_model->edit($order_info['id'], [
+					'status'		=> (int)$status,
+				]);
+
+				if ($status == 4) {
+					$this->school_order_model->edit($order_info['id'], [
+						'date_completed'	=> date('Y-m-d H:i:s')
+					]);
+				}
+
+				CI_Events::trigger('system_access_log', [
+					'method'	=> 'bulk_school_order_update_' . (int)$order_info['id'] . '_' . $status,
+				]);
+			}
+		}
+
+		output_json($json);
 	}
 }
