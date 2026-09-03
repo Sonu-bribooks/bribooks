@@ -26,36 +26,20 @@ trait SignupAlert{
 	}
 
 	public function signupCron($id = 0) {
-		log_kb(['signupCron::' => ['id'		=> $id]]);
+		log_kb(['signupCron::' => ['id' => $id]]);
 
 		if ($info = $this->student_model->get($id)) {
-			log_kb(['signupCron:: entry' => ['info'		=> $info]]);
 			if (!empty($info['source']) && (in_array(strtolower($info['source']), ['bookstore', 'referral']))) {
 				return false;
 			}
 
-			$site_id = $template_site_id = $info['site_id'];
-
-			$book_name 			= _l('this_book');
-			$book_author_name 	= _l('this_author');
-			$referral_name 		= '';
-
-			$this->load->model('event/EventUser_model', 'event_user_model');
-			$this->load->model('common/MessageTemplate_model', 'message_template_model');
-
-			$filter_data 				= [];
-			$filter_data['sort'] 		= 'event_user.id';
-			$filter_data['order'] 		= 'DESC';
-			$filter_data['event_id'] 	= 10;
-			$filter_data['user_id'] 	= (int)$id;
-			$event_users = $this->event_user_model->get_all($filter_data);
-
-			if (!empty($event_users['rows'][0])) {
-				$site_id = 2273;
-			}
+			$site_id 					= $info['site_id'];
+			$book_name 					= _li('This Book');
+			$book_author_name 			= _li('This Author');
+			$login_url 					= USER_URL . 'login?tab=username';
 
 			$site_info = $this->site_model->get($site_id);
-	log_kb(['signupCron:: site_info' => ['site_info'		=> $site_info]]);
+
 			if (empty($site_info)) return;
 
 			// generate password and store in db
@@ -68,250 +52,60 @@ trait SignupAlert{
 				'verification_code'	=> $verification_code
 			]);
 
+			$data['mobile'] 			= $info['mobile'];
+			$data['email'] 				= $info['email'];
+			$data['parent_name']		= $info['parent_name'] ?? trim($info['first_name'] . ' ' . $info['last_name']);
+			$data['name']				= ucwords(trim($info['first_name'] . ' ' . $info['last_name']));
+			$data['username']			= $info['username'];
+			$data['school_name']		= $site_info['name'] ?? '';
+			$data['password']			= $password;
+			$data['login_url']			= $login_url;
+			$data['book_name'] 			= $book_name;
+			$data['author_name'] 		= $book_author_name;
+			$data['unsubscribe_url']	= gen_unsubscribe_url($info['email']);
+			$data['system_name']		= get_settings('system_name');
+
 			if (strpos($info['source'], 'buyer') !== false) {
-				$template_code 		= 'buyer_signup';
-			} else if ($info['source'] == 'signup_desktop') {
-				$template_code 		= 'signup_desktop';
-			} else {
-				$template_code 		= 'signup_mobile';
-			}
+				$source_id = preg_replace('/\D/', '', $info['source']);
 
-			if(!empty($template_info = $this->message_template_model->getByCode($template_code, $site_id))) {
-				$reset_url = vsprintf(USER_URL . 'resetpassword?uid=%s&code=%s', [
-					$info['id'],
-					$verification_code,
+				if (!empty($source_id) && !empty($book_info = $this->book_model->get($source_id ?? 0))){
+					$data['book_name'] 			= $book_info['name'];
+					$data['author_name'] 		= $book_info['author_name'];
+				}
+
+				CI_Events::trigger('buyer_signup', [
+					'user_id'	=> $info['id'],
+					'data'		=> $data
 				]);
 
-				$login_url 					= USER_URL . 'login?tab=username';
-				$data['mobile'] 			= $info['mobile'];
-				$data['email'] 				= $info['email'];
-				$data['parent_name']		= $info['parent_name'] ?? trim($info['first_name'] . ' ' . $info['last_name']);
-				$data['name']				= $info['first_name'] . ' ' . $info['last_name'];
-				$data['username']			= $info['username'];
-				$data['school_name']		= $site_info['name'];
-				$data['password']			= $password;
-				$data['login_url']			= $login_url;
-				$data['book_name'] 			= $book_name;
-				$data['author_name'] 		= $book_author_name;
-				$data['unsubscribe_url']	= gen_unsubscribe_url($info['email']);
-				$data['system_name']		= get_settings('system_name');
+				CI_Events::trigger('access_log', [
+					'module'	=> sprintf('user_buyer_signup_%d_%d', (int)$site_id, (int)$info['id'])
+				]);
 
-				if (strpos($info['source'], 'buyer') !== false) {
-					$source_id = preg_replace('/\D/', '', $info['source']);
-
-					if (!empty($source_id) && !empty($book_info = $this->book_model->get($source_id ?? 0))){
-						$data['book_name'] 			= $book_info['name'];
-						$data['book_author_name'] 	= $book_info['author_name'];
-					}
-
-					CI_Events::trigger('buyer_signup', [
-						'user_id'	=> $info['id'],
-						'data'		=> $data
-					]);
-
-					CI_Events::trigger('access_log', [
-						'module'	=> sprintf('user_buyer_signup_%d_%d', (int)$site_id, (int)$info['id'])
-					]);
-
-				} elseif ($info['source'] == 'signup_desktop') {
-					log_kb(['cronsignup_desktop::']);
-					CI_Events::trigger('signup_desktop', [
-						'user_id'	=> $info['id'],
-						'data'		=> $data
-					]);
-
-					CI_Events::trigger('access_log', [
-						'module'	=> sprintf('user_desktop_signup_%d_%d', (int)$site_id, (int)$info['id'])
-					]);
-
-				} elseif ($info['source'] == 'signup_mobile') {
-					CI_Events::trigger('signup_mobile', [
-						'user_id'	=> $info['id'],
-						'data'		=> $data
-					]);
-
-					CI_Events::trigger('access_log', [
-						'module'	=> sprintf('user_mobile_signup_%d_%d', (int)$site_id, (int)$info['id'])
-					]);
-				}
+			} elseif ($info['source'] == 'signup_desktop') {
 				
-			} else {
-				log_kb([
-					'normal messages' 	=> $info['source'],
+				CI_Events::trigger('signup_desktop', [
+					'user_id'	=> $info['id'],
+					'data'		=> $data
 				]);
 
-				if (!empty($info['parent_referral_id']) && !empty($referral_info = $this->student_model->get($info['parent_referral_id']))) {
-					$template = 'email_referral_user_signup';
-					$referral_name = trim($referral_info['first_name'] . ' ' . $referral_info['last_name']);
-				} else {
-					if (strpos($info['source'], 'buyer') !== false) {
-						$source_id = preg_replace('/\D/', '', $info['source']);
-
-						if (!empty($source_id) && !empty($book_info = $this->book_model->get($source_id ?? 0))){
-							$book_name 			= $book_info['name'];
-							$book_author_name 	= $book_info['author_name'];
-						}
-
-						$template = 'email_buyer_signup';
-					} elseif ($info['source'] == 'signup_mobile') {
-						$template = 'email_user_signup_mobile';
-					} else {
-						$template = 'email_user_signup';
-					}
-
-					$referral_name = '';
-				}
-
-				if ($site_info['site_type'] == 2) {
-					$template = 'email_user_signup_nursery';
-				} elseif ($site_info['site_type'] == 3) {
-					$template = 'email_user_signup_university';
-				} elseif ($site_info['site_type'] == 4) {
-					$template = 'email_user_signup_community';
-					$template_site_id = $site_info['parent_id'];
-				}
-
-				$title = vsprintf(_li('Welcome to %s, your gateway to becoming a globally published author.'), [
-					get_settings('system_name')
+				CI_Events::trigger('access_log', [
+					'module'	=> sprintf('user_desktop_signup_%d_%d', (int)$site_id, (int)$info['id'])
 				]);
 
-				$title = self::formatEmailSubject($template, $template_site_id, [
-					'author_name'		=> trim($info['first_name'] . ' ' . $info['last_name']),
-					'parent_name'		=> $info['parent_name'],
-					'school_name'		=> $site_info['name'],
-				]) ?? $title;
-
-				log_kb([
-					'template' 	=> $template,
-					'title' 	=> $title
+			} elseif ($info['source'] == 'signup_mobile') {
+				CI_Events::trigger('signup_mobile', [
+					'user_id'	=> $info['id'],
+					'data'		=> $data
 				]);
 
-				$reset_url = vsprintf(USER_URL . 'resetpassword?uid=%s&code=%s', [
-					$info['id'],
-					$verification_code,
+				CI_Events::trigger('access_log', [
+					'module'	=> sprintf('user_mobile_signup_%d_%d', (int)$site_id, (int)$info['id'])
 				]);
-
-				$login_url = USER_URL . 'login?tab=username';
-
-				$data['title']			= $title;
-				$data['heading']		= '';
-				$data['subheading']		= '';
-				$data['content']		= self::formatEmailMessage($template, [
-					'parent_name'		=> $info['parent_name'] ?? trim($info['first_name'] . ' ' . $info['last_name']),
-					'name'				=> $info['first_name'] . ' ' . $info['last_name'],
-					'username'			=> $info['username'],
-					'school_name'		=> $site_info['name'],
-					'referral_name'		=> $referral_name,
-					'password'			=> $password,
-					'url'				=> $reset_url,
-					'url_2'				=> $login_url,
-					'email'				=> $info['email'],
-					'mobile'			=> $info['mobile'],
-					'book_name' 		=> $book_name,
-					'author_name' 		=> $book_author_name,
-				], $site_id);
-				$data['site_id']		= $site_id;
-				$data['parent_id']		= $site_info['parent_id'];
-				$data['site_code']		= $site_info['site_code'];
-				$data['link']			= '';
-				$data['link_text']		= '';
-				$data['unsubscribe_url']= gen_unsubscribe_url($info['email']);
-
-				// log_kb([
-				// 	'signupCron' 	=> 'signupCron',
-				// 	'site_info' 	=> $site_info,
-				// 	'template' 		=> $template,
-				// 	'title' 		=> $title,
-				// 	'message' 		=> $data['content']
-				// ]);
-
-				$message 				= $this->load->view('common/mail/templates/site/general', $data, true);
-
-				$mobile = $info['mobile'];
-				$email 	= $info['email'];
-
-				$attachment = [];
-
-				$whatsapp_temp_id 	= '';
-				$whatsapp_param 	= [];
-
-				if ($mobile && (strpos(strtolower($site_info['site_code']), NYAF_IN_SITE_CODE) !== false)) {
-					if (!empty($info['parent_referral_id']) && !empty($referral_info = $this->student_model->get($info['parent_referral_id']))) {
-
-						$whatsapp_temp_id		= '672353495003506';
-						$whatsapp_param	= [
-							trim($info['first_name'] . ' ' . $info['last_name']),
-							$info['username'],
-							$password,
-							$info['mobile']
-						];
-					}
-				} else {
-					if (strpos($info['source'], 'buyer') !== false) {
-						$whatsapp_temp_id		= '01kcrsq6renp9tz6qgh2z8ec0f';
-						// $whatsapp_temp_id		= '2916754095139842';
-						$whatsapp_param	= [
-							trim($info['first_name'] . ' ' . $info['last_name']),
-							$book_name,
-							$book_author_name,
-						];
-					} elseif ($info['source'] == 'signup_desktop') {
-						$whatsapp_temp_id		= '01kcrsmsgdxqhrtcav86ya9tr6';
-						// $whatsapp_temp_id		= '3773945916162458';
-						$whatsapp_param	= [
-							trim($info['first_name'] . ' ' . $info['last_name']),
-							$info['email']
-						];
-					} elseif ($info['source'] == 'signup_mobile') {
-						$whatsapp_temp_id		= '01kcrrrgemxm6v9am7315f3rfn';
-						// $whatsapp_temp_id		= '555644803508253';
-						$whatsapp_param	= [
-							trim($info['first_name'] . ' ' . $info['last_name']),
-							$info['email']
-						];
-					}
-				}
-
-				log_kb([
-					'email' => $email,
-					'title' => $data['title'],
-					'mesasge'=> $message
-				]);
-
-				// self::email(
-				// 	$email,
-				// 	$data['title'],
-				// 	$message,
-				// 	[],
-				// 	[],
-				// 	$attachment
-				// );
-
-				if (!empty($mobile) && !empty($whatsapp_temp_id) && !empty($whatsapp_param)) {
-					// self::_sendWhatsappText(
-					// 	$mobile,
-					// 	[
-					// 		'template'		=> $whatsapp_temp_id,
-					// 		'parameters'	=> $whatsapp_param
-					// 	],
-					// );
-
-					log_kb([
-						'template_id'	=> $whatsapp_temp_id,
-							'parameters'	=> $whatsapp_param
-					]);
-
-					self::sendOnextelWhatsappMessage(
-						$mobile,
-						[
-							'template_id'	=> $whatsapp_temp_id,
-							'parameters'	=> $whatsapp_param
-						],
-					);
-				}
 			}
 		}
 	}
+
 	public function tncSignupCron($id = 0) {
 		log_kb([
 			'tncSignupCron::' => [
@@ -573,7 +367,7 @@ trait SignupAlert{
 		$dompdf->set_option('isJavascriptEnabled', true);
 		$dompdf->set_option('isRemoteEnabled', true);
 		$dompdf->set_option('isHtml5ParserEnabled', true);
-		$dompdf->setPaper('A4', 'potrait');
+		$dompdf->setPaper('A4', 'portrait');
 		$dompdf->render();
 
 		$file 	= 'uploads/termandconditions/author/author_' . $id . '.pdf';

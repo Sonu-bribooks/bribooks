@@ -210,16 +210,7 @@ trait WhatsappAlert {
 			($user_info = $this->student_model->get($info['user_id'] ?? 0)) &&
 			$info['status'] != 0
 		) {
-			$book_event_info = $this->event_book_model->get_all([
-				'book_id'	=> $info['id'],
-			])['rows'][0] ?? [];
-
 			$site_id = $user_info['site_id'];
-
-			$site_info = $this->site_model->get($site_id);
-
-			$this->load->model('common/MessageTemplate_model', 'message_template_model');
-
 			$ordered_author_copies = $this->order_model->getAuthorProducts([
 				'product_id'	=> $info['id'],
 				'user_id'		=> $info['user_id']
@@ -227,75 +218,24 @@ trait WhatsappAlert {
 
 			if ($ordered_author_copies > 0) return;
 
-			if(!empty($this->message_template_model->getByCode('publish_book_without_order', $site_id))) {
-				$data['mobile']					= $user_info['mobile'];
-				$data['email']					= $user_info['email'];
-				$data['author_name']			= $info['author_name'];
-				$data['school_name']			= $site_info['name'];
-				$data['book_name']	  			= $info['name'];
-				$data['book_url']				= USER_URL . 'bookstore/' . $info['slug'];
-				$data['my_certificates_url']	= USER_URL . 'account/mycertificates';
-				$data['unsubscribe_url']		= gen_unsubscribe_url($user_info['email']);
-				$data['system_name']			= get_settings('system_name');
+			$data['mobile']					= $user_info['mobile'];
+			$data['email']					= $user_info['email'];
+			$data['author_name']			= $info['author_name'];
+			$data['book_name']	  			= $info['name'];
+			$data['book_url']				= USER_URL . 'bookstore/' . $info['slug'];
+			$data['my_certificates_url']	= USER_URL . 'account/mycertificates';
+			$data['site_id']				= $site_id;
+			$data['unsubscribe_url']		= gen_unsubscribe_url($user_info['email']);
+			$data['system_name']			= get_settings('system_name');
 
-				CI_Events::trigger('publish_book_without_order', [
-					'book_id'	=> $info['id'],
-					'data'		=> $data
-				]);
-			} else {
-				$template = 'email_user_publish_book_without_order';
-				$data['title']			= self::formatEmailSubject($template, $site_id, [
-						'author_name'	  	=> $info['author_name'],
-						'book_name'	  		=> $info['name'],
-						'event_id'	  		=> $book_event_info['event_id'] ?? 0,
-					]) ?? vsprintf(_li('%s: Order printed copies of your recently published book'), [
-					get_settings('system_name')
-				]);
+			CI_Events::trigger('publish_book_without_order', [
+				'book_id'	=> $info['id'],
+				'data'		=> $data
+			]);
 
-				$data['heading']		= '';
-				$data['subheading']		= '';
-				$data['content']		= self::formatEmailMessage($template, [
-					'event_id'	  		=> $book_event_info['event_id'] ?? 0,
-					'author_name'		=> $info['author_name'],
-					'school_name'		=> $site_info['name'],
-					'book_name'	  		=> $info['name'],
-					'url'				=> USER_URL . 'bookstore/' . $info['slug'],
-					'my_certificates_url'	=> USER_URL . 'account/mycertificates',
-				], $site_id);
-				$data['site_id']		= $site_id;
-				$data['parent_id']		= $site_info['parent_id'];
-				$data['site_code']		= $site_info['site_code'];
-				$data['link']			= '';
-				$data['link_text']		= '';
-				$data['unsubscribe_url']= gen_unsubscribe_url($user_info['email']);;
-
-				$message 				= $this->load->view('common/mail/templates/site/general', $data, true);
-
-				$mobile		= $user_info['mobile'];
-				$email		= $user_info['email'];
-
-				if ($mobile) {
-					self::sendOnextelWhatsappMessage(
-						$mobile,
-						[
-							'template_id'	=> '01kev9ct425e3nfyy2ag5azy50',
-							'parameters'	=> [
-								trim($info['author_name']),
-								USER_URL . 'bookstore/' . $info['slug']
-							]
-						],
-					);
-				}
-
-				self::email(
-					$email,
-					$data['title'],
-					$message,
-					[],
-					(ENVIRONMENT == 'production') ? ['communication@bribooks.com'] : []
-				);
-			}
-
+			CI_Events::trigger('access_log', [
+				'module'	=> sprintf('user_publish_book_without_order_%d_%d', (int)$user_info['id'], (int)$info['id'])
+			]);
 		}
 	}
 

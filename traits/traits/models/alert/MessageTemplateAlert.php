@@ -1,4 +1,5 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed');
+
 use Dompdf\Dompdf;
 
 trait MessageTemplateAlert {
@@ -12,7 +13,6 @@ trait MessageTemplateAlert {
 
 		$site_id			= $data['site_id'] ?? 1;
 		$template_info 		= $this->message_template_model->getByCode($data['code'], $site_id);
-		log_kb(['genericMessageTemplate::template_info' => $template_info]);
 		if (empty($template_info['status'])) return;
 
 		$id			 		= $data['id'] ?? 0;
@@ -21,7 +21,6 @@ trait MessageTemplateAlert {
 		$email		  		= $data['email'] ?? '';
 		$mobile		 		= $data['mobile'] ?? '';
 		$template_id		= $template_info['id'] ?? '';
-		
 
 		if ($schedule_time == 0) {
 			$this->genericMessageTemplateCron([
@@ -33,9 +32,15 @@ trait MessageTemplateAlert {
 				'data'			=> $data['data'],
 			]);
 		} else {
-			
+			$code = sprintf('genericMessageTemplateCron_%s_%s', $code, $id);
+
+			if (!empty($data['alert_once'])) {
+				$code_info = $this->cron_model->getByCode($code);
+				if (!empty($code_info)) return;
+			}
+
 			$this->cron_model->add([
-				'code'			=> sprintf('genericMessageTemplateCron_%s_%s', $code, $id),
+				'code'			=> $code,
 				'action'		=> 'alert_model->genericMessageTemplateCron',
 				'site_id'		=> 1,
 				'alert_date'	=> date('Y-m-d H:i:s', strtotime(sprintf('+%s minutes', $schedule_time))),
@@ -52,13 +57,12 @@ trait MessageTemplateAlert {
 	}
 
 	public function genericMessageTemplateCron($data = []) {
-		log_kb(['genericMessageTemplateCron::data'=>$data]);
 		if (empty($data['template_id']) || empty($data['data'])) return;
 
 		$this->load->model('common/MessageTemplate_model', 'message_template_model');
-		
+
 		if (empty($template_info = $this->message_template_model->get($data['template_id']))) return;
-		log_kb(['genericMessageTemplateCron::data::template_info'=>$template_info]);
+
 		$includes = !empty($data['includes']) ? $data['includes'] : ['email', 'sms', 'whatsapp'];
 
 		$email_template_info	= json_decode($template_info['email'], true);
@@ -68,17 +72,6 @@ trait MessageTemplateAlert {
 		$email				  	= $data['email'];
 		$mobile				 	= $data['mobile'];
 
-
-		log_kb([
-			'genericMessageTemplateCron::EMAIL_CHECK' => [
-				'email' => $email,
-				'includes' => $includes,
-				'template_id' => $data['template_id'],
-				'email_template_info' => $email_template_info,
-				'subject' => $email_template_info['subject'] ?? '',
-				'message' => $email_template_info['message'] ?? '',
-			]
-		]);
 		// Email part
 		if (
 			!empty($email_template_info['subject'] ?? '') &&
@@ -89,8 +82,8 @@ trait MessageTemplateAlert {
 			$bcc		= !empty($email_template_info['bcc']) ? explode(',', $email_template_info['bcc']) : [];
 			$subject 	= format_message_with_data($email_template_info['subject'], $data['data']);
 			$message 	= format_message_with_data($email_template_info['message'], $data['data']);
-			$attachment = self::_generateEmailAttachmentPDF($email_template_info['attachment'] ?? '',$email_template_info['attachment_name'] ?? '',$data['data']);
-			
+			$attachment = self::_generateEmailAttachmentPDF($email_template_info['attachment'] ?? '', $email_template_info['attachment_name'] ?? '', $data['data']);
+
 			self::email(
 				$email,
 				$subject,
@@ -189,14 +182,16 @@ trait MessageTemplateAlert {
 		if (empty($attachment)) return;
 		if (empty($data)) return;
 
-		log_kb(['genericMessageTemplateCron::_generateEmailAttachmentPDF'=>['attachment_name'=>$attachment_name, 'data'=>$data]]);
+		log_kb(['genericMessageTemplateCron::_generateEmailAttachmentPDF'=>[
+			'attachment_name' 	=> $attachment_name,
+			'data'				=> $data
+		]]);
 
 		$attachment = format_message_with_data($attachment, $data);
 
 		$attachment_name = !empty($attachment_name)
 			? format_message_with_data($attachment_name, $data)
 			: sprintf('document_%s_%s.pdf', date('Y_m_d'), time());
-			
 
 		if (strtolower(pathinfo($attachment_name, PATHINFO_EXTENSION)) !== 'pdf') {
 			$attachment_name .= '.pdf';
@@ -225,11 +220,11 @@ trait MessageTemplateAlert {
 		$dompdf->set_option('isHtml5ParserEnabled', true);
 		$dompdf->setPaper('A4', 'portrait');
 		$dompdf->render();
+
 		file_put_contents($file, $dompdf->output());
-		
-		log_kb(['genericMessageTemplateCron::Dompdf'=>['file'=>$file]]);
+
+		log_kb(['genericMessageTemplateCron::Dompdf' => ['file' => $file]]);
 
 		return $file;
 	}
-
 }

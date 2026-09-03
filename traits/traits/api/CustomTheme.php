@@ -54,6 +54,8 @@ trait CustomTheme {
 							? $this->config->item('cloudfront_url') . 'public/CustomThemes/' . $custom_theme_info['image']
 							: '',
 					];
+
+					self::_updateUserCustomThemeLog();
 				}
 			} else {
 				$this->json['error'] = _l('upload_error');
@@ -61,53 +63,30 @@ trait CustomTheme {
 		}
 	}
 
-	public function updateUserCustomThemeLog() {
-		$this->form_validation->set_rules('status', _l('status'), 'trim|required|numeric|in_list[0,1]');
+	private function _updateUserCustomThemeLog() {
+		if (!empty($user_id = (int)$this->session->userdata('user_id'))) {
+			if (empty($custom_theme_log_info = $this->custom_theme_log_model->get_all([
+				'user_id'	=> (int)$user_id,
+			])['rows'][0] ?? [])) {
+				$document_id = sha1(md5($user_id . time() . $this->config->item('password_salt')));
+				$custom_theme_log_id = $this->custom_theme_log_model->add([
+					'user_id'		=> $user_id,
+					'book_id'		=> (int)$this->input->post('book_id') ?? 0,
+					'document_id'	=> $document_id,
+					'ip_address'	=> $this->input->ip_address(),
+					'status'		=> 1
+				]);
 
-		self::_runFormValidation();
+				$code = 'customThemeAlert';
 
-		if (!$this->json) {
-			if (!empty($user_id = (int)$this->session->userdata('user_id'))) {
-				if (!empty($custom_theme_log_info = $this->custom_theme_log_model->get_all([
-					'user_id'	=> (int)$user_id,
-					'start'		=> 0,
-					'limit'		=> 1,
-				])['rows'][0] ?? [])) {
-					return;
-				}
+				$this->load->model('common/Cron_model', 'cron_model');
 
-				if ($custom_theme_log_info = $this->db->get_where('custom_theme_log', ['user_id' => $user_id])->row_array()) {
-					$custom_theme_log_id = $custom_theme_log_info['id'];
-					$this->custom_theme_log_model->edit($custom_theme_log_id, [
-						'status'	=> (int)$this->input->post('status')
-					]);
-				} else {
-					$document_id = sha1(md5($user_id . time() . $this->config->item('password_salt')));
-					$custom_theme_log_id = $this->custom_theme_log_model->add([
-						'user_id'		=> $user_id,
-						'book_id'		=> (int)$this->input->post('book_id') ?? 0,
-						'document_id'	=> $document_id,
-						'ip_address'	=> $this->input->ip_address(),
-						'status'		=> (int)$this->input->post('status')
-					]);
-				}
-
-				if ((int)$this->input->post('status') == 1) {
-					$code = 'customThemeAlert';
-
-					$this->load->model('common/Cron_model', 'cron_model');
-
-					$this->cron_model->add([
-						'code'			=> $code . '_' . $custom_theme_log_id,
-						'action'		=> 'alert_model->' . $code,
-						'data'			=> [$custom_theme_log_id],
-						'alert_date'	=> date('Y-m-d H:i:s', strtotime('+1 minutes'))
-					]);
-				}
-
-				self::_formatUser($user_id);
-
-				$this->json['success'] = _l('custom_theme_log_updated');
+				$this->cron_model->add([
+					'code'			=> $code . '_' . $custom_theme_log_id,
+					'action'		=> 'alert_model->' . $code,
+					'data'			=> [$custom_theme_log_id],
+					'alert_date'	=> date('Y-m-d H:i:s', strtotime('+1 minutes'))
+				]);
 			}
 		}
 	}

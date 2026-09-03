@@ -142,11 +142,10 @@ trait MessageTemplate {
 		}
 
 		$code = $info['code'] ?? '';
-
-		$variables = $this->_getTemplateVariables($code);
+		$variables = self::_getTemplateVariables($code);
 
 		if (!empty($variables)) {
-			$data['info'] = sprintf('<h4>%s</h4>',_l('available_variables')).implode('<br />',array_map(fn($k, $v) => sprintf('<b>{%s}</b> : %s',$k,$v),array_keys($variables),$variables));
+			$data['info'] = sprintf('<h4>%s</h4>', _l('available_variables')) . implode('<br />', array_map(fn($k, $v) => sprintf('<b>{%s}</b> : %s', $k, $v), array_keys($variables), $variables));
 		}
 
 		$data['fields'][] = [
@@ -225,7 +224,7 @@ trait MessageTemplate {
 			'required'	=> false,
 			'value'		=> $info['email']['message'] ?? '',
 		];
-		
+
 		$data['fields'][] = [
 			'type'		=> 'html',
 			'key'		=> 'email[attachment]',
@@ -233,7 +232,7 @@ trait MessageTemplate {
 			'required'	=> false,
 			'value'		=> $info['email']['attachment'] ?? '',
 		];
-		
+
 		$data['fields'][] = [
 			'type'		=> 'text',
 			'key'		=> 'email[attachment_name]',
@@ -431,42 +430,41 @@ trait MessageTemplate {
 		return false;
 	}
 
-	private function _getTemplateVariables($code = '')
-	{
+	private function _getTemplateVariables($code = '') {
 		$order_variables = [
 			'buyer_name' => _l('buyer_name'),
 			'username'   => _l('username'),
 			'order_code' => _l('order_code'),
 		];
-		$variables = [
 
+		$variables = [
 			'order_confirmation_paperback' => [
-				'buyer_name'      => _l('buyer_name'),
-				'order_code'      => _l('order_code'),
-				'order_details'   => _l('order_details'),
+				'name'      		=> _l('buyer_name'),
+				'order_code'      	=> _l('order_code'),
+				'order_details'   	=> _l('order_details'),
 			],
 
 			'order_confirmation_ebook' => [
-				'buyer_name'      => _l('buyer_name'),
-				'order_code'      => _l('order_code'),
-				'order_details'   => _l('order_details'),
-				'book_name'       => _l('book_name'),
-				'ebook_url'		  => _l('ebook_url'),
+				'name'      		=> _l('buyer_name'),
+				'order_code'      	=> _l('order_code'),
+				'order_details'   	=> _l('order_details'),
+				'book_name'       	=> _l('book_name'),
+				'ebook_url'		  	=> _l('ebook_url'),
 			],
 
 			'order_confirmation_audiobook' => [
-				'buyer_name'      => _l('buyer_name'),
-				'order_code'      => _l('order_code'),
-				'order_details'   => _l('order_details'),
-				'book_name'       => _l('book_name'),
-				'audio_book_url'  => _l('audio_book_url'),
+				'name'      		=> _l('buyer_name'),
+				'order_code'      	=> _l('order_code'),
+				'order_details'   	=> _l('order_details'),
+				'book_name'       	=> _l('book_name'),
+				'audiobook_url'  	=> _l('audiobook_url'),
 			],
 
 			'abandon_cart_buyer' => [
-				'buyer_name'   => _l('buyer_name'),
-				'author_name'  => _l('book_author_name'),
-				'book_name'    => _l('book_name'),
-				'cart_url'     => _l('cart_url'),
+				'name'   		=> _l('buyer_name'),
+				'author_name'  	=> _l('book_author_name'),
+				'book_name'    	=> _l('book_name'),
+				'cart_url'     	=> _l('cart_url'),
 			],
 
 			'abandon_cart_author' => [
@@ -475,56 +473,38 @@ trait MessageTemplate {
 			],
 
 			'signup_mobile' => [
-				'mobile'       => _l('mobile'),
-				'email'        => _l('email'),
-				'parent_name'  => _l('parent_name'),
-				'author_name'  => _l('author_name'),
-				'username'     => _l('username'),
-				'password'     => _l('password'),
-				'school_name'  => _l('school_name'),
-				'reset_url'    => _l('reset_password_url'),
-				'login_url'    => _l('login_url'),
+				'mobile'       	=> _l('mobile'),
+				'email'        	=> _l('email'),
+				'name'			=> _l('user_full_name'),	
+				'parent_name'  	=> _l('parent_name'),
+				'username'     	=> _l('username'),
+				'password'     	=> _l('password'),
+				'school_name'  	=> _l('school_name'),
+				'login_url'    	=> _l('login_url'),
 			],
-			
+
 			'signup_desktop' => [
 				'mobile'       => _l('mobile'),
 				'email'        => _l('email'),
+				'name'			=> _l('user_full_name'),
 				'parent_name'  => _l('parent_name'),
-				'author_name'  => _l('author_name'),
 				'username'     => _l('username'),
 				'password'     => _l('password'),
 				'school_name'  => _l('school_name'),
-				'reset_url'    => _l('reset_password_url'),
 				'login_url'    => _l('login_url'),
 			],
 
 			'buyer_signup' => [
-				'mobile'           => _l('mobile'),
-				'email'            => _l('email'),
-				'parent_name'      => _l('parent_name'),
-				'author_name'      => _l('author_name'),
-				'username'         => _l('username'),
-				'password'         => _l('password'),
-				'school_name'      => _l('school_name'),
-				'reset_url'        => _l('reset_password_url'),
-				'login_url'        => _l('login_url'),
-				'book_name'        => _l('book_name'),
-				'book_author_name' => _l('book_author_name'),
-			],
-
-			'referral_signup' => [
-				'mobile'           => _l('mobile'),
-				'email'            => _l('email'),
-				'parent_name'      => _l('parent_name'),
-				'author_name'      => _l('author_name'),
-				'username'         => _l('username'),
-				'password'         => _l('password'),
-				'school_name'      => _l('school_name'),
-				'referral_name'    => _l('referral_name'),
-				'reset_url'        => _l('reset_password_url'),
-				'login_url'        => _l('login_url'),
-				'book_name'        => _l('book_name'),
-				'book_author_name' => _l('book_author_name'),
+				'mobile'           	=> _l('mobile'),
+				'email'            	=> _l('email'),
+				'name'				=> _l('user_full_name'),
+				'parent_name'      	=> _l('parent_name'),
+				'username'         	=> _l('username'),
+				'password'         	=> _l('password'),
+				'school_name'      	=> _l('school_name'),
+				'login_url'        	=> _l('login_url'),
+				'book_name'        	=> _l('book_name'),
+				'author_name' 		=> _l('book_author_name'),
 			],
 
 			'publish_book_on_bookstore' => [
@@ -532,6 +512,7 @@ trait MessageTemplate {
 				'book_name'   		=> _l('book_name'),
 				'book_cover_image'  => _l('book_cover_image'),
 				'book_url' 			=> _l('book_store_url'),
+				'logo_url'			=> _l('BriBooks_dark_logo_url'),
 				'author_city'       => _l('author_city'),
 				'author_state'      => _l('author_state'),
 				'mobile'     		=> _l('mobile'),
@@ -553,33 +534,33 @@ trait MessageTemplate {
 				'mobile'     	=> _l('mobile'),
 				'email'			=> _l('email'),
 				'isbn_number' 	=> _l('book_isbn_number'),
-				
+
 			],
 
 			'author_royalty' => [
 				'author_name'       => _l('book_author_name'),
 				'quantity'          => _l('quantity'),
-				'copy_text_label'   => _l('copy_text_label'),
+				'copy_text_label'   => _l('copy_text_label_like_copy_copies'),
 				'book_name'         => _l('book_name'),
 				'purchase_time'     => _l('purchase_time'),
 				'purchase_date'     => _l('purchase_date'),
-				'buyer_name'        => _l('buyer_name'),
+				'name'              => _l('buyer_name'),
 				'author_royalty'    => _l('author_royalty'),
-				'no_of_sold'        => _l('no_of_sold'),
+				'no_of_sold'        => _l('no_of_sold_books_text_like_1_copy_2_copies'),
 				'logo_url'          => _l('BriBoo_gif_logo_url'),
 				'earning_icon_url'  => _l('earning_icon_url'),
 				'books_icon_url'    => _l('books_icon_url'),
 			],
 
 			'tnc_user_image' => [
-				'author_name'     	=> _l('author_name'),
+				'name'     			=> _l('user_full_name'),
 				'document_date'		=> _l('document_date'),
 				'document_title'	=> _l('document_title'),
 				'document_id'		=> _l('document_id'),
 				'created_date'		=> _l('document_created_date'),
-				'signed_by'			=> _l('document_signed_author_name'),
-				'ip_address'		=> _l('author_ip_address'),
-				'signed_date'		=> _l('author_signed_date'),
+				'signed_by'			=> _l('document_signed_by_user_name'),
+				'ip_address'		=> _l('user_ip_address'),
+				'signed_date'		=> _l('user_signed_date'),
 			],
 
 			'user_otp' => [
@@ -625,17 +606,16 @@ trait MessageTemplate {
 				'price'             => _l('price'),
 			],
 
-			'order_created'           => $order_variables,
-			'printer_assigned'        => $order_variables,
-			'order_moved_to_afs'      => $order_variables,
-			'order_shipped'           => $order_variables,
-			'order_out_for_delivery' => $order_variables,
-			'order_undelivered'       => $order_variables,
-			'order_delivered'         => $order_variables,
+			'order_created'           	=> $order_variables,
+			'printer_assigned'        	=> $order_variables,
+			'order_moved_to_afs'      	=> $order_variables,
+			'order_shipped'           	=> $order_variables,
+			'order_out_for_delivery' 	=> $order_variables,
+			'order_undelivered'       	=> $order_variables,
+			'order_delivered'         	=> $order_variables,
 
 		];
 
-		
 		return $variables[$code] ?? [];
 	}
 }

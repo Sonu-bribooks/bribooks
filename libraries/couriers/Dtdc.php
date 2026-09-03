@@ -66,7 +66,7 @@ final class Dtdc {
 		return $rates;
 	}
 
-	private function _calculateRate($pincode = '', $weight = 0, $order_type = 'book', $csv_name) {
+	private function _calculateRate($pincode = '', $weight = 0, $order_type = 'book', $csv_name='priority_zone_wise.csv') {
 		if (empty($pincode)) return 0;
 
 		$this->CI 	= &get_instance();

@@ -52,7 +52,6 @@ trait RoyaltyAlert {
 		if ($info = $this->order_model->get($id)) {
 			$this->load->library('Royalty_lib', 'royalty_lib');
 			$this->load->model('user/AuthorEarning_model', 'author_earning_model');
-			$this->load->model('common/MessageTemplate_model', 'message_template_model');
 
 			$user_info = $this->user_model->get($info['user_id']);
 
@@ -72,50 +71,27 @@ trait RoyaltyAlert {
 				])['rows'][0] ?? [])) return;
 
 				$author_royalty 			= ($author_earning_info['currency_code'] ?? '') . ' ' . ($author_earning_info['amount'] ?? 0);
-				
-				if(!empty($this->message_template_model->getByCode('author_royalty', $author_info['site_id']))) {
-					$data['author_name'] 		= $book_info['author_name'];
-					$data['quantity'] 			= $product['quantity'];
-					$data['copy_text_label'] 	= _getCopyTextLabel($product['quantity']);
-					$data['book_name'] 			= $book_info['name'];
-					$data['purchase_time'] 		= format_date($info['date_added'], $author_info['timezone'], 'h:i A');
-					$data['purchase_date'] 		= format_date($info['date_added'], $author_info['timezone'], 'M j, Y');
-					$data['buyer_name'] 		= $user_info['first_name'] . ' ' . $user_info['last_name'];
-					$data['author_royalty'] 	= $author_royalty;
-					$data['no_of_sold'] 		= $product['quantity'] ?? 0;
-					$data['logo_url'] 			= base_url('assets/icons/BriBoo.gif');
-					$data['earning_icon_url'] 	= base_url('assets/icons/earning.png');
-					$data['books_icon_url'] 	= base_url('assets/icons/books.png');
+				$data['author_name'] 		= $book_info['author_name'];
+				$data['quantity'] 			= $product['quantity'];
+				$data['copy_text_label'] 	= _getCopyTextLabel($product['quantity']);
+				$data['book_name'] 			= $book_info['name'];
+				$data['purchase_time'] 		= format_date($info['date_added'], $author_info['timezone'], 'h:i A');
+				$data['purchase_date'] 		= format_date($info['date_added'], $author_info['timezone'], 'M j, Y');
+				$data['name'] 				= sprintf('%s %s', $user_info['first_name'], $user_info['last_name']);
+				$data['author_royalty'] 	= $author_royalty;
+				$data['no_of_sold'] 		= $product['quantity'] ?? 0 . ' ' . _getCopyTextLabel($product['quantity']);
+				$data['logo_url'] 			= base_url('assets/icons/BriBoo.gif');
+				$data['earning_icon_url'] 	= base_url('assets/icons/earning.png');
+				$data['books_icon_url'] 	= base_url('assets/icons/books.png');
 
-					CI_Events::trigger('author_royalty', [
-						'user_id'	=> $author_info['id'],
-						'data'		=> $data
-					]);
+				CI_Events::trigger('author_royalty', [
+					'user_id'	=> $author_info['id'],
+					'data'		=> $data
+				]);
 
-				} else {
-					$data['title']			= sprintf(_li('%s %s of your Book has been sold on BriBooks'), $product['quantity'], _getCopyTextLabel($product['quantity']));
-					$data['heading']		= sprintf(_li('%s %s of your Book has been sold on BriBooks'), $product['quantity'], _getCopyTextLabel($product['quantity']));
-
-					$data['content']		= $this->load->view('common/mail/part/author_royalty', [
-						'author'			=> $author_info,
-						'product'			=> $product,
-						'book'				=> $book_info,
-						'order'				=> $info,
-						'no_sold'			=> $product['quantity'] ?? 0,
-						'author_royalty'	=> $author_royalty,
-						'buyer'				=> $user_info['first_name'] . ' ' . $user_info['last_name'],
-					], true);
-
-					$message 	= $this->load->view('common/mail/templates/2/general', $data, true);
-
-					self::email(
-						$author_info['email'],
-						$data['title'],
-						$message,
-						[],
-						[]
-					);
-				}
+				CI_Events::trigger('access_log', [
+					'module'	=> sprintf('user_author_royalty_%d_%d', (int)$author_info['id'], (int)$info['id'])
+				]);
 			}
 
 			$this->config->set_item('site_country_code', 'IN');

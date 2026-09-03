@@ -19,8 +19,10 @@ if (!function_exists('_school_order_code')) {
 		$CI->load->model('common/Site_model', 'site_model');
 		$CI->load->library('BriBooksShipping_lib', 'bribooksshipping_lib');
 
-		$shipping_info = json_decode($result['shipping_info'], true);
-
+		// $shipping_info = json_decode($result['shipping_info'], true);
+		$shipping_info = !empty($result['shipping_info'])
+			? json_decode($result['shipping_info'], true)
+			: [];
 		$implode = [];
 
 		if (!empty($shipping_info['courier_name']) &&  $shipping_info['courier_name'] == 'BriBooks Speed Shipping') {
@@ -128,7 +130,10 @@ if (!function_exists('_so_buttons')) {
 		}
 
 		if ($order_info['shipping_status'] == 1 && in_array($order_info['status'], [4, 9, 15])) {
-			$shipping_info = json_decode($order_info['shipping_info'], true);
+			// $shipping_info = json_decode($order_info['shipping_info'], true);
+			$shipping_info = !empty($result['shipping_info'])
+			? json_decode($result['shipping_info'], true)
+			: [];
 
 			if (!empty($shipping_info['bb_shipment_id'])) {
 				$buttons[] = vsprintf('<button type="button" class="btn btn-warning btn-sm generate-singlelabel" data-id="%s" data-type="school">%s</button>', [

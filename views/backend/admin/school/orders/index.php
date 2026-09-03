@@ -10,8 +10,8 @@
 						<div class="input-group">
 							<select name="bulk-send" id="bulk-send" class="form-control bulk-send">
 								<option value=""><?=_l('select_bulk_action')?></option>
-								<option value="4"><?=_l('complete_order')?></option>
-								<option value="15"><?=_l('mark_as_return')?></option>
+								<option value="<?= ORDER_STATUS['delivered'] ?>"><?=_l('complete_order')?></option>
+								<option value="<?= ORDER_STATUS['returned'] ?>"><?=_l('mark_as_return')?></option>
 							</select>
 							<div class="input-group-append">
 								<button type="button" class="btn btn-primary" id="bulk-action">
@@ -416,7 +416,7 @@ $('#bulk-action').on('click', function(event) {
 
 	if (confirm('<?=_l('Are you sure?')?>')) {
 		$.ajax({
-			url: '<?=base_url('admin/bulk_school_order_update')?>',
+			url: '<?=base_url('admin/ajax_bulk_school_order_update')?>',
 			type: 'POST',
 			data: {
 				ids: ids,

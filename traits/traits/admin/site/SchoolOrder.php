@@ -589,13 +589,13 @@ trait SchoolOrder {
 		$dompdf->stream($file_name, array('Attachment' => 1));
 	}
 
-	public function bulk_school_order_update() {
+	public function ajax_bulk_school_order_update() {
 		$json = [];
 
 		$order_ids 	= $this->input->post('ids');
 		$status 	= $this->input->post('status');
 
-		if (in_array($status, [2, 3, 4, 8, 9, 10, 15, 21])) {
+		if (in_array($status, [ORDER_STATUS['delivered'], ORDER_STATUS['returned']])) {
 			foreach ($order_ids as $order_id) {
 				$order_info = $this->school_order_model->get($order_id);
 

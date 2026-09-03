@@ -32,7 +32,6 @@ CI_Events::on('abandon_cart_author', 'EventListener_lib::abandonCartAuthor');
 CI_Events::on('signup_mobile', 'EventListener_lib::signupMobile');
 CI_Events::on('signup_desktop', 'EventListener_lib::signupDesktop');
 CI_Events::on('buyer_signup', 'EventListener_lib::buyerSignup');
-CI_Events::on('referral_signup', 'EventListener_lib::referralSignup');
 CI_Events::on('publish_book_without_order','EventListener_lib::publishBookWithoutOrder');
 CI_Events::on('publish_book_on_bookstore','EventListener_lib::publishBookOnBookstore');
 CI_Events::on('author_royalty', 'EventListener_lib::authorRoyalty');
@@ -69,8 +68,7 @@ CI_Events::on('subscription_expired', 'MessageTemplateListener_lib::subscription
 CI_Events::on('medallion_feedback', 'MessageTemplateListener_lib::medallionFeedback');
 CI_Events::on('event_invite_verified', 'MessageTemplateListener_lib::eventInviteVerified');
 
-// BRIMINDS 
+// BRIMINDS
 CI_Events::on('bm_user_otp', 'BMMessageTemplateListener_lib::bmUserOtp');
 CI_Events::on('bm_school_signup', 'BMMessageTemplateListener_lib::bmSchoolSignup');
 CI_Events::on('bm_after_school_signup', 'BMMessageTemplateListener_lib::bmAfterSchoolSignup');
-

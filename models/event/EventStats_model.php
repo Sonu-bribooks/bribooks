@@ -30,7 +30,7 @@ class EventStats_model extends CI_Model {
 		}
 
 		if (!empty($data['is_south'])) {
-			$this->rdb->where("site.state_id in (select id from state where country_id = 1 and code = 'ss')");
+			$this->rdb->where("site.state_id in (select state_id from state_zone where zone_name = 'south')");
 		}
 
 		$this->rdb->where('site._deleted', 0);
