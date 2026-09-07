@@ -164,10 +164,10 @@ if (ENVIRONMENT === 'production') {
 
 	$db['brisharks'] = array(
 		'dsn'	=> '',
-		'hostname' => '',
-		'username' => '',
+		'hostname' => 'localhost',
+		'username' => 'root',
 		'password' => '',
-		'database' => '',
+		'database' => 'brisharks',
 		'dbdriver' => 'mysqli',
 		'dbprefix' => '',
 		'pconnect' => FALSE,
@@ -233,7 +233,7 @@ if (ENVIRONMENT === 'production') {
 		'hostname' => 'localhost',
 		'username' => 'root',
 		'password' => '',
-		'database' => 'bribooks',
+		'database' => 'brisharks',
 		'dbdriver' => 'mysqli',
 		'dbprefix' => '',
 		'pconnect' => FALSE,

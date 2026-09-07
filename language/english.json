@@ -1449,5 +1449,17 @@
     "total_copies": "Total Copies",
     "total_price": "Total Price",
     "shipping": "Shipping",
-    "taxes": "Taxes"
+    "taxes": "Taxes",
+    "user_reg_end_date": "User reg end date",
+    "exhibition_date": "Exhibition date",
+    "bs_event_dashboard": "Bs event dashboard",
+    "registered_user_from_school": "Registered user from school",
+    "enrolled_user_from_school": "Enrolled user from school",
+    "previous_registered_user": "Previous registered user",
+    "previous_enrolled_user": "Previous enrolled user",
+    "previous_registered_users": "Previous registered users",
+    "previous_enrolled_users": "Previous enrolled users",
+    "new_registered_users": "New registered users",
+    "new_enrolled_users": "New enrolled users",
+    "total_enrolled_users": "Total enrolled users"
 }

@@ -17,4 +17,5 @@ trait BriSharks {
 	use BSEventInvite;
 	use BSEventChallenge;
 	use BSSite;
+	use BSDashboard;
 }

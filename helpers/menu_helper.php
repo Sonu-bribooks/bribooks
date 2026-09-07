@@ -1068,6 +1068,11 @@ if (!function_exists('get_navigation_menus')) {
 					'url'	=> 'admin/bs_event',
 				],
 				[
+					'key'	=> 'bs_dashboard',
+					'name'	=> _l('event_dashboard'),
+					'url'	=> 'admin/bs_get_dashboard_count',
+				],
+				[
 					'key'	=> 'bs_event_challenge',
 					'name'	=> _l('event_challenge'),
 					'url'	=> 'admin/bs_event_challenge',

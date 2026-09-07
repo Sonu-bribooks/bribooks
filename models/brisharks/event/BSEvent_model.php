@@ -17,12 +17,16 @@ class BSEvent_model extends CI_Model {
 	public function get_all($data = []) {
 		$this->bsdb->select('event.*');
 
-		if (isset($data['code'])) {
-			$this->bsdb->where('event.code', $data['code']);
+		if (isset($data['event_id'])) {
+			$this->bsdb->where('event.id', (int)$data['event_id']);
 		}
 
-		if (isset($data['action'])) {
-			$this->bsdb->where('event.action', $data['action']);
+		if (isset($data['start_date_le'])) {
+			$this->bsdb->where('event.start_date <= ', date('Y-m-d H:i:s', strtotime($data['start_date_le'])));
+		}
+
+		if (isset($data['end_date_ge'])) {
+			$this->bsdb->where('event.end_date >= ', date('Y-m-d H:i:s', strtotime($data['end_date_ge'])));
 		}
 
 		if (isset($data['status'])) {
