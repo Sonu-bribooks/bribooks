@@ -259,7 +259,8 @@ class Api extends CI_Controller {
 		Profile,
 		EventVote,
 		BriMinds,
-		OrderUndelivered
+		OrderUndelivered,
+		EventPreWriting
 	;
 
 	public function index() {

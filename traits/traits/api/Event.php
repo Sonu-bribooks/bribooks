@@ -197,7 +197,7 @@ trait Event {
 
 			// app stop live ranking
 			if ($this->input->post('app_os')) return;
-
+			
 			// if ($this->config->item('site_country_code') !== 'IN') {
 			// 	return;
 			// }
@@ -214,14 +214,16 @@ trait Event {
 			$event_info = $this->event_model->get($active_event['event_id'] ?? 0);
 
 			$this->json['event'] = !empty($event_info) ? [
-				'id'			=> $event_info['id'] ?? 0,
-				'name'			=> $event_info['name'] ?? '',
-				'start_date'	=> $event_info['start_date'] ?? '',
-				'end_date'		=> $event_info['end_date'] ?? '',
-				'publish_date'	=> $event_info['book_writing_end_date'] ?? '',
-				'url'			=> $event_info['url'] ?? '',
-				'active'		=> $event_info['start_date'] <= date('Y-m-d H:i:s') && date('Y-m-d H:i:s') <= $event_info['end_date'] ?? '',
-				'can_publish'	=> date('Y-m-d H:i:s') <= $event_info['book_writing_end_date'] ?? '',
+				'id'					=> $event_info['id'] ?? 0,
+				'name'					=> $event_info['name'] ?? '',
+				'slug'					=> $event_info['slug'] ?? '',
+				'start_date'			=> $event_info['start_date'] ?? '',
+				'end_date'				=> $event_info['end_date'] ?? '',
+				'publish_date'			=> $event_info['book_writing_end_date'] ?? '',
+				'url'					=> $event_info['url'] ?? '',
+				'active'				=> $event_info['start_date'] <= date('Y-m-d H:i:s') && date('Y-m-d H:i:s') <= $event_info['end_date'] ?? '',
+				'can_publish'			=> date('Y-m-d H:i:s') <= $event_info['book_writing_end_date'] ?? '',
+				'pre_writing' 			=> $event_info['pre_writing'] ? true : false,
 			] : [];
 		}
 	}

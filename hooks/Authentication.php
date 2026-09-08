@@ -77,6 +77,7 @@ class Authentication {
 			'updateUserDetails',
 			'eventCertificateStatus',
 			'addEventBookVote',
+			'updatePreWriting',
 		];
 	}
 

@@ -1461,5 +1461,6 @@
     "previous_enrolled_users": "Previous enrolled users",
     "new_registered_users": "New registered users",
     "new_enrolled_users": "New enrolled users",
-    "total_enrolled_users": "Total enrolled users"
+    "total_enrolled_users": "Total enrolled users",
+    "select_pre_writing": "Select pre writing"
 }
