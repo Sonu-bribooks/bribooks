@@ -59,7 +59,7 @@
 			<?php if ($field['type'] == 'image') { ?>
 				<div>
 					<a
-						href="<?= $this->image_model->resize(!empty($field['value']) ? ($this->config->item('s3_user_gallery') . $field['image']) : 'no_image.png', 100, 100) ?>"
+						href="<?= $this->image_model->resize(!empty($field['value']) ? ($this->config->item('s3_user_gallery') . ($field['image'] ?? '')) : 'no_image.png', 100, 100) ?>"
 						id="logo-thumb-<?= $id ?>"
 						data-toggle="image"
 						class="img-thumbnail"

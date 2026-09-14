@@ -125,6 +125,24 @@ trait EventConfig {
 			'fields'	=> self::_renderGenreFields($info, 'user'),
 		];
 
+		$data['fields'][] = [
+			'type'		=> 'select',
+			'key'		=> 'pre_writing',
+			'label'		=> _l('select_pre_writing'),
+			'required'	=> true,
+			'value'		=> $info['pre_writing'] ?? 0,
+			'options'	=> [
+				[
+					'label'	=> _l('enable'),
+					'value'	=> 1,
+				],
+				[
+					'label'	=> _l('disable'),
+					'value'	=> 0,
+				],
+			],
+		];
+
 		// pr($data, 1);
 
 		$data['config_fields']['awards'] = $this->load->view('backend/admin/event/stage/generic', $data, true);

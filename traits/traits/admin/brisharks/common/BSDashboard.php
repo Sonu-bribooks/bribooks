@@ -79,6 +79,14 @@ trait BSDashboard {
 				'url'			=> '',
 			],
             [
+				'label'			=> _l('total_registered_user_from_school'),
+				'key'			=> 'total_registered_user_from_school',
+				'icon'			=> 'dripicons-bookmark',
+				'total'			=> $total_user_from_school,
+				'today' 		=>  $this->{$model}->registered_user_from_school($today_filter_data),
+				'url'			=> '',
+			],
+            [
 				'label'			=> _l('registered_user_from_school'),
 				'key'			=> 'registered_user_from_school',
 				'icon'			=> 'dripicons-bookmark',
@@ -98,14 +106,22 @@ trait BSDashboard {
 		];
 
         $previous_total_user_registered     = $this->{$model}->old_user_enrollemt(array_merge($filter_data, ['is_old' => 1]));
-        $previous_total_user_enrolled       = $this->{$model}->old_user_enrollemt(array_merge($filter_data, ['is_old' => 1, 'paid_user' => 1]));
-        $previous_total_user_registered     = $previous_total_user_registered - $previous_total_user_enrolled;
+        $previous_user_enrolled             = $this->{$model}->old_user_enrollemt(array_merge($filter_data, ['is_old' => 1, 'paid_user' => 1]));
+        $previous_user_registered           = $previous_total_user_registered - $previous_user_enrolled;
 		$data['stats']['previous_users'] = [
 			[
+				'label'			=> _l('total_previous_registered_users'),
+				'key'			=> 'total_previous_registered_users',
+				'icon'			=> 'dripicons-bookmark',
+				'total'			=> $previous_total_user_registered,
+				'today' 		=> $this->{$model}->old_user_enrollemt(array_merge($today_filter_data, ['is_old' => 1])),
+				'url'			=> '',
+			],
+            [
 				'label'			=> _l('previous_registered_users'),
 				'key'			=> 'previous_registered_users',
 				'icon'			=> 'dripicons-bookmark',
-				'total'			=> $previous_total_user_registered,
+				'total'			=> $previous_user_registered,
 				'today' 		=> $this->{$model}->old_user_enrollemt(array_merge($today_filter_data, ['is_old' => 1])),
 				'url'			=> '',
 			],
@@ -113,31 +129,39 @@ trait BSDashboard {
 				'label'			=> _l('previous_enrolled_users'),
 				'key'			=> 'previous_enrolled_users',
 				'icon'			=> 'dripicons-bookmark',
-				'total'			=> $previous_total_user_enrolled,
+				'total'			=> $previous_user_enrolled,
 				'today' 		=> $this->{$model}->old_user_enrollemt(array_merge($today_filter_data, ['is_old' => 1, 'paid_user' => 1])),
 				'url'			=> '',
 			],
 		];
 
-        $new_total_user_registered     = $this->{$model}->new_user_enrollemt(array_merge($filter_data, ['is_new' => 1]));
-        $new_total_user_enrolled       = $this->{$model}->new_user_enrollemt(array_merge($filter_data, ['is_new' => 1, 'paid_user' => 1]));
-       // $new_total_user_registered     = $new_total_user_registered - $new_total_user_enrolled;
+        $new_total_user_registered      = $this->{$model}->new_user_enrollemt(array_merge($filter_data, ['is_new' => 1]));
+        $new_user_enrolled              = $this->{$model}->new_user_enrollemt(array_merge($filter_data, ['is_new' => 1, 'paid_user' => 1]));
+        $new_user_registered            = $new_total_user_registered - $new_user_enrolled;
 		
 
 		$data['stats']['new_users'] = [
 			[
-				'label'			=> _l('new_registered_users'),
-				'key'			=> 'new_registered_users',
+				'label'			=> _l('total_new_registered_users'),
+				'key'			=> 'total_new_registered_users',
 				'icon'			=> 'dripicons-bookmark',
 				'total' 		=> $new_total_user_registered,
 				'today'			=> $this->{$model}->new_user_enrollemt(array_merge($today_filter_data, ['is_new' => 1])),
+				'url'			=> '',
+			],
+            [
+				'label'			=> _l('new_registered_users'),
+				'key'			=> 'new_registered_users',
+				'icon'			=> 'dripicons-bookmark',
+				'total'			=> $new_user_registered,
+				'today' 		=> $this->{$model}->new_user_enrollemt(array_merge($today_filter_data, ['is_new' => 1, 'paid_user' => 1])),
 				'url'			=> '',
 			],
 			[
 				'label'			=> _l('new_enrolled_users'),
 				'key'			=> 'new_enrolled_users',
 				'icon'			=> 'dripicons-bookmark',
-				'total'			=> $new_total_user_enrolled,
+				'total'			=> $new_user_enrolled,
 				'today' 		=> $this->{$model}->new_user_enrollemt(array_merge($today_filter_data, ['is_new' => 1, 'paid_user' => 1])),
 				'url'			=> '',
 			],
@@ -145,7 +169,7 @@ trait BSDashboard {
 				'label'			=> _l('total_enrolled_users'),
 				'key'			=> 'total_enrolled_users',
 				'icon'			=> 'dripicons-bookmark',
-				'total'			=> $previous_total_user_enrolled + $new_total_user_enrolled,
+				'total'			=> $previous_user_enrolled + $new_user_enrolled,
 				'today'			=>  $this->{$model}->old_user_enrollemt(array_merge($today_filter_data, ['is_old' => 1, 'paid_user' => 1])) + $this->{$model}->new_user_enrollemt(array_merge($today_filter_data, ['is_new' => 1, 'paid_user' => 1])),
 				'url'			=> '',
 			]

@@ -499,23 +499,6 @@ trait BasicInfo {
 			}, $this->genre_model->get_all(['parent_id' => 0, 'order' => 'ASC'])['rows'] ?? []),
 		];
 
-		$data['fields'][] = [
-			'type'		=> 'select',
-			'key'		=> 'pre_writing',
-			'label'		=> _l('select_pre_writing'),
-			'required'	=> true,
-			'value'		=> $info['pre_writing'] ?? 0,
-			'options'	=> [
-				[
-					'label'	=> _l('enable'),
-					'value'	=> 1,
-				],
-				[
-					'label'	=> _l('disable'),
-					'value'	=> 0,
-				],
-			],
-		];
 
 		$data['action'] = !empty($info)
 			? base_url('admin/ajax_event_basic_info_crud/edit/' . $info['id'])

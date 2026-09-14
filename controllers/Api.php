@@ -260,7 +260,8 @@ class Api extends CI_Controller {
 		EventVote,
 		BriMinds,
 		OrderUndelivered,
-		EventPreWriting
+		EventPreWriting,
+		GokwikNdrOrder
 	;
 
 	public function index() {

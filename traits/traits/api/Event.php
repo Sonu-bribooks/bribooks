@@ -210,8 +210,14 @@ trait Event {
 				'start'				=> 0,
 				'limit'				=> 1,
 			])['rows'][0] ?? [];
-
+			
 			$event_info = $this->event_model->get($active_event['event_id'] ?? 0);
+
+			$event_config_info = $this->event_config_model->get_all([
+				'event_id'		=> $event_info ?  (int)$event_info['id'] : 0,
+				'start'			=> 0,
+				'limit'			=> 1,
+			])['rows'][0] ?? [];
 
 			$this->json['event'] = !empty($event_info) ? [
 				'id'					=> $event_info['id'] ?? 0,
@@ -223,7 +229,7 @@ trait Event {
 				'url'					=> $event_info['url'] ?? '',
 				'active'				=> $event_info['start_date'] <= date('Y-m-d H:i:s') && date('Y-m-d H:i:s') <= $event_info['end_date'] ?? '',
 				'can_publish'			=> date('Y-m-d H:i:s') <= $event_info['book_writing_end_date'] ?? '',
-				'pre_writing' 			=> $event_info['pre_writing'] ? true : false,
+				'pre_writing' 			=> $event_config_info['pre_writing'] ? true : false,
 			] : [];
 		}
 	}
