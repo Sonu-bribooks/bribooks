@@ -95,7 +95,7 @@ trait Brochure {
 			'value'		=> $info['personal_note']['footer'] ?? '',
 		];
 
-		$data['ebrochure'] 			= json_decode($info['ebrochure'], true);
+		$data['ebrochure'] 			= json_decode($info['ebrochure'] ?? '', true);
 		$data['ebrochure_dynamic'] 	= $info['ebrochure_dynamic'];
 
 		if (empty($data['ebrochure'])) {

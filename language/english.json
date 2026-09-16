@@ -1543,5 +1543,14 @@
     "personal_note_content": "Personal note content",
     "personal_note_footer": "Personal note footer",
     "e_brochure": "E brochure",
-    "ebrochure_dynamic_image_index": "Ebrochure dynamic image index"
+    "ebrochure_dynamic_image_index": "Ebrochure dynamic image index",
+    "min_sold_quantity": "Min sold quantity",
+    "max_sold_quantity": "Max sold quantity",
+    "is_league": "Is league",
+    "the_{field}_field_is_required.": "The {field} field is required.",
+    "error_occured": "Error occured",
+    "medallion_id": "Medallion id",
+    "certificate_message_template_id": "Certificate message template id",
+    "medallion_order_added_successfully": "Medallion order added successfully",
+    "savesss": "Savesss"
 }

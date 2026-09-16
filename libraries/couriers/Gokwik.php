@@ -4,7 +4,7 @@ final class Gokwik {
 	public function __construct() {
 		$this->api_url = ENVIRONMENT === 'production'
 			? 'https://api.gokwik.co/kwikship'
-			: 'https://api-gw-v4.dev.gokwik.in/kwikship/dev';
+			: 'https://api.gokwik.co/kwikship';
 
 		$this->CI		= &get_instance();
 		$this->load	 	= $this->CI->load;
@@ -35,8 +35,8 @@ final class Gokwik {
 				'password' => 'Y4S7wNNEXI1z8W',
 			]
 			: [
-				'username' => 'dev-store-kwik-labs',
-				'password' => 'rSsq3o22cYG07VWK3t1',
+				'username' => 'kwikship_production',
+				'password' => 'gATSTuYmor6cd_w8',
 			];
 
 		$response = self::_curl('/authToken', $payload, 'POST', false);
@@ -215,7 +215,7 @@ final class Gokwik {
 			'deliveryAddressId'	 	=> '',
 			'deliveryAddressDetails'=> [
 				'name'			  	=> $drop_location_name,
-				'phone'			 	=> $data['drop_location']['mobile'],
+				'phone'			 	=> ENVIRONMENT !== 'production' ? self::_normalizeIndianMobileForDev($data['drop_location']['mobile']) : $data['drop_location']['mobile'],
 				'address1'		  	=> $address_1,
 				'address2'		  	=> $data['drop_location']['landmark'],
 				'pincode'			=> $data['drop_location']['zipcode'],
@@ -513,5 +513,18 @@ final class Gokwik {
 			->where('_deleted', 0)
 			->get('state')
 			->row()->code;
+	}
+
+	private function _normalizeIndianMobileForDev($mobile) {
+		$mobile = preg_replace('/\D/', '', (string) $mobile);
+
+		// Remove +91 prefix only in non-production environments
+		// when the number is 12 digits and the remaining number
+		// is a valid 10-digit Indian mobile number.
+		if (ENVIRONMENT !== 'production' && preg_match('/^91[6-9]\d{9}$/', $mobile)) {
+			return substr($mobile, 2);
+		}
+
+		return $mobile;
 	}
 }

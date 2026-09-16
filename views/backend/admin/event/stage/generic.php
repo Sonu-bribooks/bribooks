@@ -240,7 +240,7 @@ function fixSelect2(target) {
 function fixTinymce(target) {
 	console.log(target)
 	tinymce.init({
-		selector: '#' + target,
+		selector: target,
 		branding: false,
 		force_br_newlines: true,
 		force_p_newlines: false,
@@ -285,7 +285,7 @@ function loadGroupItem(target) {
 		$el = $(this);
 		$el.removeAttr('aria-hidden');
 		$el.show();
-		fixTinymce($el.attr('id'));
+		fixTinymce('#' + $el.attr('id'));
 	});
 }
 
@@ -303,6 +303,13 @@ $(function() {
 	// 	format: 'MM/DD/YYYY hh:mm:ss A',
 	// 	showClose: true,
 	// });
+
+	$(document).on('focusin', function (e) {
+		if ($(e.target).closest(".tox-tinymce, .tox-tinymce-aux, .tox-dialog").length) {
+			e.stopImmediatePropagation();
+		}
+	});
+
 	$('.filter_select').select2({
 		ajax: {
 			url: $(this).data('ajax-url'),
@@ -362,18 +369,7 @@ $(function() {
 	$('select[data-target]').trigger('change');
 	tinymce.remove();
 	// tinymce.init(tinyconfig);
-
-	tinymce.init({
-		selector: '.tinymce',
-		branding: false,
-		force_br_newlines: true,
-		force_p_newlines: false,
-		forced_root_block: '',
-		plugins: 'lists code emoticons link',
-		toolbar: 'undo redo | styleselect | bold italic | ' +
-			'alignleft aligncenter alignright alignjustify | ' +
-			'outdent indent | numlist bullist | emoticons',
-	});
+	fixTinymce('.tinymce')
 });
 </script>
 <?php } ?>

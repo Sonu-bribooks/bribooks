@@ -255,7 +255,7 @@ trait CertificateTemplate {
 				'id'					=> $result['id'],
 				'name'					=> $result['name'],
 				'country_code'			=> $result['country_code'],
-				'medallion'				=> $medallion_info['name'],
+				'medallion'				=> $medallion_info['name'] ?? '',
 				'type'					=> $result['type'],
 				'book_sold'				=> $result['book_sold'],
 				'thumb'					=> $this->image_model->thumb($result['image']),

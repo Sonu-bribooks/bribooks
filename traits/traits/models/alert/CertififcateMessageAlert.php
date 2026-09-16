@@ -60,6 +60,8 @@ trait CertififcateMessageAlert {
 			}
 		}
 
+		$email_attachment			= !empty($template_info['attachment']) ? json_decode($template_info['attachment'], true) : [];
+
 		$variables = [
 			'author_name'			=> $book_info['author_name'] ?? '',
 			'author_first_name'		=> $book_info['author_name'] ?? '',
@@ -75,65 +77,7 @@ trait CertififcateMessageAlert {
 			'state'					=> $state_info['name'] ?? '',
 			'city'					=> $city_info['name'] ?? '',
 			'league_url'			=> $league_url,
-			'awards_url'			=> ($event_info['url'] ?? 'https://www.yaf.bribooks.com/india/2024/') . 'student/awards' ,
-
-			'msgheader'			    => 'The Published Author Certificate Awaits You!',
-			'publishcert'		    => 'Publish your book soon to earn the prestigious Published Author Certificate and stand a chance to win more exciting rewards, including a fully paid trip to AFCC Singapore!',
-			'rewards_await'         => 'Exciting rewards await you',
-			'pinnacle_award'        => 'Pinnacle Awards: Win a fully paid trip to AFCC Singapore, launch your book & win an iPad!',
-			'bestseller_award'      => 'Jury Choice & Best Seller Awards: Samsung Tabs, NDTV interviews, and features in top outlets like Business World and Times of India.',
-			'discountedrate'        => 'Get your first printed copy at a discounted rate here to qualify',
-			'special_gift'          => 'But wait, there\'s more! We have a special gift for you, and we\'ll be sending another email shortly',
-			'exicting_opp'          => 'You’ve unlocked exciting opportunities!',
-			'book_prom'             => 'Need help promoting your book? Watch this masterclass by Ami Dror',
-			'champ'                 => 'You are a Champion!',
-			'exicting_news'         => '🏅 Stay tuned for another email from us - we\'ve got some exciting news coming your way! 🎁',
-			'another_email'         => 'Stay tuned for another email from us. We have a SURPRISE for you!',
-			'surprise'              => 'Stay tuned! We have a BIG SURPRISE for you!',
-			'time'                  => 'Time to CELEBRATE!',
-
-			'cong_pub' 				=> 'Congrats on Your \'Published Author Certificate\'!',
-			'earned' 				=> 'Exciting news! You\'ve earned the \'Published Author Certificate\' for selling the first',
-			'touch' 				=> 'But wait, there\'s more! We have a special gift for you, and we\'ll be in touch soon.',
-			'famous' 				=> 'Become Famous as an Emerging Author',
-			'away' 					=> 'away from earning the prestigious Emerging Author Certificate & Silver Star Medallion, pocketing up to 25% in author royalties.',
-			'share' 				=> 'Share your',
-			'sure' 					=> 'Not sure how to promote',
-			'tuned' 				=> 'Stay tuned for more exciting news from us.',
-			'rock' 					=> 'Congratulations again! You\'re a ROCKSTAR AUTHOR!',
-			'push' 					=> 'Pushing! You Can Be a Gold Star',
-			'earn' 					=> 'away from earning the prestigious Gold Star Young Author Certificate & Gold Star Medallion, pocketing up to 25% in author royalties.',
-			'buy' 					=> 'read and buy your amazing book.',
-			'status' 				=> 'Hurray! You\'ve achieved the status of a Gold Star Young',
-			'once' 					=> 'Congratulations once again!',
-			'close' 				=> 'So Close to Becoming an Entrepreneur',
-			'esteemed' 				=> 'away from earning the esteemed Entrepreneur Author Certificate & Platinum Star Medallion, pocketing up to 25% in author royalties.',
-			'get' 					=> 'Get Ready, ROCKSTAR!',
-			'have' 					=> 'We have a SURPRISE for you!',
-			'keep' 					=> 'Keep SHINING!',
-			'know' 					=> 'Did you know that an ISBN serves as a worldwide declaration that you are the book\'s ',
-			'cost' 					=> 'cost more than $100 USD, but guess what?',
-			'gift' 					=> 'as a gift, completely free of charge.',
-			'prest' 				=> 'But that\'s not all, you will also earn the prestigious',
-			'alloted' 				=> 'allotted the ISBN Number by the Ministry of Education, Government of India/National Library - UAE.',
-			'excit' 				=> 'tuned for another email from us. We have EXCITING NEWS for you!',
-			'place' 				=> 'from securing your place in the Amazon global',
-			'globally' 				=> 'that\'s not all, you will also earn the prestigious Globally Published',
-			'pocket' 				=> 'shine as an international author. Pocket up to 25% in author royalties.',
-			'amazon' 				=> 'You\'re a Champion Author on Amazon!',
-			'among' 				=> 'you\'ve secured your place among the top authors featured on Amazon.com.',
-			'recog' 				=> 'achieved the highest recognition as a young published author!',
-
-			'won'                     =>'Congratulations! You\'ve Won the \'Published Author Certificate\'',
-			'news'                    =>'We\'re pleased to share the exciting news that you\'ve won the ‘Published Author Certificate’ with the first printed copy of',
-			'wait'                    =>'But wait, there\'s more! We have a special gift for you, and you\'ll receive another notification about it shortly.',
-			'rock_already'            =>'You are already a rock star!',
-			'you'                     =>'Special Surprise for You!',
-			'unlocked'                =>'unlocked exciting opportunities!',
-			'preg_em'                 =>' earning the prestigious ‘Emerging Young Author’ certificate!',
-			'your_book'               =>'promoting your book? Watch this masterclass',
-			'good'                    =>'Good luck—you\'re a champion!',
-			'celeb'                   =>'Time to CELEBRATE!',
+			'date'					=> date('Y-m-d')
 		];
 
 		$title 					= self::formatCertificateMessage(trim($template_info['subject']), $variables);
@@ -151,6 +95,9 @@ trait CertififcateMessageAlert {
 		$data['link_text']	  	= '';
 
 		$message 				= $this->load->view('common/mail/templates/site/general', $data, true);
+		$attachment 			= !empty($email_attachment['attachment'])
+			? self::_generateEmailAttachmentPDF($email_attachment['attachment'] ?? '', $email_attachment['attachment_name'] ?? '', $variables)
+			: [];
 
 		!empty($email) && self::email(
 			$email,
@@ -158,7 +105,7 @@ trait CertififcateMessageAlert {
 			$message,
 			[],
 			(ENVIRONMENT === 'production') ? ['communication@bribooks.com'] : [],
-			[]
+			$attachment
 		);
 
 		if (!empty($template_info['whatsapp_template_id'])) {
@@ -224,6 +171,7 @@ trait CertififcateMessageAlert {
 				}
 			}
 
+			$email_attachment			= !empty($template_info['attachment']) ? json_decode($template_info['attachment'], true) : [];
 			$variables = [
 				'author_name'			=> $book_info['author_name'] ?? '',
 				'author_first_name'		=> $book_info['author_name'] ?? '',
@@ -237,64 +185,7 @@ trait CertififcateMessageAlert {
 				'state'					=> $state_info['name'] ?? '',
 				'city'					=> $city_info['name'] ?? '',
 				'league_url'			=> $league_url,
-
-				'msgheader'			    => 'The Published Author Certificate Awaits You!',
-				'publishcert'		    => 'Publish your book soon to earn the prestigious Published Author Certificate and stand a chance to win more exciting rewards, including a fully paid trip to AFCC Singapore!',
-				'rewards_await'         => 'Exciting rewards await you',
-				'pinnacle_award'        => 'Pinnacle Awards: Win a fully paid trip to AFCC Singapore, launch your book & win an iPad!',
-				'bestseller_award'      => 'Jury Choice & Best Seller Awards: Samsung Tabs, NDTV interviews, and features in top outlets like Business World and Times of India.',
-				'discountedrate'        => 'Get your first printed copy at a discounted rate here to qualify',
-				'special_gift'          => 'But wait, there\'s more! We have a special gift for you, and we\'ll be sending another email shortly',
-				'exicting_opp'          => 'You’ve unlocked exciting opportunities!',
-				'book_prom'             => 'Need help promoting your book? Watch this masterclass by Ami Dror',
-				'champ'                 => 'You are a Champion!',
-				'exicting_news'         => '🏅 Stay tuned for another email from us - we\'ve got some exciting news coming your way! 🎁',
-				'another_email'         => 'Stay tuned for another email from us. We have a SURPRISE for you!',
-				'surprise'              => 'Stay tuned! We have a BIG SURPRISE for you!',
-				'time'                  => 'Time to CELEBRATE!',
-
-				'cong_pub' 				=> 'Congrats on Your \'Published Author Certificate\'!',
-				'earned' 				=> 'Exciting news! You\'ve earned the \'Published Author Certificate\' for selling the first',
-				'touch' 				=> 'But wait, there\'s more! We have a special gift for you, and we\'ll be in touch soon.',
-				'famous' 				=> 'Become Famous as an Emerging Author',
-				'away' 					=> 'away from earning the prestigious Emerging Author Certificate & Silver Star Medallion, pocketing up to 25% in author royalties.',
-				'share' 				=> 'Share',
-				'sure' 					=> 'Not sure how to promote',
-				'tuned' 				=> 'Stay tuned for more exciting news from us.',
-				'rock' 					=> 'Congratulations again! You\'re a ROCKSTAR AUTHOR!',
-				'push' 					=> 'Pushing! You Can Be a Gold Star',
-				'earn' 					=> 'away from earning the prestigious Gold Star Young Author Certificate & Gold Star Medallion, pocketing up to 25% in author royalties.',
-				'buy' 					=> 'read and buy your amazing book.',
-				'status' 				=> 'Hurray! You\'ve achieved the status of a Gold Star Young',
-				'once' 					=> 'Congratulations once again!',
-				'close' 				=> 'So Close to Becoming an Entrepreneur',
-				'esteemed' 				=> 'away from earning the esteemed Entrepreneur Author Certificate & Platinum Star Medallion, pocketing up to 25% in author royalties.',
-				'get' 					=> 'Get Ready, ROCKSTAR!',
-				'have' 					=> '"We have a SURPRISE for you! 🎁 Congratulations once again! 🎉',
-				'keep' 					=> 'Keep SHINING!',
-				'know' 					=> 'Did you know that an ISBN serves as a worldwide declaration that you are the book\'s ',
-				'cost' 					=> 'cost more than $100 USD, but guess what?',
-				'gift' 					=> 'as a gift, completely free of charge.',
-				'prest' 				=> 'But that\'s not all, you will also earn the prestigious',
-				'alloted' 				=> 'allotted the ISBN Number by the Ministry of Education, Government of India/National Library - UAE.',
-				'excit' 				=> 'tuned for another email from us. We have EXCITING NEWS for you!',
-				'place' 				=> 'from securing your place in the Amazon global',
-				'globally' 				=> 'that\'s not all, you will also earn the prestigious Globally Published',
-				'pocket' 				=> 'shine as an international author. Pocket up to 25% in author royalties.',
-				'amazon' 				=> 'You\'re a Champion Author on Amazon!',
-				'among' 				=> 'you\'ve secured your place among the top authors featured on Amazon.com.',
-				'recog' 				=> 'achieved the highest recognition as a young published author!',
-
-				'won'                   =>'Congratulations! You\'ve Won the \'Published Author Certificate\'',
-				'news'                  =>'We\'re pleased to share the exciting news that you\'ve won the ‘Published Author Certificate’ with the first printed copy of',
-				'wait'                  =>'But wait, there\'s more! We have a special gift for you, and you\'ll receive another notification about it shortly.',
-				'rock_already'          =>'You are already a rock star!',
-				'you'                   =>'Special Surprise for You!',
-				'unlocked'              =>'unlocked exciting opportunities!',
-				'preg_em'               =>' earning the prestigious ‘Emerging Young Author’ certificate!',
-				'your_book'             =>'promoting your book? Watch this masterclass',
-				'good'                  =>'Good luck—you\'re a champion!',
-				'celeb'                 =>'Time to CELEBRATE!',
+				'date'					=> date('Y-m-d')
 			];
 
 			$title 					= self::formatCertificateMessage(trim($template_info['subject']), $variables);
@@ -312,6 +203,9 @@ trait CertififcateMessageAlert {
 			$data['link_text']	  	= '';
 
 			$message 				= $this->load->view('common/mail/templates/site/general', $data, true);
+			$attachment 			= !empty($email_attachment['attachment'])
+				? self::_generateEmailAttachmentPDF($email_attachment['attachment'] ?? '', $email_attachment['attachment_name'] ?? '', $variables)
+				: [];
 
 			!empty($email) && self::email(
 				$email,
@@ -319,7 +213,7 @@ trait CertififcateMessageAlert {
 				$message,
 				[],
 				(ENVIRONMENT === 'production') ? ['communication@bribooks.com'] : [],
-				[]
+				$attachment
 			);
 
 			if (!empty($template_info['whatsapp_template_id'])) {

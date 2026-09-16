@@ -24,6 +24,9 @@ trait Book {
 				return;
 			}
 
+			//book sold count 
+			$book_info['sold'] = $this->bookstore_model->getByBookId($book_info['id'])['sold'];
+
 			$this->json['book'] 	= $book_info;
 			$this->json['success'] 	= _l('book_fetched');
 		}
@@ -135,7 +138,9 @@ trait Book {
 					]) == 0
 						? true
 						: false; // $this->book_model->isFreeAuthor($book_info['id']);
-				$this->json['watermark'] = true;
+
+				$this->json['book']['sold'] = $this->bookstore_model->getByBookId($book_info['id'])['sold'] ?? '';
+				$this->json['watermark'] 	= true;
 
 				self::_addAppreciation($this->json['book']);
 

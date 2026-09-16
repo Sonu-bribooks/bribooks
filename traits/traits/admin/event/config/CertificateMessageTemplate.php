@@ -59,6 +59,10 @@ trait CertificateMessageTemplate {
 			];
 		}, $this->certificate_type_model->get_all()['rows']);
 
+		if (!empty($info['attachment'])) {
+			$info['attachment'] = json_decode($info['attachment'], true);
+		}
+
 		$data['fields'][] = [
 			'type'		=> 'text',
 			'key'		=> 'name',
@@ -108,6 +112,22 @@ trait CertificateMessageTemplate {
 			'label'		=> _l('email_message'),
 			'required'	=> true,
 			'value'		=> $info['body'] ?? '',
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'html',
+			'key'		=> 'attachment[attachment]',
+			'label'		=> _l('email_attachment'),
+			'required'	=> false,
+			'value'		=> $info['attachment']['attachment'] ?? '',
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'text',
+			'key'		=> 'attachment[attachment_name]',
+			'label'		=> _l('email_attachment_name'),
+			'required'	=> false,
+			'value'		=> $info['attachment']['attachment_name'] ?? '',
 		];
 
 		$data['fields'][] = [
@@ -282,10 +302,14 @@ trait CertificateMessageTemplate {
 
 				$data['body'] 		= _allowSpecificHtmlTags($data['body']);
 
-				$certificate_type_info 	= $this->certificate_type_model->get($data['certificate_type_id']);
+				$certificate_type_info 	= !empty($data['certificate_type_id']) ? $this->certificate_type_model->get($data['certificate_type_id']) : 0;
 				$event_info 			= $this->event_model->get($event_id);
 
 				$data['event_id'] 		= (int)$event_id;
+
+				if (!empty($data['attachment']) && is_array($data['attachment'])) {
+					$data['attachment']  	= json_encode($data['attachment']);
+				}
 
 				$this->certificate_message_template_model->add($data);
 			}
@@ -293,14 +317,18 @@ trait CertificateMessageTemplate {
 			self::_validateCertificateMessageTemplateForm($id);
 
 			if (empty($this->json['errors'])) {
-				$data = $this->input->post();
-
+				$data = $this->input->post(NULL, FALSE);
+				
 				$data['body'] 		= _allowSpecificHtmlTags($data['body']);
-
-				$certificate_type_info 	= $this->certificate_type_model->get($data['certificate_type_id']);
+				
+				$certificate_type_info 	= !empty($data['certificate_type_id']) ? $this->certificate_type_model->get($data['certificate_type_id']) : 0;
 				$event_info 			= $this->event_model->get($event_id);
 
 				$data['event_id'] 		= (int)$event_id;
+
+				if (!empty($data['attachment']) && is_array($data['attachment'])) {
+					$data['attachment']  	= json_encode($data['attachment']);
+				}
 
 				$this->certificate_message_template_model->edit($id, $data);
 			}
