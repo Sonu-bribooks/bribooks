@@ -51,6 +51,7 @@ trait OrderUndelivered {
 
 		if (!$this->json) {
 			$this->load->model('order/OrderUndelivered_model', 'order_undelivered_model');
+			$this->load->model('shipping/Shipment_model', 'shipment_model');
 
 			$order_info = $this->order_model->get($this->input->post('order_id'));
 			$user_info 	= $this->user_model->get($order_info['user_id']);
@@ -67,33 +68,35 @@ trait OrderUndelivered {
 				return;
 			}
 
-            $slot               = $this->input->post('slot');
-            $phone              = $this->input->post('alternate_mobile') ?? $user_info['mobile'];
-            $gokwik_response    = self::_gokwikNdrAction($order_info, $slot, $phone);
+			$shipping_info = json_decode($order_info['shipping_info'], true);
+			$vendor_name = $shipping_info['bb_vendor_name'] ?? '';
 
-            if (!$gokwik_response['status']) {
+        	if (empty($shipping_info['bb_vendor_name'])) {
+				$vendor_name = $this->shipment_model->get($shipping_info['bb_shipment_id'])['vendor_name'];
+			}
 
-                log_kb([
-                    'OrderUndelivered::NDR_response::error'     => json_encode($gokwik_response),
-                    'OrderUndelivered::NDR_response::order_id'  => $order_id,
-                ]);
+			if (!empty($vendor_name) && $vendor_name === 'gokwik') {
+				$slot               = $this->input->post('slot');
+				$phone              = $this->input->post('alternate_mobile') ?? $user_info['mobile'];
+				$gokwik_response    = self::_gokwikNdrAction($order_info, $slot, $phone);
 
-                $this->json['error'] = _l('Unable_to_schedule_re-attempt._Please_try_again.');
-                return;
+				log_kb([
+					'OrderUndelivered::NDR_response::error'     => json_encode($gokwik_response),
+					'OrderUndelivered::NDR_response::order_id'  => $order_id,
+				]);
 
-            }else{
+			}
 
-                $this->order_undelivered_model->add([
-                    'order_id'  		=> (int)$this->input->post('order_id'),
-                    'email'	 			=> $user_info['email'],
-                    'mobile'			=> $user_info['mobile'],
-                    'alternate_mobile'	=> $this->input->post('alternate_mobile') ?? '',
-                    'slot'	  			=> $this->input->post('slot') ?? '',
-                    'status'			=> 20,
-                ]);
+			$this->order_undelivered_model->add([
+				'order_id'  		=> (int)$this->input->post('order_id'),
+				'email'	 			=> $user_info['email'],
+				'mobile'			=> $user_info['mobile'],
+				'alternate_mobile'	=> $this->input->post('alternate_mobile') ?? '',
+				'slot'	  			=> $this->input->post('slot') ?? '',
+				'status'			=> 20,
+			]);
 
-                $this->json['success'] = _l('you_have_submitted_successfully');
-            }
+            $this->json['success'] = _l('you_have_submitted_successfully');
 		}
 	}
 }
