@@ -42,7 +42,9 @@ trait ImportInit {
 			'event_vote_book',
 			'event_certificate',
 			'event_literary_leader',
-			'relationship_manager'
+			'relationship_manager',
+			'event_order_amazon',
+			'live_book_page_data_uat'
 		];
 
 		$this->columns['author'] = [
@@ -380,6 +382,27 @@ trait ImportInit {
 			'mobile',
 			'manager_id',
 		];
+
+		$this->columns['event_order_amazon'] = [
+			'event_id',
+			'book_id',
+			'user_id',
+			'quantity',
+			'price',
+			'currency_id',
+		];
+
+		$this->columns['live_book_page_data_uat'] = [
+			'book_id',
+			'theme_id',
+			'custom_theme_id',
+			'texts',
+			'sort_order',
+			'status',
+		];
+
+		
+		
 
 		$this->default_values['student'] = [
 			'0 (site_id from registration)',
@@ -725,6 +748,23 @@ trait ImportInit {
 			'0(required)',
 			'0(required)',
 			'0',
+		];
+
+		$this->default_values['event_order_amazon'] = [
+			'0(required)',
+			'0(required)',
+			'0(required)',
+			'0(required)',
+			'0(required)',
+			'0(required)',
+		];
+		$this->default_values['live_book_page_data_uat'] = [
+			'0(required)',
+			'0(required)',
+			'0(required)',
+			'0(required)',
+			'0(required)',
+			'0(required)',
 		];
 
 

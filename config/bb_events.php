@@ -120,4 +120,8 @@ define('CHALLENGE_TYPES', [
 		'value'	=> 'group',
 		'label'	=> 'group',
 	],
+	[
+		'value'	=> 'amazon',
+		'label'	=> 'amazon',
+	],
 ]);

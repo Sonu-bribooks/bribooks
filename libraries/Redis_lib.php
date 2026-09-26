@@ -15,8 +15,9 @@ final class Redis_lib {
 	protected static $_sRemove_name;
 
 	public function __construct() {
+		
 		if (!$this->is_supported()) {
-			log_message('error', 'Redis: Failed to create Redis object; extension not loaded?');
+			log_kb(['error', 'Redis: Failed to create Redis object; extension not loaded?']);
 			return;
 		}
 

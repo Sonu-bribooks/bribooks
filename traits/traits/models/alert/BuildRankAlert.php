@@ -132,18 +132,15 @@ trait BuildRankAlert {
 			'user_type'			=> 'school'
 		])['rows'][0] ?? [])) return;
 
-		$filter_data = [
+		$rows = $this->event_literary_leader_model->get_all([
+			'type'			=> $challenge_type,
+			'event_id'		=> $event_id,
+			'challenge_id' 	=> $challenge_id,
 			'start' 		=> 0,
 			'limit' 		=> $limit,
 			'sort'			=> 'event_literary_leader.rank',
 			'order'			=> 'ASC',
-		];
-
-		$rows = $this->event_literary_leader_model->get_all([
-			'type' 							=> $challenge_type,
-			'event_id' 						=> $event_id,
-			'literary_leader_challenge_id' 	=> $challenge_id
-		],$filter_data)['rows'] ?? [];
+		])['rows'] ?? [];
 
 		log_kb(['buildLiteraryLeaderCertCron::LiteraryLeaderdata' => [$rows]]);
 
@@ -169,5 +166,5 @@ trait BuildRankAlert {
 				]);
 			}
 		}
-	}
+	}	
 }

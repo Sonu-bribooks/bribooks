@@ -196,16 +196,9 @@ trait EventChallengeLiteraryLeader {
 			'search'			=> $this->input->get('search[value]'),
 			'sort'				=> $columns[$this->input->get('order[0][column]')]['data'] ?? '',
 			'order'				=> mb_strtoupper($this->input->get('order[0][dir]')),
-            'search_keyword' => [
-                'event_challenge_literary_leader.heading',
-                'event_challenge_literary_leader.slug',
-                'event_challenge_literary_leader.id',
-                'event_challenge_literary_leader.event_id',
-                'event_challenge_literary_leader.type'
-            ]
 		];
 
-		$results = $this->event_challenge_literary_leader_model->get_all([],$filter_data);
+		$results = $this->event_challenge_literary_leader_model->get_all($filter_data);
 
 		$json['recordsTotal'] 		= $results['total'];
 		$json['recordsFiltered'] 	= $results['total'];

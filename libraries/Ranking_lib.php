@@ -33,6 +33,8 @@ final class Ranking_lib {
 		$this->load->model('ranking/RankingGeneral_model');
 		$this->load->model('ranking/RankingGenre_model');
 		$this->load->model('ranking/RankingGroup_model');
+		$this->load->model('ranking/RankingAmazon_model');
+
 
 		$this->load->model('event/Event_model');
 		$this->load->model('event/EventUser_model');
@@ -51,6 +53,8 @@ final class Ranking_lib {
 		$this->load->model('event/EventBookQualificationPending_model');
 		$this->load->model('event/EventGroupBook_model');
 		$this->load->model('ranking/LeagueBreakPointMessage_model');
+		$this->load->model('event/EventOrderAmazon_model');
+		$this->load->model('event/EventChallengeAmazon_model');
 
 		$this->load->model('user/User_model');
 		$this->load->model('user/Student_model');
@@ -83,11 +87,13 @@ final class Ranking_lib {
 		$this->ranking_general_model					= $this->CI->RankingGeneral_model;
 		$this->ranking_genre_model						= $this->CI->RankingGenre_model;
 		$this->ranking_group_model						= $this->CI->RankingGroup_model;
+		$this->ranking_amazon_model						= $this->CI->RankingAmazon_model;
 
 		$this->event_model								= $this->CI->Event_model;
 		$this->event_user_model							= $this->CI->EventUser_model;
 		$this->event_book_model							= $this->CI->EventBook_model;
 		$this->event_order_model						= $this->CI->EventOrder_model;
+		$this->event_order_amazon_model					= $this->CI->EventOrderAmazon_model;
 
 		$this->event_challenge_weekly_model				= $this->CI->EventChallengeWeekly_model;
 		$this->event_challenge_daily_model				= $this->CI->EventChallengeDaily_model;
@@ -99,6 +105,7 @@ final class Ranking_lib {
 		$this->event_challenge_general_model			= $this->CI->EventChallengeGeneral_model;
 		$this->event_challenge_genre_model				= $this->CI->EventChallengeGenre_model;
 		$this->event_challenge_group_model				= $this->CI->EventChallengeGroup_model;
+		$this->event_challenge_amazon_model				= $this->CI->EventChallengeAmazon_model;
 
 		$this->event_book_qualification_pending_model	= $this->CI->EventBookQualificationPending_model;
 		$this->event_group_book_model					= $this->CI->EventGroupBook_model;
@@ -146,7 +153,8 @@ final class Ranking_lib {
 		GenreRanking,
 		GroupRanking,
 		LegendRanking,
-		EventBookQualificationPending
+		EventBookQualificationPending,
+		AmazonRanking
 	;
 
 	private function _updateBookInfo($table, $id = 0, $data = []) {
@@ -642,5 +650,33 @@ final class Ranking_lib {
 		];
 
 		return str_replace($find, $replace, $message);
+	}
+
+	public function updateRankForAmazon($amazon_order_id = 0, $rank_type = 'all') {
+
+		log_kb(['updateRankForAmazon::' => [$amazon_order_id,$rank_type]]);
+		$amazon_order = $this->event_order_amazon_model->get((int)$amazon_order_id);
+
+		if (empty($amazon_order)) return;
+
+		$event_info = $this->event_model->get($amazon_order['event_id']);
+
+		if (empty($event_info)) return;
+
+		$book_info = $this->book_model->get($amazon_order['book_id']);
+
+		if (empty($book_info)) return;
+
+		if (
+			$event_info['start_date'] <= date('Y-m-d H:i:s') &&
+			$event_info['end_date'] >= date('Y-m-d H:i:s')
+		) {
+			log_kb(['updateAmazonRank::' => [$event_info,$book_info,$amazon_order]]);
+			self::updateAmazonRank([
+				'event_info'   => $event_info,
+				'book_info'    => $book_info,
+				'amazon_order' => $amazon_order,
+			]);
+		}
 	}
 }

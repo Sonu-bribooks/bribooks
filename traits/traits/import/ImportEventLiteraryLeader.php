@@ -44,7 +44,7 @@ trait ImportEventLiteraryLeader {
             if (empty($literary_leader_info = $this->event_literary_leader_model->get_all([
                 'event_id'                      => $data['event_id'],
                 'type'                          => $data['type'],
-                'literary_leader_challenge_id'  => $data['literary_leader_challenge_id'],
+                'challenge_id'                  => $data['literary_leader_challenge_id'],
                 'site_id'                       => $data['site_id'],
             ])['rows'][0] ?? [])) {
 

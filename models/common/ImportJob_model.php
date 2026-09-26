@@ -17,7 +17,9 @@ class ImportJob_model extends CI_Model {
 		ImportEventExhibition,
 		ImportEventCertificate,
 		ImportEventLiteraryLeader,
-		ImportRelationshipManager
+		ImportRelationshipManager,
+		ImportEventOrderAmazon,
+		ImportLiveBookPageDataUat
 	;
 
 	public function __construct() {

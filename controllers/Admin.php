@@ -183,6 +183,7 @@ class Admin extends CI_Controller {
 		$this->load->model('event/EventChallengeCountry_model', 'event_challenge_country_model');
 		$this->load->model('event/EventChallengeGroup_model', 'event_challenge_group_model');
 		$this->load->model('event/EventChallengeLiteraryLeader_model', 'event_challenge_literary_leader_model');
+		$this->load->model('event/EventChallengeAmazon_model', 'event_challenge_amazon_model');
 
 		$this->load->model('event/EventLeagueGroup_model', 'event_league_group_model');
 		$this->load->model('event/EventAward_model', 'event_award_model');
@@ -408,7 +409,9 @@ class Admin extends CI_Controller {
 		BriSharks,
 		DeactivateUser,
 		ThirdPartyService,
-		EventChallengeLiteraryLeader
+		EventChallengeLiteraryLeader,
+		EventChallengeAmazon,
+		AmazonOrder
 	;
 
 	public function index() {

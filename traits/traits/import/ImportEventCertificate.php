@@ -66,11 +66,7 @@ trait ImportEventCertificate {
 			AND order._deleted = 0
 			AND order.parent_order_id = 0
 			AND order.status NOT IN (0,91,92)
-			AND book_id NOT IN (
-				SELECT book_id
-				FROM certificates
-				WHERE event_id = '" . $event_id . "'  AND _deleted = '0'
-			)
+			
 			GROUP BY book_id"
 		)->result_array();
 

@@ -106,6 +106,11 @@ if (!function_exists('get_navigation_menus')) {
 					'name'	=> _l('address'),
 					'url'	=> 'admin/address',
 				],
+				[
+					'key'	=> 'amazon_order',
+					'name'	=> _l('amazon_order'),
+					'url'	=> 'admin/amazon_order',
+				],
 			],
 		];
 		$menus[]	= [
@@ -743,6 +748,11 @@ if (!function_exists('get_navigation_menus')) {
 					'key'	=> 'event_challenge_literary_leader',
 					'name'	=> _l('event_challenge_literary_leader'),
 					'url'	=> 'admin/event_challenge_literary_leader',
+				],
+				[
+					'key'	=> 'event_challenges_amazon',
+					'name'	=> _l('event_challenges_amazon'),
+					'url'	=> 'admin/event_challenges_amazon',
 				],
 			],
 		];

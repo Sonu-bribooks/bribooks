@@ -100,7 +100,7 @@
 				<?= $field['required'] ? ' required' : '' ?>
 				data-value="<?= is_array($field['value']) ? implode(',', $field['value']) : $field['value'] ?>"
 				data-ajax-url="<?= $field['ajax_url'] ?>"
-				data-ajax-options="<?= $field['ajax_options'] ?>"
+				data-ajax-options="<?= $field['ajax_options'] ?? '' ?>"
 			>
 				<option value=""><?= $field['label'] ?></option>
 				<?php if (!empty($field['value'])) { ?>
@@ -142,7 +142,7 @@
 				multiple
 				data-value="<?= is_array($field['value']) ? implode(',', $field['value']) : $field['value'] ?>"
 				data-ajax-url="<?= $field['ajax_url'] ?>"
-				data-ajax-options="<?= $field['ajax_options'] ?>"
+				data-ajax-options="<?= $field['ajax_options'] ?? '' ?>"
 				<?= $field['required'] ? ' required' : '' ?>
 			>
 				<?php if (!empty($field['options'])) { ?>
