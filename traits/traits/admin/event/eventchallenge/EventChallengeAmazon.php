@@ -388,6 +388,7 @@ trait EventChallengeAmazon {
 		output_json($json);
 	}
 
+	//used for rank building
 	// public function event_challenges_amazon_build_rank($challenge_id = 0) {
     //     $this->load->model('event/EventChallengeAmazon_model', 'event_challenge_amazon_model');
 	// 	$challenge_info = $this->event_challenge_amazon_model->get($challenge_id);
