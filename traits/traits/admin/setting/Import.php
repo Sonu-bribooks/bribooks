@@ -59,7 +59,7 @@ trait Import {
 			$json['data'][] = [
 				'sn'					=> $filter_data['start'] + 1 + $key,
 				'id'					=> $result['id'],
-				'name'					=> in_array($result['action'], ['_importSchoolLetterHead', '_importAuthorCalendar', '_importAuthorWall']) && !empty($result['status'])
+				'name'					=> in_array($result['action'], ['_importSchoolLetterHead', '_importAuthorCalendar', '_importAuthorWall','_importDiwaliGiftBook']) && !empty($result['status'])
 					? vsprintf('%s <a href="%s" class="btn-popup" data-title="%s">%s</a>', [
 						$result['name'],
 						base_url('admin/download_attachment/' . $result['id'] . '/' . strtolower(str_replace('_import', '', $result['action']))),
@@ -105,29 +105,64 @@ trait Import {
 		}
 	}
 
-	public function download_attachment($job_id = 0, $type = 'schoolletterhead') {
+	// public function download_attachment($job_id = 0, $type = 'schoolletterhead') {
+	// 	$hrefs = [];
+
+	// 	$this->load->library('S3_lib', 's3_lib');
+	// 	$this->load->library('zip');
+
+	// 	$this->s3_lib->setBucket('bbpdfenginefiles');
+
+	// 	$directory 	= sprintf('%s%s_%s/%s', (ENVIRONMENT === 'production' ? '' : 'test'), $type, date('Y'), $job_id);
+	// 	$result 	= $this->s3_lib->listDirObjects($directory);
+
+	// 	foreach ($result['Contents'] ?? [] as $key => $item) {
+	// 		if (substr($item['key'], -1) === '/') continue;
+
+	// 		if (!empty($item['Key'])) {
+	// 			$hrefs[] = vsprintf('<a href="%s">%s</a>', [
+	// 				$this->s3_lib->getUrl($item['Key'], $directory, false, 120),
+	// 				$item['Key']
+	// 			]);
+	// 		}
+	// 	}
+
+	// 	echo implode('<br>', $hrefs);
+	// }
+
+	public function download_attachment($job_id = 0, $type = 'giftcard') {
 		$hrefs = [];
 
-		$this->load->library('S3_lib', 's3_lib');
-		$this->load->library('zip');
+		// Local folder ka path jahan zip save ki gayi hai
+		$local_folder = FCPATH . 'uploads/gift_cards/';
 
-		$this->s3_lib->setBucket('bbpdfenginefiles');
+		if (is_dir($local_folder)) {
+			// Folder ke andar ki saari files ko scan karein
+			$files = scandir($local_folder);
 
-		$directory 	= sprintf('%s%s_%s/%s', (ENVIRONMENT === 'production' ? '' : 'test'), $type, date('Y'), $job_id);
-		$result 	= $this->s3_lib->listDirObjects($directory);
+			foreach ($files as $file) {
+				// '.' aur '..' directories ko skip karein aur sirf .zip files check karein
+				if ($file === '.' || $file === '..' || pathinfo($file, PATHINFO_EXTENSION) !== 'zip') {
+					continue;
+				}
 
-		foreach ($result['Contents'] ?? [] as $key => $item) {
-			if (substr($item['key'], -1) === '/') continue;
+				// Agar aapko sirf specific job_id ki zip dikhani hai, toh yahan condition laga sakte hain
+				// Filhal yeh folder ki saari zip files ke links dikha dega
+				
+				$file_url = base_url('uploads/gift_cards/' . $file);
 
-			if (!empty($item['Key'])) {
-				$hrefs[] = vsprintf('<a href="%s">%s</a>', [
-					$this->s3_lib->getUrl($item['Key'], $directory, false, 120),
-					$item['Key']
+				$hrefs[] = vsprintf('<a href="%s" download>%s</a>', [
+					$file_url,
+					$file
 				]);
 			}
 		}
 
-		echo implode('<br>', $hrefs);
+		if (empty($hrefs)) {
+			echo "No local zip files found in uploads/gift_cards/.";
+		} else {
+			echo implode('<br><br>', $hrefs);
+		}
 	}
 
 	private function _download_attachment($job_id = 0, $type = 'schoolletterhead') {

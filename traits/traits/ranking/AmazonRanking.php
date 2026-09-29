@@ -141,13 +141,13 @@ trait AmazonRanking {
 			]
 		);
 
-		self::_notifyAppUsers(
-			sprintf('bb_notifications_ranking_national_%s', $rank_info['event_id']),
-			[
-				'title'	=> _li('national_rank_update'),
-				'body'	=> _li('national_rank_update'),
-			]
-		);
+		// self::_notifyAppUsers(
+		// 	sprintf('bb_notifications_ranking_national_%s', $rank_info['event_id']),
+		// 	[
+		// 		'title'	=> _li('national_rank_update'),
+		// 		'body'	=> _li('national_rank_update'),
+		// 	]
+		// );
 
 		self::_saveAmazonAlertForEveryOne($rank_info, $alert_payload);
 	}

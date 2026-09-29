@@ -44,7 +44,8 @@ trait ImportInit {
 			'event_literary_leader',
 			'relationship_manager',
 			'event_order_amazon',
-			'live_book_page_data_uat'
+			'live_book_page_data_uat',
+			'diwali_gift_book'
 		];
 
 		$this->columns['author'] = [
@@ -400,9 +401,13 @@ trait ImportInit {
 			'sort_order',
 			'status',
 		];
-
 		
-		
+		$this->columns['diwali_gift_book'] = [
+			'book_id',
+			'quantity',
+			'front_page',
+			'back_page',
+		];
 
 		$this->default_values['student'] = [
 			'0 (site_id from registration)',
@@ -758,6 +763,7 @@ trait ImportInit {
 			'0(required)',
 			'0(required)',
 		];
+
 		$this->default_values['live_book_page_data_uat'] = [
 			'0(required)',
 			'0(required)',
@@ -765,6 +771,13 @@ trait ImportInit {
 			'0(required)',
 			'0(required)',
 			'0(required)',
+		];
+
+		$this->default_values['diwali_gift_book'] = [
+			'0(required)',
+			'0(required)',
+			'front_page_url',
+			'back_page_url',
 		];
 
 

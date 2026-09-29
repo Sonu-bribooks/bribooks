@@ -43,59 +43,59 @@ trait AmazonOrderRankAlert {
 			}
 		}
 
-        $this->scheduleAmazonCloseLeague([
-			'type'			=> 'amazon',
-			'challenge_id'	=> $challenge_id,
-		]);
+        // $this->scheduleAmazonCloseLeague([
+		// 	'type'			=> 'amazon',
+		// 	'challenge_id'	=> $challenge_id,
+		// ]);
 
 	}
 
-    public function scheduleAmazonCloseLeague($data = []) {
-		if (
-			empty($data) ||
-			empty($data['challenge_id']) ||
-			empty($data['type'])
-		) return;
+    // public function scheduleAmazonCloseLeague($data = []) {
+	// 	if (
+	// 		empty($data) ||
+	// 		empty($data['challenge_id']) ||
+	// 		empty($data['type'])
+	// 	) return;
 
-		$this->load->model('common/Cron_model', 'cron_model');
-        $this->load->model('event/EventChallengeAmazon_model', 'event_challenge_amazon_model');
+	// 	$this->load->model('common/Cron_model', 'cron_model');
+    //     $this->load->model('event/EventChallengeAmazon_model', 'event_challenge_amazon_model');
 
-		$challenge_info = $this->event_challenge_amazon_model->get($data['challenge_id']);
+	// 	$challenge_info = $this->event_challenge_amazon_model->get($data['challenge_id']);
 
-		// if (strtotime($challenge_info['end_date']) < time()) return;
+	// 	// if (strtotime($challenge_info['end_date']) < time()) return;
 
-		$code = sprintf('AmazonleagueClosingCron_%s_%s_%s', $data['type'], $challenge_info['event_id'], $data['challenge_id']);
-        $now = date('Y-m-d H:i:s');
-        $end_date = $challenge_info['end_date'];
+	// 	$code = sprintf('AmazonleagueClosingCron_%s_%s_%s', $data['type'], $challenge_info['event_id'], $data['challenge_id']);
+    //     $now = date('Y-m-d H:i:s');
+    //     $end_date = $challenge_info['end_date'];
 
-        $alert_date = (strtotime($now) >= strtotime($end_date))
-            ? date('Y-m-d H:i:s', strtotime('+5 minutes', strtotime($now)))
-            : date('Y-m-d H:i:s', strtotime('+5 minutes', strtotime($end_date)));
+    //     $alert_date = (strtotime($now) >= strtotime($end_date))
+    //         ? date('Y-m-d H:i:s', strtotime('+5 minutes', strtotime($now)))
+    //         : date('Y-m-d H:i:s', strtotime('+5 minutes', strtotime($end_date)));
 
-		$update_data = [
-			'code'			=> $code,
-			'action'		=> 'alert_model->AmazonleagueClosingCron',
-			'data'			=> [[
-				'event_id'		=> $challenge_info['event_id'],
-				'challenge_id'	=> $challenge_info['id'],
-				'type'			=> $data['type'],
-				'is_moved'		=> $challenge_info['is_moved'] ?? 0,
-				'limit'			=> $challenge_info['rank_limit'] ?? 0,
-				'need_invite'	=> $challenge_info['need_invite'] ?? 0,
-				'need_image'	=> $challenge_info['need_image'] ?? 0,
-				'need_address'	=> $challenge_info['need_address'] ?? 0,
-			]],
-			'site_id'		=> 1,
-			'status'		=> 0,
-			'alert_date'	=> $alert_date,
-		];
+	// 	$update_data = [
+	// 		'code'			=> $code,
+	// 		'action'		=> 'alert_model->AmazonleagueClosingCron',
+	// 		'data'			=> [[
+	// 			'event_id'		=> $challenge_info['event_id'],
+	// 			'challenge_id'	=> $challenge_info['id'],
+	// 			'type'			=> $data['type'],
+	// 			'is_moved'		=> $challenge_info['is_moved'] ?? 0,
+	// 			'limit'			=> $challenge_info['rank_limit'] ?? 0,
+	// 			'need_invite'	=> $challenge_info['need_invite'] ?? 0,
+	// 			'need_image'	=> $challenge_info['need_image'] ?? 0,
+	// 			'need_address'	=> $challenge_info['need_address'] ?? 0,
+	// 		]],
+	// 		'site_id'		=> 1,
+	// 		'status'		=> 0,
+	// 		'alert_date'	=> $alert_date,
+	// 	];
 
-		if (!empty($cron_info = $this->cron_model->getByCode($code))) {
-			$this->cron_model->edit($cron_info['id'], $update_data);
-		} else {
-			$this->cron_model->add($update_data);
-		}
-	}
+	// 	if (!empty($cron_info = $this->cron_model->getByCode($code))) {
+	// 		$this->cron_model->edit($cron_info['id'], $update_data);
+	// 	} else {
+	// 		$this->cron_model->add($update_data);
+	// 	}
+	// }
 
     public function AmazonleagueClosingCron($data = []) {
 		log_kb([

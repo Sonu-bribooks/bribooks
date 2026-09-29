@@ -63,6 +63,13 @@ trait ImportEventOrderAmazon {
 				continue;
 			}
 
+            if ( empty($data['currency_id'])  || empty($currency_info = $this->currency_model->get($data['currency_id']))) {
+				self::_updateCounter($job_id, true);
+               
+				$skipped++;
+				continue;
+			}
+
             $this->event_order_amazon_model->add([
                 'event_id'                    => $data['event_id'],
                 'book_id'                     => $data['book_id'],

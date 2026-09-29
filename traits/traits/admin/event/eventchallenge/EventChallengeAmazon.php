@@ -48,9 +48,9 @@ trait EventChallengeAmazon {
 				'url'	=> 'admin/event_challenge_amazon_form/edit/',
 			],
 			[
-				'key'	=> 'build_rank',
+				'key'	=> 'build_cert',
 				'type' 	=> 'confirm',
-				'url'	=> 'admin/event_challenges_amazon_build_rank/',
+				'url'	=> 'admin/event_challenges_amazon_build_cert/',
 			],
 			[
 				'key'	=> 'delete',
@@ -388,8 +388,47 @@ trait EventChallengeAmazon {
 		output_json($json);
 	}
 
-	public function event_challenges_amazon_build_rank($challenge_id = 0) {
-        $this->load->model('event/EventChallengeAmazon_model', 'event_challenge_amazon_model');
+	// public function event_challenges_amazon_build_rank($challenge_id = 0) {
+    //     $this->load->model('event/EventChallengeAmazon_model', 'event_challenge_amazon_model');
+	// 	$challenge_info = $this->event_challenge_amazon_model->get($challenge_id);
+
+	// 	if (empty($challenge_info)) {
+	// 		$this->session->set_flashdata('error_message', _li('event_challenge_amazon_not_found'));
+	// 		redirect(base_url('admin/event_challenges_amazon'), 'refresh');
+	// 	}
+
+	// 	if (strtotime($challenge_info['end_date']) < time()) {
+	// 		$this->session->set_flashdata('error_message', _li('event_challenge_amazon_is_not_running'));
+	// 		redirect(base_url('admin/event_challenges_amazon'), 'refresh');
+	// 	}
+
+    //     $code = sprintf('buildAmazonRank_%s', (int)$challenge_id);
+
+    //     $update_data = [
+    //         'code'      => $code,
+    //         'site_id'   => 1,
+    //         'action'    => 'alert_model->buildAmazonRankCron',
+    //         'data'      => [[
+    //             'event_id'      => (int)$challenge_info['event_id'],
+    //             'challenge_id'  => (int)$challenge_id,
+    //             'type'          => 'amazon',
+    //         ]],
+    //         'status'     => 0,
+    //         'alert_date' => date('Y-m-d H:i:00', strtotime('+1 minutes')),
+    //     ];
+
+    //     if (!empty($cron_info = $this->cron_model->getByCode($code))) {
+    //         $this->cron_model->edit($cron_info['id'], $update_data);
+    //     } else {
+    //         $this->cron_model->add($update_data);
+    //     }
+
+	// 	$this->session->set_flashdata('flash_message', _li('event_challenges_amazon_build_rank_is_added'));
+	// 	redirect(base_url('admin/event_challenges_amazon'), 'refresh');
+	// }
+
+	public function event_challenges_amazon_build_cert($challenge_id = 0) {
+		$this->load->model('event/EventChallengeAmazon_model', 'event_challenge_amazon_model');
 		$challenge_info = $this->event_challenge_amazon_model->get($challenge_id);
 
 		if (empty($challenge_info)) {
@@ -397,33 +436,25 @@ trait EventChallengeAmazon {
 			redirect(base_url('admin/event_challenges_amazon'), 'refresh');
 		}
 
-		if (strtotime($challenge_info['end_date']) < time()) {
-			$this->session->set_flashdata('error_message', _li('event_challenge_amazon_is_not_running'));
-			redirect(base_url('admin/event_challenges_amazon'), 'refresh');
-		}
+		$code = sprintf('AmazonleagueClosingCron_%s_%s', $challenge_info['event_id'], $challenge_id);
+		$this->cron_model->add([
+			'code'		=> $code,
+			'site_id'	=> 1,
+			'action'	=> 'alert_model->AmazonleagueClosingCron',
+			'data'		=> [[
+				'event_id'		=> (int)$challenge_info['event_id'],
+				'challenge_id'	=> (int)$challenge_id,
+				'type'			=> 'amazon',
+				'is_moved'		=> $challenge_info['is_moved'] ?? 0,
+				'limit'			=> $challenge_info['rank_limit'] ?? 0,
+				'need_invite'	=> $challenge_info['need_invite'] ?? 0,
+				'need_image'	=> $challenge_info['need_image'] ?? 0,
+				'need_address'	=> $challenge_info['need_address'] ?? 0,
+			]],
+			'alert_date'	=> date('Y-m-d H:i:00', strtotime('+1 minutes')),
+		]);
 
-        $code = sprintf('buildAmazonRank_%s', (int)$challenge_id);
-
-        $update_data = [
-            'code'      => $code,
-            'site_id'   => 1,
-            'action'    => 'alert_model->buildAmazonRankCron',
-            'data'      => [[
-                'event_id'      => (int)$challenge_info['event_id'],
-                'challenge_id'  => (int)$challenge_id,
-                'type'          => 'amazon',
-            ]],
-            'status'     => 0,
-            'alert_date' => date('Y-m-d H:i:00', strtotime('+1 minutes')),
-        ];
-
-        if (!empty($cron_info = $this->cron_model->getByCode($code))) {
-            $this->cron_model->edit($cron_info['id'], $update_data);
-        } else {
-            $this->cron_model->add($update_data);
-        }
-
-		$this->session->set_flashdata('flash_message', _li('event_challenges_amazon_build_rank_is_added'));
+		$this->session->set_flashdata('flash_message', _li('event_challenges_amazon_build_cert_is_added'));
 		redirect(base_url('admin/event_challenges_amazon'), 'refresh');
 	}
 }

@@ -21,7 +21,8 @@ class Import extends CI_Controller {
 		ImportEventLiteraryLeader,
 		ImportRelationshipManager,
 		ImportEventOrderAmazon,
-		ImportLiveBookPageDataUat
+		ImportLiveBookPageDataUat,
+		ImportDiwaliGiftBook
 	;
 
 	public function __construct() {
