@@ -1,6 +1,255 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed');
 
 trait AmazonRanking {
+	public function getAmazonRanks($event_id = 0, $event_challenge_amazon_id = 0, $page = 1, $search = NULL, $limit = 0) {
+		$page 		= (int)$page;
+		$limit 		= (int)$limit;
+		$limit 		= min(max($limit, 10), 50);
+
+		$ranks 		= [];
+		$rank_key 	= self::_getAmazonKey($event_id, $event_challenge_amazon_id);
+
+		$start 		= $page > 0 ? ($page - 1) * $limit : 0;
+		$end 		= $start + $limit - 1;
+
+		if (!empty($search)) {
+			$results = [];
+
+			$rank_results = $this->ranking_amazon_model->get_all([
+				'event_id'					=> (int)$event_id,
+				'event_challenge_amazon_id'	=> (int)$event_challenge_amazon_id,
+				'search'					=> $search,
+				'start'						=> $page > 0 ? ($page - 1) * $limit : 0,
+				'limit'						=> $limit
+			]);
+
+			$total = $rank_results['total'];
+
+			foreach ($rank_results['rows'] ?? [] as $item) {
+				$results[$item['id']] = $item;
+			}
+		} else {
+			$results 	= $this->redis_lib->getRanks($rank_key, $start, $end);
+			$total 		= $this->redis_lib->getTotal($rank_key);
+		}
+
+		foreach ($results as $rank_id => $item) {
+			$rank_info 	= $this->ranking_amazon_model->get($rank_id);
+			$ranks[] 	= self::_formatAmazonRank(
+				$this->redis_lib->getRank($rank_key, $rank_id) + 1,
+				$rank_info
+			);
+		}
+
+		log_kb(['Ranking_lib::getAmazonRanks::ranks::' => [$results, $ranks]]);
+
+		return ['ranks' => $ranks, 'total' => $total];
+	}
+
+	public function getUserAmazonRank($event_id = 0, $event_challenge_amazon_id = 0, $user_id = 0, $book_id = 0) {
+		$rank_key = self::_getAmazonKey($event_id, $event_challenge_amazon_id);
+
+		$filter_data = [
+			'event_id'					=> (int)$event_id,
+			'event_challenge_amazon_id' => (int)$event_challenge_amazon_id,
+			'user_id'					=> (int)$user_id,
+			'book_id'					=> (int)$book_id,
+		];
+
+		if (empty($book_id)) {
+			unset($filter_data['book_id']);
+		}
+
+		$user_rank = $this->ranking_amazon_model->get_all($filter_data)['rows'][0] ?? [];
+
+		$result = $this->redis_lib->getRank($rank_key, $user_rank['id'] ?? 0);
+
+		$result += 1;
+
+		if (!empty($result) && !empty($user_rank)) {
+			$user_rank['rank'] = $result ?? 0;
+		}
+
+		log_kb(['user_rank' => $user_rank]);
+
+		$user_rank = !empty($user_rank)
+			? $user_rank
+			: self::_genUserAmazonRank($event_id, $event_challenge_amazon_id, $user_id, $book_id)
+		;
+
+		if (!empty($user_rank)) {
+			$author_info = $this->student_model->get($user_rank['user_id']);
+			$user_rank['city_id']	= $author_info['city_id'];
+			$user_rank['state_id'] 	= $author_info['state_id'];
+		}
+
+		if (!empty($user_rank)) {
+			$user_rank = array_merge($user_rank, [
+				'is_early_access'			=> self::_isEarlyAccess($user_rank['book_id']),
+				'is_prime_author'			=> self::_isPrimeAuthor($user_rank['book_id']),
+			]);
+		}
+
+		$user_rank['message'] = self::_getAmazonUserMessage($user_rank);
+
+		return $user_rank;
+	}
+
+	public function getUserNoAmazonRank($event_id = 0, $event_challenge_amazon_id = 0, $user_id = 0, $book_id = 0) {
+		$user_rank = self::getUserAmazonRank($event_id, $event_challenge_amazon_id, $user_id, $book_id);
+
+		$user_rank = !empty($user_rank)
+			? $user_rank
+			: self::_genUserAmazonRank($event_id, $event_challenge_amazon_id, $user_id, $book_id)
+		;
+
+		$author_info 	= $this->student_model->get($user_id);
+		$site_info 		= $this->site_model->get($author_info['site_id'] ?? 0);
+		$state_info 	= $this->state_model->get($author_info['state_id'] ?? 0);
+		$city_info 		= $this->city_model->get($author_info['city_id'] ?? 0);
+
+		if (empty($user_rank['book_id'])) {
+			$user_rank = [
+				'id'						=> 0,
+				'rank'						=> 0,
+				'event_challenge_amazon_id'	=> $event_challenge_amazon_id,
+				'event_id'					=> $event_id,
+				'user_id'					=> $user_id,
+				'author_name'				=> trim(($author_info['first_name'] ?? '') . ' ' . ($author_info['last_name'] ?? '')),
+				'author_image'				=> $author_info['image'] ?? '',
+				'book_image'				=> '',
+				'book_id'					=> 'NA',
+				'book_name'					=> 'NA',
+				'book_slug'					=> 'NA',
+				'score'						=> 0,
+				'message'					=> (in_array($event_id, [9]))
+					? _li('You haven\'t joined the National Best-Sellers League as your book is yet to be published')
+					: _li('Unfortunately, your book wasn\'t submitted for this event, so you can\'t participate in the Best Seller League.'),
+				'amazon_url'				=> '',
+				'site_id'					=> $author_info['site_id'] ?? '0',
+				'school'					=> $site_info['name'] ?? '',
+				'state_id'					=> $author_info['state_id'] ?? '0',
+				'state'						=> $state_info['name'] ?? '',
+				'city_id'					=> $author_info['city_id'] ?? '0',
+				'city'						=> $city_info['name'] ?? ''
+			];
+		}
+
+		return $user_rank;
+	}
+
+	private function _genUserAmazonRank($event_id = 0, $event_challenge_amazon_id = 0, $user_id = 0, $book_id = 0) {
+		if ($rank_info = $this->ranking_amazon_model->get_all([
+			'event_id'					=> (int)$event_id,
+			'event_challenge_amazon_id' => (int)$event_challenge_amazon_id,
+			'user_id'					=> (int)$user_id,
+			'book_id'					=> (int)$book_id,
+		])['rows'][0] ?? []) {
+			return self::_formatAmazonRank(0, $rank_info);
+		}
+
+		$author_info = $this->student_model->get($user_id);
+		$site_info = $this->site_model->get($author_info['site_id'] ?? 0);
+		$state_info = $this->state_model->get($author_info['state_id'] ?? 0);
+		$city_info = $this->city_model->get($author_info['city_id'] ?? 0);
+
+		if ($top_sold_book = $this->event_order_amazon_model->getSoldByBook([
+			'user_id'	=> (int)$user_id,
+			'event_id'	=> (int)$event_id,
+			'book_id'	=> (int)$book_id,
+			'sort'		=> 'quantity',
+			'order'		=> 'DESC',
+			'start'		=> 0,
+			'limit'		=> 1,
+		])['rows'][0] ?? []) {
+			$item = $this->book_model->get($top_sold_book['book_id']);
+		} else {
+			$item = $this->db->select('book.*')
+				->from('event_book')
+				->join('book', 'book.id = event_book.book_id')
+				->where('book.status', 1)
+				->where('book.archived', 0)
+				->where('book._deleted', 0)
+				->where('event_book.event_id', (int)$event_id)
+				->where('book.user_id', (int)$user_id)
+				->where('book.id', (int)$book_id)
+				->get()->row_array()
+			;
+		}
+
+		$no_sold = (!empty($item['id']) && !empty($event_id)) ? $this->event_order_amazon_model->getTotalSoldByBook($event_id, $item['id']) : 0;
+
+		$rank_data = [
+			'id'						=> 0,
+			'rank'						=> 0,
+			'event_challenge_amazon_id'	=> (int)$event_challenge_amazon_id,
+			'event_id'					=> (int)$event_id,
+			'user_id'					=> $user_id,
+			'author_name'				=> $item['author_name'] ?? '',
+			'author_image'				=> $item['author_image'] ?? '',
+			'book_image'				=> $item['cover_image'] ?? '',
+			'book_id'					=> $item['id'] ?? 0,
+			'book_name'					=> $item['name'] ?? '',
+			'book_slug'					=> $item['slug'] ?? '',
+			'is_early_access'			=> self::_isEarlyAccess($item['id'] ?? 0),
+			'is_prime_author'			=> self::_isPrimeAuthor($item['id'] ?? 0),
+			'score'						=> $no_sold,
+			'site_id'					=> $author_info['site_id'] ?? '0',
+			'school'					=> $site_info['name'] ?? '',
+			'state_id'					=> $author_info['state_id'] ?? '0',
+			'state'						=> $state_info['name'] ?? '',
+			'city_id'					=> $author_info['city_id'] ?? '0',
+			'city'						=> $city_info['name'] ?? ''
+		];
+
+		return array_merge(
+			$rank_data,
+			[
+				'message' => self::_getAmazonUserMessage($rank_data)
+			],
+		);
+	}
+
+	public function getAmazonUpdate($event_id = 0, $event_challenge_amazon_id = 0, $user_id = 0) {
+		self::_updateLiveAmazonUser($user_id, $event_id, $event_challenge_amazon_id);
+
+		$amazon_rank_key = self::_getAmazonRankKey($event_id, $event_challenge_amazon_id, $user_id);
+
+		$json = json_decode($this->cache->get($amazon_rank_key), true);
+
+		log_kb(['Ranking_lib::getAmazonUpdate::' => [
+			$json,
+			$amazon_rank_key,
+		]]);
+
+		self::removeAmazonUserUpdate($event_id, $event_challenge_amazon_id, $user_id);
+
+		$data = json_encode($json ?? []);
+		$event = 'rank_update';
+
+		header('Content-Type: text/event-stream');
+		header('Cache-Control: no-cache');
+		header('Connection: keep-alive');
+		header('Pragma: no-cache');
+		header('Access-Control-Allow-Methods: GET,PUT,POST,DELETE,OPTIONS');
+		header('Access-Control-Allow-Headers: x-requested-with, Accept, Content-Type, Authorization, Origin');
+		header('Access-Control-Allow-Credentials: true');
+		header('Access-Control-Allow-Origin: ' . $this->input->get_request_header('Origin', true));
+
+		echo "event: {$event}\ndata: {$data}\n\n";
+		exit;
+	}
+
+	public function removeAmazonUserUpdate($event_id = 0, $event_challenge_amazon_id = 0, $user_id = 0) {
+		$amazon_rank_key = self::_getAmazonRankKey($event_id, $event_challenge_amazon_id, $user_id);
+
+		log_kb([
+			'rank_key' => $amazon_rank_key
+		]);
+
+		$this->cache->delete($amazon_rank_key);
+	}
+
     public function updateAmazonRank($data = []) {
 		$book_info 	    = $data['book_info'] ?? [];
 		$event_info     = $data['event_info'] ?? [];
@@ -295,6 +544,21 @@ trait AmazonRanking {
 			);
 		}
 	}
+
+	private function _updateLiveAmazonUser($user_id = 0, $event_id = 0, $event_challenge_amazon_id = 0) {
+		$users = self::_getLiveAmazonUsers($event_id, $event_challenge_amazon_id);
+
+		if (!in_array($user_id, $users)) {
+			$users[] = $user_id;
+		} else {
+			return;
+		}
+
+		log_kb(['_updateLiveAmazonUser::new' => $users, [$user_id]]);
+
+		$this->cache->save(self::_getLiveAmazonUserKey($event_id, $event_challenge_amazon_id), json_encode($users), 900);
+	}
+
 
     private function _getLiveAmazonUsers($event_id = 0, $event_challenge_amazon_id = 0) {
 		$users = json_decode($this->cache->get(self::_getLiveAmazonUserKey($event_id, $event_challenge_amazon_id)), true);

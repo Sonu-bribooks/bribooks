@@ -20,7 +20,8 @@ trait Ranking {
 		CityChallengeTeacher,
 		StateChallengeTeacher,
 		CountryChallengeTeacher,
-		VoteChallenge
+		VoteChallenge,
+		AmazonChallenge
 	;
 
 	public function removeUserUpdate() {

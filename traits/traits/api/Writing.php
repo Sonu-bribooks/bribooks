@@ -584,6 +584,50 @@ trait Writing {
 		}
 	}
 
+	public function bookAiReview() {
+		$this->form_validation->set_rules('book_id', _l('book_id'), [
+			'trim',
+			'required',
+			'numeric',
+			['book', [$this->validate_model, 'book']]
+		]);
+
+		self::_runFormValidation();
+
+		if (!$this->json) {
+			if (!self::_validateWriting()) {
+				$this->json['error'] = _l('not_authorized');
+				return;
+			}
+
+			if (strtolower($this->config->item('site_country_code')) !== 'in') return;
+			if (empty(get_settings('bb_page_ai_review'))) return;
+
+			CI_Events::trigger('access_log', [
+				'module'	=> 'ai_review_' . (int)$this->input->post('book_id')
+			]);
+
+			$this->json['pages'] = array_map(
+				fn($item) => [
+					'id'			=> $item['id'],
+					'book_id'		=> $item['book_id'],
+					'page_id'		=> $item['page_id'],
+					'version'		=> $item['version'],
+					'sort_order'	=> $item['sort_order'],
+					'index'			=> $item['index'],
+					'original_text'	=> $item['original_text'],
+					'new_text'		=> $item['new_text'],
+					'changes'		=> json_decode($item['changes'], true),
+				],
+				$this->page_ai_logs_model->get_all([
+					'book_id'	=> (int)$this->input->post('book_id'),
+					'sort'		=> 'page_ai_logs.sort_order',
+					'order'		=> 'ASC'
+				])['rows'] ?? []
+			);
+		}
+	}
+
 	public function publishBook() {
 		$this->form_validation->set_rules('book_id', _l('book_id'), [
 			'trim',

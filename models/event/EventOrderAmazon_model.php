@@ -106,6 +106,79 @@ class EventOrderAmazon_model extends CI_Model {
 		]);
 	}
 
+	public function getSoldByBook($data = []) {
+		$grouped = false;
+
+		$this->db->select('event_order_amazon.book_id, SUM(event_order_amazon.quantity) AS quantity');
+
+		if (isset($data['book_id'])) {
+			$this->db->where('event_order_amazon.book_id', (int)$data['book_id']);
+		}
+
+		if (isset($data['event_id'])) {
+			$this->db->where('event_order_amazon.event_id', (int)$data['event_id']);
+		}
+
+		if (isset($data['user_id'])) {
+			$this->db->where('book.user_id', (int)$data['user_id']);
+		}
+
+		if (isset($data['quantity_ge'])) {
+			$this->db->having('quantity >= ', (int)$data['quantity_ge']);
+			$this->db->group_by('event_order_amazon.book_id');
+			$grouped = true;
+		}
+
+		if (isset($data['quantity_le'])) {
+			$this->db->having('quantity <= ', (int)$data['quantity_le']);
+			!$grouped && $this->db->group_by('event_order_amazon.book_id');
+			$grouped = true;
+		}
+
+		$this->db->where('event_order_amazon._deleted', 0);
+
+		if (isset($data['user_id'])) {
+			$this->db->join('book', 'book.id = event_order_amazon.book_id', 'left');
+			!$grouped && $this->db->group_by('event_order_amazon.book_id');
+		}
+
+		$this->db->from('event_order_amazon');
+
+		if (isset($data['start']) && isset($data['limit'])) {
+			if ($data['start'] < 0) {
+				$data['start'] = 0;
+			}
+
+			if ($data['limit'] < 1) {
+				$data['limit'] = 10;
+			}
+
+			$this->db->limit($data['limit'], $data['start']);
+		}
+
+		$sort_data = [
+			'quantity',
+			'event_order_amazon.date_added',
+			'event_order_amazon.date_modified',
+		];
+
+		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+			$sort = $data['sort'];
+		} else {
+			$sort = 'event_order_amazon.id';
+		}
+
+		if (isset($data['order']) && ($data['order'] == 'ASC')) {
+			$order = 'ASC';
+		} else {
+			$order = 'DESC';
+		}
+
+		$this->db->order_by($sort, $order);
+
+		return ['rows' => $this->db->get()->result_array()];
+	}
+	
     public function getTotalSoldByBook($event_id = 0, $book_id = 0) {
 		$this->db->select_sum('event_order_amazon.quantity');
 

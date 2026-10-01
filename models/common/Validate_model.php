@@ -55,6 +55,7 @@ class Validate_model extends CI_Model {
 		$this->load->model('event/EventChallengeGroup_model', 'event_challenge_group_model');
 		$this->load->model('event/EventChallengeVote_model', 'event_challenge_vote_model');
 		$this->load->model('event/EventLeagueGroup_model', 'event_league_group_model');
+		$this->load->model('event/EventChallengeAmazon_model', 'event_challenge_amazon_model');
 
 		$this->load->model('common/Notification_model', 'notification_model');
 
@@ -665,6 +666,24 @@ class Validate_model extends CI_Model {
 
 	public function event_challenge_country_slug($str) {
 		if (!$this->event_challenge_country_model->getBySlug($str)) {
+			$this->form_validation->set_message('slug', _li('The {field} is not found'));
+			return false;
+		}
+
+		return true;
+	}
+
+	public function event_challenge_amazon($str) {
+		if (!$this->event_challenge_amazon_model->get($str)) {
+			$this->form_validation->set_message('event_challenge_amazon', _li('The {field} is not found'));
+			return false;
+		}
+
+		return true;
+	}
+
+	public function event_challenge_amazon_slug($str) {
+		if (!$this->event_challenge_amazon_model->getBySlug($str)) {
 			$this->form_validation->set_message('slug', _li('The {field} is not found'));
 			return false;
 		}
