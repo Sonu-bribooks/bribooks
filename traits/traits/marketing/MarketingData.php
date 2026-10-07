@@ -22,7 +22,7 @@ trait MarketingData {
 				return [];
 			}
 
-			$rdb = $this->load->database('replica', TRUE);
+			$rdb = $this->load->database('development', TRUE);
 
 			$rows = $rdb->query($sql_query['sql_query'])->result_array();
 		}

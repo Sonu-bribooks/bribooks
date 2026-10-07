@@ -208,6 +208,8 @@ trait MarketingAlert {
 			'_sendSingleData::data::row' 	=> $row,
 		]);
 
+		self::_prepareMarketingDataUrls($row, $info);
+
 		self::_marketingAlert([
 			'subject'			=> self::_formatMarketingEmailMessage($info['subject'], $row, $info),
 			'template_id'		=> $info['template_id'] ?? '',
@@ -694,6 +696,38 @@ trait MarketingAlert {
 				]]);
 
 				log_kb(['SendWebPush::' => $result]);
+			}
+		}
+	}
+
+	private function _prepareMarketingDataUrls(&$data, $info = []) {
+		if (!empty($info['generate_short_url']) && is_string($info['generate_short_url'])) {
+			$raw_field_string = str_replace(['{', '}'], '', $info['generate_short_url']);
+			$short_url_keys = array_map('trim', explode(',', $raw_field_string));
+			
+			$urls_to_process = $keys_map = [];
+			
+			foreach ($short_url_keys as $key) {
+				if (!empty($data[$key]) && is_string($data[$key])) {
+					$url = trim($data[$key]);
+					// Skip if already converted to short URL
+					if (strpos($url, USER_URL . 'r/') === 0) {
+						continue;
+					}
+					$urls_to_process[] = $url;
+					$keys_map[$url] = $key;
+				}
+			}
+
+			if (!empty($urls_to_process)) {
+				$generated_codes_mapping = process_short_urls($urls_to_process);
+
+				foreach ($generated_codes_mapping as $original_url => $code) {
+					if (isset($keys_map[$original_url])) {
+						$variable_key = $keys_map[$original_url];
+						$data[$variable_key] = USER_URL . 'r/' . $code;
+					}
+				}
 			}
 		}
 	}

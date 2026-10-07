@@ -261,7 +261,8 @@ class Api extends CI_Controller {
 		BriMinds,
 		OrderUndelivered,
 		EventPreWriting,
-		GokwikNdrOrder
+		GokwikNdrOrder,
+		ShortUrl
 	;
 
 	public function index() {

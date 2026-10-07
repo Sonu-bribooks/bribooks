@@ -1327,3 +1327,111 @@ if (!function_exists('update_thirdparty_status')) {
 		$CI->redis_lib->save($cache_key, $data, 14400);
 	}
 }
+
+if (!function_exists('process_short_urls')) {
+	function process_short_urls(array $urls) {
+		static $static_cache = [];
+		$CI =& get_instance();
+		$CI->load->model('common/ShortUrl_model', 'short_url_model');
+
+		$redis_available = false;
+		try {
+			if (!isset($CI->redis_lib)) {
+				$CI->load->library('Redis_lib');
+			}
+			if (isset($CI->redis_lib) && method_exists($CI->redis_lib, 'get')) {
+				$redis_available = true;
+			}
+		} catch (Exception $e) {
+			$redis_available = false;
+		}
+
+		$env_prefix = (ENVIRONMENT === 'production') ? 'live' : 'test';
+		$cache_ttl = 86400 * 30; // 30 days
+
+		$response_mapping = [];
+		foreach ($urls as $original_url) {
+			if (empty($original_url)) {
+				continue;
+			}
+
+			// 1. Static In-Memory Cache (0.00001ms - Instant for loops)
+			if (isset($static_cache[$original_url])) {
+				$response_mapping[$original_url] = $static_cache[$original_url];
+				continue;
+			}
+
+			$url_cache_key = sprintf('%s_short_url_%s', $env_prefix, md5($original_url));
+
+			// 2. Redis Cache Check
+			if ($redis_available) {
+				try {
+					$cached_code = $CI->redis_lib->get($url_cache_key);
+					if (!empty($cached_code) && is_string($cached_code)) {
+						$static_cache[$original_url] = $cached_code;
+						$response_mapping[$original_url] = $cached_code;
+						continue;
+					}
+				} catch (Exception $e) {
+					// Fallback to database
+				}
+			}
+
+			// 3. Database Check
+			$existing = $CI->short_url_model->getByUrl($original_url);
+
+			if ($existing && !empty($existing['short_code'])) {
+				$code = $existing['short_code'];
+				$static_cache[$original_url] = $code;
+				$response_mapping[$original_url] = $code;
+
+				if ($redis_available) {
+					try {
+						$CI->redis_lib->save($url_cache_key, $code, $cache_ttl);
+						$CI->redis_lib->save(sprintf('%s_short_code_%s', $env_prefix, $code), [
+							'id'  => $existing['id'] ?? 0,
+							'url' => $original_url,
+						], $cache_ttl);
+					} catch (Exception $e) {}
+				}
+				continue;
+			}
+
+			// 4. Generate Unique Code (with safety max attempts)
+			$attempts = 0;
+			do {
+				$characters 	= '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+				$length 		= ($attempts > 5) ? 8 : 6;
+				$code 			= strtolower(substr(str_shuffle($characters), 0, $length));
+				$code_exists 	= $CI->short_url_model->getByCode($code);
+				$attempts++;
+			} while ($code_exists && $attempts < 10); 
+
+			$insert_id = $CI->short_url_model->add([
+				'url'           => $original_url,
+				'short_code'    => $code,
+				'status'        => 1
+			]);
+
+			$static_cache[$original_url] = $code;
+			$response_mapping[$original_url] = $code;
+
+			// Save to Redis Cache
+			if ($redis_available) {
+				try {
+					$CI->redis_lib->save($url_cache_key, $code, $cache_ttl);
+					$CI->redis_lib->save(sprintf('%s_short_code_%s', $env_prefix, $code), [
+						'id'  => $insert_id ?? 0,
+						'url' => $original_url,
+					], $cache_ttl);
+				} catch (Exception $e) {}
+			}
+		}
+
+		return $response_mapping;
+	}	
+
+}
+
+
+

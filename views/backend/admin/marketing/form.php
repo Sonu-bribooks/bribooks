@@ -170,6 +170,11 @@
 						</select>
 					</div>
 
+					<div class="form-group">
+						<label for="generate_short_url"><?php echo _l('generate_short_url'); ?></label>
+						<input class="form-control" id="generate_short_url" name="generate_short_url" value="<?php echo $details['generate_short_url'] ?? ''; ?>" placeholder="coma seperated {varibale} name" />
+					</div>
+
 					<div class="form-group sms_box">
 						<label for="sms_message"><?php echo _l('sms_message'); ?><span class="required">*</span></label>
 						<textarea rows="3" class="form-control" id="ms_message" name="sms"><?php echo $details['sms'] ?? ''; ?></textarea>

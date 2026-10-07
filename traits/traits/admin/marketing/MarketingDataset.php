@@ -186,7 +186,7 @@ trait MarketingDataset {
 		}
 
 		try {
-			$rdb = $this->load->database('replica', TRUE);
+			$rdb = $this->load->database('development', TRUE);
 
 			$result = $rdb->query($query);
 

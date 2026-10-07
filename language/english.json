@@ -1685,5 +1685,11 @@
     "upload_favicon": "Upload favicon",
     "stripe_payment_switcher": "Stripe payment switcher",
     "merge_single_site": "Merge single site",
-    "author_of": "Author of"
+    "author_of": "Author of",
+    "coupon_color": "Coupon color",
+    "coupon_form_edit": "Coupon form edit",
+    "replace_url": "Replace url",
+    "generate_short_url": "Generate short url",
+    "sql_query_cannot_be_empty": "Sql query cannot be empty",
+    "build_cert": "Build cert"
 }

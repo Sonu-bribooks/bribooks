@@ -222,6 +222,14 @@ trait Coupon {
 		];
 
 		$data['fields'][] = [
+			'type'		=> 'color',
+			'key'		=> 'color',
+			'label'		=> _l('coupon_color'),
+			'required'	=> false,
+			'value'		=> $info['color'] ?? '',
+		];
+
+		$data['fields'][] = [
 			'type'		=> 'number',
 			'key'		=> 'discount',
 			'label'		=> _l('discount'),

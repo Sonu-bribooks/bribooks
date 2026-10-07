@@ -786,7 +786,9 @@ $(function() {
 			'processing': '<div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;"><span class="sr-only">Loading...</span></div>'
 		},
 		'createdRow': function(row, data, dataIndex) {
-			if (data.is_black_white) {
+			if (data.coupon_row_color) {
+				$(row).css('background-color', data.coupon_row_color);
+			} else if (data.is_black_white) {
 				$(row).css('background-color', '#c7c7c7');
 			} else if (data.is_international) {
 				$(row).css('background-color', '#fde0dc');
@@ -795,7 +797,7 @@ $(function() {
 				$(row).css('background-color', '#fff3cd');
 			} else if (data.is_dropshipper) {
 				$(row).css('background-color', '#33fff9');
-			}
+			} 
 		}
 	})
 });

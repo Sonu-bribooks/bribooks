@@ -291,6 +291,10 @@ trait Orders {
 
 			$shipping_tracking_info = !empty($result['shipping_tracking_info']) ? json_decode($result['shipping_tracking_info'], true) : '';
 
+			$coupon_info = $this->coupon_model->get($result['coupon_id']);
+			
+			$coupon_row_color = !empty($coupon_info['color']) ? $coupon_info['color']: '';
+
 			$json['data'][] = [
 				'#'					=> self::_renderCheckBox($result, $products),
 				'sn'				=> $filter_data['start'] + 1 + $key,
@@ -306,6 +310,7 @@ trait Orders {
 				'is_international'	=> ($result['currency_id'] !== '47') ? '1' : '',
 				'is_black_white'	=> _is_option_type_exist($result['id'], $option_type) ? '1' : '',
 				'is_clone'			=> !empty($result['parent_order_id']),
+				'coupon_row_color'  => $coupon_row_color,
 			];
 		}
 
