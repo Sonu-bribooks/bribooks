@@ -1691,5 +1691,6 @@
     "replace_url": "Replace url",
     "generate_short_url": "Generate short url",
     "sql_query_cannot_be_empty": "Sql query cannot be empty",
-    "build_cert": "Build cert"
+    "build_cert": "Build cert",
+    "genre_&_theme": "Genre & theme"
 }

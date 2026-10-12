@@ -288,7 +288,8 @@ $event_list = $this->event_model->get_all()['rows'] ?? [];
 									<tr>
 										<th><input type="checkbox" class="select-all"></th>
 										<th><?php echo _l('id'); ?></th>
-										<th><?php echo _l('theme'); ?></th>
+										<th><?php echo _l('genre_&_theme'); ?></th>
+										<th><?php echo _l('event_name'); ?></th>
 										<th><?php echo _l('user'); ?></th>
 										<th><?php echo _l('country'); ?></th>
 										<th><?php echo _l('name'); ?></th>

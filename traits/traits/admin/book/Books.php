@@ -104,7 +104,8 @@ trait Books {
 		$data['fields'] = [
 			'sn',
 			'id',
-			'theme',
+			'genre_&_theme',
+			'event_name',
 			'user',
 			'country',
 			'name',
@@ -229,7 +230,8 @@ trait Books {
 		$data['fields'] = [
 			'sn',
 			'id',
-			'theme',
+			'genre_&_theme',
+			'event_name',
 			'user',
 			'country',
 			'name',
@@ -293,10 +295,13 @@ trait Books {
 				'limit'		=> 1,
 			])['rows'][0] ?? [];
 
+			$genre_theme = ($result['genre'] ?? '') . ' : ' . ($result['category'] ?? '');
+
 			$json['data'][] = [
 				'sn'					=> $filter_data['start'] + 1 + $key,
 				'id'					=> $result['id'],
-				'theme'					=> $result['category'] ?? '',
+				'genre_&_theme'			=> $genre_theme,
+				'event_name'			=> '',
 				'user'					=> $result['first_name'] ?? '',
 				'country'				=> $result['location'] ?? '',
 				'name'					=> $result['name'],
@@ -408,7 +413,9 @@ trait Books {
 			$book_info = $this->book_model->get($result['id']);
 
 			$event_id = (!empty($event_book_info['rows'][0])) ? $event_book_info['rows'][0]['event_id'] : '';
-
+			if (!empty($event_id)) {
+				$event_name = $this->event_model->get($event_id)['name'];
+			}
 			$amazon_book_info = $this->amazon_book_model->get_all(['book_id' => $result['id']]);
 
 			$amazon_book_id = (!empty($amazon_book_info['rows'][0])) ? $amazon_book_info['rows'][0]['id'] : '';
@@ -418,6 +425,7 @@ trait Books {
 			$hall_of_fame_id = (!empty($hall_of_fame_info['rows'][0])) ? $hall_of_fame_info['rows'][0]['id'] : '';
 
 			$category_info = $this->category_model->get($result['category_id']);
+			$genre_info = $this->genre_model->get($result['genre_id']);
 			$user_info = $this->student_model->get($result['user_id']);
 			$pages = $this->page_model->get_all([
 				'book_id' => $result['id'],
@@ -454,13 +462,15 @@ trait Books {
 					)
 					: ''
 			);
+			$genre_theme = ($genre_info['name'] ?? '') . ' : ' . ($category_info['name'] ?? '');
 
 			$json['data'][] = [
 				'sn'				=> '<input type="checkbox" class="select-me" value="' . $result['id'] . '">', //$filter_data['start'] + 1 + $key,
 				'id'				=> $result['id'],
 				'event_id'			=> $event_id,
 				'amazon_book_id'	=> $amazon_book_id,
-				'theme'				=> $category_info['name'],
+				'genre_&_theme'		=> $genre_theme,
+				'event_name'		=> isset($event_name) ? $event_name : '',
 				'custom_theme'		=> !empty($custom_theme_book) ? 'YES' : 'NO',
 				'user'				=> ($user_info['first_name'] ?? '') . ' ' . ($user_info['last_name'] ?? ''),
 				'country'			=> $user_info['location'] ?? '',
@@ -491,7 +501,8 @@ trait Books {
 		$data['fields']			= [
 			'sn',
 			'id',
-			'theme',
+			'genre_&_theme',
+			'event_name',
 			'user',
 			'country',
 			'name',
@@ -568,6 +579,7 @@ trait Books {
 
 		foreach ($results['rows'] ?? [] as $key => $result) {
 			$category_info = $this->category_model->get($result['category_id']);
+			$genre_info = $this->genre_model->get($result['genre_id']);
 			$user_info = $this->student_model->get($result['user_id']);
 			$pages = $this->page_model->get_all([
 				'book_id' => $result['id']
@@ -585,7 +597,8 @@ trait Books {
 			$json['data'][] = [
 				'sn'				=> '<input type="checkbox" class="select-me" value="' . $result['id'] . '">', //$filter_data['start'] + 1 + $key,
 				'id'				=> $result['id'],
-				'theme'				=> $category_info['name'],
+				'genre_&_theme'		=> $genre_theme,
+				'event_name'		=> '',
 				'user'				=> $user_info['first_name'] . ' ' . $user_info['last_name'],
 				'country'			=> $user_info['location'] ?? '',
 				'name'				=> $result['name'],

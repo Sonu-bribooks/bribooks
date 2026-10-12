@@ -144,4 +144,52 @@ trait League {
 			$rank_info[sprintf('%s_id', $stage)],
 		]);
 	}
+
+	public function getEventLeagueType() {
+		$this->form_validation->set_rules('event_id', _l('event_id'), [
+			'trim',
+			'required',
+			'numeric',
+			['event', [$this->validate_model, 'event']]
+		]);
+
+		self::_runFormValidation();
+
+		if (!$this->json) {
+			$event_id = (int)$this->input->post('event_id');
+
+			$event = $this->event_model->get($event_id); 
+
+			$event_name = '';
+			if (!empty($event)) {
+				$event_name = $event['name'] ?? '';
+			}
+			$challenge_types = [
+				'country' => $this->event_challenge_country_model,
+				'state'   => $this->event_challenge_state_model,
+				'city'    => $this->event_challenge_city_model,
+				'school'  => $this->event_challenge_school_model,
+			];
+
+			$league_types = [];
+
+			foreach ($challenge_types as $type => $model) {
+				if ($model) {
+					$rows = $model->get_all([
+						'event_id' => (int)$event_id,
+						'type'     => 'user',
+					])['rows'][0] ?? [];
+
+					if (!empty($rows)) {
+						$league_types[] = [
+							'name' => strtoupper($type),
+							'type' => $type
+						];
+					}
+				}
+			}
+			$this->json['event_name'] = $event_name;
+			$this->json['leagues'] = $league_types;
+		}
+	}
 }

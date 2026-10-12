@@ -282,9 +282,9 @@ trait ImportGeneric {
 				continue;
 			}
 
-			$this->event_book_model->edit($event_book_id, [
-				'date_added'	=> $date_published
-			]);
+			// $this->event_book_model->edit($event_book_id, [
+			// 	'date_added'	=> $date_published
+			// ]);
 
 			if (empty($this->event_user_model->get_all([
 				'event_id'		=> $event_id,
@@ -350,6 +350,76 @@ trait ImportGeneric {
 						}
 					}
 				}
+			}
+
+			$uploaded++;
+		}
+
+		self::_updateCompleted($job_id);
+
+		return [
+			'skipped' 	=> $skipped,
+			'uploaded' 	=> $uploaded,
+		];
+	}
+
+	private function _importEventBookEnrolUpdate($rows = [], $map = [], $job_id = 0) {
+		$this->load->model('event/Event_model', 'event_model');
+		$this->load->model('book/Book_model', 'book_model');
+		$this->load->model('event/EventBook_model', 'event_book_model');
+
+		$skipped = $uploaded = 0;
+
+		foreach ($rows as $index => $row) {
+			$data = array_combine(array_keys($map), array_map(function($i) use($row) {
+				return @$row[$i];
+			}, array_values($map)));
+
+			self::_updateCounter($job_id);
+
+			if (empty($data['event_id']) || empty($data['book_id']) || empty($data['date_added'])) {
+				self::_updateCounter($job_id, true);
+				$skipped++;
+				continue;
+			}
+
+			$event_id 			= (int)$data['event_id'];
+			$book_id 			= (int)$data['book_id'];
+			$date_added			= date('Y-m-d H:i:s', strtotime($data['date_added']));
+
+			if (empty($event_info = $this->event_model->get($event_id))) {
+				self::_updateCounter($job_id, true);
+				$skipped++;
+				continue;
+			}
+
+			if (empty($book_info = $this->book_model->get($book_id))) {
+				self::_updateCounter($job_id, true);
+				$skipped++;
+				continue;
+			}
+
+			if (empty($book_info['status'])) {
+				self::_updateCounter($job_id, true);
+				$skipped++;
+				continue;
+			}
+
+			if (!empty($event_book_info = $this->event_book_model->get_all([
+				'book_id'	=> (int)$book_id,
+				'event_id'	=> (int)$event_id,
+				'start'		=> 0,
+				'limit'		=> 1,
+			])['rows'][0] ?? [])) {
+
+				$this->event_book_model->edit($event_book_info['id'], [
+					'date_added'	=> $date_added
+				]);
+				
+			} else {
+				self::_updateCounter($job_id, true);
+				$skipped++;
+				continue;
 			}
 
 			$uploaded++;

@@ -45,7 +45,8 @@ trait ImportInit {
 			'relationship_manager',
 			'event_order_amazon',
 			'live_book_page_data_uat',
-			'diwali_gift_book'
+			'diwali_gift_book',
+			'event_book_enrol_update'
 		];
 
 		$this->columns['author'] = [
@@ -334,6 +335,12 @@ trait ImportInit {
 			'book_id',
 			'gen_rank',
 			'gen_certificate',
+		];
+
+		$this->columns['event_book_enrol_update'] = [
+			'event_id',
+			'book_id',
+			'date_added',
 		];
 
 		$this->columns['deleted_user_modify'] = [
@@ -705,6 +712,12 @@ trait ImportInit {
 			'0, (id from book)',
 			'0, (1 for yes)',
 			'0, (1 for yes)',
+		];
+
+		$this->default_values['event_book_enrol_update'] = [
+			'0, (id from event)',
+			'0, (id from book)',
+			date('Y-m-d H:i:s'),
 		];
 
 		$this->default_values['deleted_user_modify'] = [
