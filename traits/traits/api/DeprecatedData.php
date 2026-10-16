@@ -196,21 +196,97 @@ trait DeprecatedData {
 		}
 	}
 
+	// public function getHallOfFameBooks() {
+	// 	if (!$this->json) {
+	// 		$filter_data = [];
+
+	// 		$filter_data = [
+	// 			'status'	=> 1,
+	// 			'start'		=> $this->input->post('page') > 0 ? ($this->input->post('page') - 1) * 16 : 1,
+	// 			'limit'		=> 16,
+	// 			'sort'		=> 'priority',
+	// 			'order'		=> 'ASC'
+	// 		];
+
+	// 		if ($this->input->post('page') && $this->input->post('search')) {
+	// 			$filter_data['search'] = (string)$this->input->post('search');
+	// 		}
+
+	// 		$key = vsprintf('%s_%s_%s_%s', [
+	// 			(ENVIRONMENT === 'production' ? 'live' : 'test'),
+	// 			'hall_of_fame_books',
+	// 			implode('_', array_keys($filter_data)),
+	// 			str_replace(' ', '', implode('_', array_values($filter_data))),
+	// 		]);
+
+	// 		$cache_data = json_decode($this->cache->get($key), true);
+
+	// 		if (!empty($cache_data)) {
+	// 			$this->json['hall_of_fame'] = $cache_data;
+	// 		} else {
+	// 			$this->load->model('halloffame/HallOfFame_model', 'hall_of_fame_model');
+
+	// 			$hall_of_fame_books = array_map(function ($item) {
+	// 				$student_info = $this->student_model->get($item['user_id']);
+
+	// 				$author_image = empty($item['author_image']) ? base_url('uploads/user_image/placeholder.png') : $this->config->item('cloudfront_url') . 'public/' . $item['author_image'];
+
+	// 				return [
+	// 					'book_id'		=> $item['id'],
+	// 					'user_id'		=> $item['user_id'],
+	// 					'book_name'		=> $item['name'],
+	// 					'author_name'	=> $item['author_name'],
+	// 					'book_image'	=> $this->config->item('cloudfront_url') . 'public/' . $item['cover_image'],
+	// 					'author_image'	=> $author_image,
+	// 					'book_url'		=> USER_URL . 'bookstore/' . $item['slug'],
+	// 					'book_sold'		=> $item['sold'] ?? 0,
+	// 					'priority'		=> $item['priority'] ?? 0,
+	// 					'country'		=> !empty($item['location']) ? $item['location'] : '',
+	// 					'country_code'	=> !empty($item['country_code']) ? strtolower($item['country_code']) : ''
+	// 				];
+	// 			}, $this->hall_of_fame_model->get_all($filter_data)['rows'] ?? []);
+
+	// 			$this->json['hall_of_fame'] = array_values(array_filter($hall_of_fame_books));
+
+	// 			$this->cache->save($key, json_encode($this->json['hall_of_fame']), 600);
+	// 		}
+	// 	}
+	// }
+
 	public function getHallOfFameBooks() {
 		if (!$this->json) {
-			$filter_data = [];
+			$page = (int) $this->input->post('page');
 
 			$filter_data = [
-				'status'	=> 1,
-				'start'		=> $this->input->post('page') > 0 ? ($this->input->post('page') - 1) * 16 : 1,
-				'limit'		=> 16,
-				'sort'		=> 'priority',
-				'order'		=> 'ASC'
+				'status' => 1,
+				'start'  => $page > 0 ? ($page - 1) * 16 : 0,
+				'limit'  => 16,
+				'sort'   => 'priority',
+				'order'  => 'ASC'
 			];
 
-			if ($this->input->post('page') && $this->input->post('search')) {
-				$filter_data['search'] = (string)$this->input->post('search');
+			// Search filter
+			$search = trim((string) $this->input->post('search'));
+
+			if ($search !== '') {
+				$filter_data['search'] = $search;
 			}
+
+			// Country filter: all fame books of selected country
+			$country_code = $this->input->post('country_code');
+
+			if ($country_code !== null && $country_code !== '') {
+				$filter_data['country_code'] = strtoupper(trim($country_code));
+			}
+
+			// Event filter: only selected event
+			$event_id = $this->input->post('event_id');
+
+			if ($event_id !== null && $event_id !== '') {
+				$filter_data['event_id'] = (int) $event_id;
+			}
+
+			$filter_data['book_id'] = $this->input->post('book_id');
 
 			$key = vsprintf('%s_%s_%s_%s', [
 				(ENVIRONMENT === 'production' ? 'live' : 'test'),
@@ -221,32 +297,116 @@ trait DeprecatedData {
 
 			$cache_data = json_decode($this->cache->get($key), true);
 
-			if (!empty($cache_data)) {
+			if ($cache_data !== null && $cache_data !== false) {
 				$this->json['hall_of_fame'] = $cache_data;
 			} else {
 				$this->load->model('halloffame/HallOfFame_model', 'hall_of_fame_model');
 
-				$hall_of_fame_books = array_map(function ($item) {
-					$student_info = $this->student_model->get($item['user_id']);
+				$rows = $this->hall_of_fame_model->get_all($filter_data)['rows'] ?? [];
 
-					$author_image = empty($item['author_image']) ? base_url('uploads/user_image/placeholder.png') : $this->config->item('cloudfront_url') . 'public/' . $item['author_image'];
+				$hall_of_fame_books = array_map(function ($item) {
+					$author_image = empty($item['author_image'])
+						? base_url('uploads/user_image/placeholder.png')
+						: $this->config->item('cloudfront_url') . 'public/' . $item['author_image'];
 
 					return [
-						'book_id'		=> $item['id'],
-						'user_id'		=> $item['user_id'],
-						'book_name'		=> $item['name'],
-						'author_name'	=> $item['author_name'],
-						'book_image'	=> $this->config->item('cloudfront_url') . 'public/' . $item['cover_image'],
-						'author_image'	=> $author_image,
-						'book_url'		=> USER_URL . 'bookstore/' . $item['slug'],
-						'book_sold'		=> $item['sold'] ?? 0,
-						'priority'		=> $item['priority'] ?? 0,
-						'country'		=> !empty($item['location']) ? $item['location'] : '',
-						'country_code'	=> !empty($item['country_code']) ? strtolower($item['country_code']) : ''
+						'book_id'      => $item['id'],
+						'user_id'      => $item['user_id'],
+						'book_name'    => $item['name'],
+						'author_name'  => $item['author_name'],
+						'book_image'   => $this->config->item('cloudfront_url') . 'public/' . $item['cover_image'],
+						'author_image' => $author_image,
+						'book_url'     => USER_URL . 'bookstore/' . $item['slug'],
+						'book_sold'    => $item['sold'] ?? 0,
+						'priority'     => $item['priority'] ?? 0,
+						'country'      => $item['location'] ?? '',
+						'country_code' => !empty($item['country_code'])
+							? strtolower($item['country_code'])
+							: ''
 					];
-				}, $this->hall_of_fame_model->get_all($filter_data)['rows'] ?? []);
+				}, $rows);
 
 				$this->json['hall_of_fame'] = array_values(array_filter($hall_of_fame_books));
+
+				$this->cache->save($key, json_encode($this->json['hall_of_fame']), 600);
+			}
+		}
+	}
+
+	public function getHallOfFameAsiaBooks() {
+		if (!$this->json) {
+			$page = (int) $this->input->post('page');
+
+			$filter_data = [
+				'status' => 1,
+				'start'  => $page > 0 ? ($page - 1) * 16 : 0,
+				'limit'  => 16,
+				'sort'   => 'priority',
+				'order'  => 'ASC'
+			];
+
+			// Search filter
+			$search = trim((string) $this->input->post('search'));
+
+			if ($search !== '') {
+				$filter_data['search'] = $search;
+			}
+
+			// Country filter: all fame books of selected country
+			$country_code = $this->input->post('country_code');
+
+			if ($country_code !== null && $country_code !== '') {
+				$filter_data['country_code'] = strtoupper(trim($country_code));
+			}
+
+			// Event filter: only selected event
+			$event_id = $this->input->post('event_id');
+
+			if ($event_id !== null && $event_id !== '') {
+				$filter_data['event_id'] = (int) $event_id;
+			}
+
+			$filter_data['book_id'] = $this->input->post('book_id');
+
+			$key = vsprintf('%s_%s_%s_%s', [
+				(ENVIRONMENT === 'production' ? 'live' : 'test'),
+				'hall_of_fame_asia_books',
+				implode('_', array_keys($filter_data)),
+				str_replace(' ', '', implode('_', array_values($filter_data))),
+			]);
+
+			$cache_data = json_decode($this->cache->get($key), true);
+
+			if ($cache_data !== null && $cache_data !== false) {
+				$this->json['hall_of_fame'] = $cache_data;
+			} else {
+				$this->load->model('halloffame/HallOfFameAsia_model', 'hall_of_fame_asia_model');
+
+				$rows = $this->hall_of_fame_asia_model->get_all($filter_data)['rows'] ?? [];
+
+				$hall_of_fame_asia_books = array_map(function ($item) {
+					$author_image = empty($item['author_image'])
+						? base_url('uploads/user_image/placeholder.png')
+						: $this->config->item('cloudfront_url') . 'public/' . $item['author_image'];
+
+					return [
+						'book_id'      => $item['id'],
+						'user_id'      => $item['user_id'],
+						'book_name'    => $item['name'],
+						'author_name'  => $item['author_name'],
+						'book_image'   => $this->config->item('cloudfront_url') . 'public/' . $item['cover_image'],
+						'author_image' => $author_image,
+						'book_url'     => USER_URL . 'bookstore/' . $item['slug'],
+						'book_sold'    => $item['sold'] ?? 0,
+						'priority'     => $item['priority'] ?? 0,
+						'country'      => $item['location'] ?? '',
+						'country_code' => !empty($item['country_code'])
+							? strtolower($item['country_code'])
+							: ''
+					];
+				}, $rows);
+
+				$this->json['hall_of_fame'] = array_values(array_filter($hall_of_fame_asia_books));
 
 				$this->cache->save($key, json_encode($this->json['hall_of_fame']), 600);
 			}

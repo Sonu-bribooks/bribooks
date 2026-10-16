@@ -1692,5 +1692,20 @@
     "generate_short_url": "Generate short url",
     "sql_query_cannot_be_empty": "Sql query cannot be empty",
     "build_cert": "Build cert",
-    "genre_&_theme": "Genre & theme"
+    "genre_&_theme": "Genre & theme",
+    "global_hall_of_fame": "Global hall of fame",
+    "hall_of_fame": "Hall of fame",
+    "global_fame": "Global fame",
+    "country_list": "Country list",
+    "event_list": "Event list",
+    "country_name": "Country name",
+    "add_global_hall_of_fame": "Add global hall of fame",
+    "edit_global_hall_of_fame": "Edit global hall of fame",
+    "global_fame_already_exist_for_this_country.": "Global fame already exist for this country.",
+    "for_event": "For event",
+    "for_country": "For country",
+    "desable": "Desable",
+    "asia_hall_of_fame": "Asia hall of fame",
+    "asia_fame": "Asia fame",
+    "add_asia_hall_of_fame": "Add asia hall of fame"
 }

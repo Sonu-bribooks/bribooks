@@ -116,7 +116,8 @@ class Alert_model extends CI_Model {
 		InviteAlert,
 		AcknowledgeAlert,
 		BMMessageTemplateAlert,
-		AmazonOrderRankAlert
+		AmazonOrderRankAlert,
+		HallOfFameAlert
 	;
 
 	public function email($to, $subject, $message, $cc = NULL, $bcc = NULL, $attachment = NULL, $sender = NULL, $sender_name = 'BriBooks', $reply_to = 'support@bribooks.com', $headers = []) {

@@ -189,4 +189,15 @@ class Event_model extends CI_Model {
 
 		return $this->db->get('event')->row_array();
 	}
+
+	public function getBySlug($slug = '') {
+		$this->db->select('event.*, event_type.name as event_type');
+
+		$this->db->where('event.slug', $slug);
+		$this->db->where('event.status != ', 0);
+		$this->db->where('event._deleted', 0);
+		$this->db->join('event_type', 'event_type.id = event.event_type_id', 'left');
+
+		return $this->db->get('event')->row_array();
+	}
 }

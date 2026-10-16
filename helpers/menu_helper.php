@@ -253,6 +253,28 @@ if (!function_exists('get_navigation_menus')) {
 		];
 
 		$menus[]	= [
+			'key'	=> 'hall_of_fame',
+			'icon'	=> 'fas fa-crown',
+			'name'	=> _l('hall_of_fame'),
+			'url'	=> '#',
+			'roles'	=> [],
+			'childs'=> [
+				[
+					'key'	=> 'global_hall_of_fame',
+					'name'	=> _l('global_hall_of_fame'),
+					'url'	=> 'admin/global_fame_country',
+					'regex'	=> 'admin/(global_fame_country|global_fame_event)'
+				],
+				[
+					'key'	=> 'asia_hall_of_fame',
+					'name'	=> _l('asia_hall_of_fame'),
+					'url'	=> 'admin/asia_fame_country',
+					'regex'	=> 'admin/(asia_fame_country|asia_fame_event)'
+				],
+			],
+		];
+
+		$menus[]	= [
 			'key'	=> 'review',
 			'icon'	=> 'fas fa-user-edit',
 			'name'	=> _l('review'),

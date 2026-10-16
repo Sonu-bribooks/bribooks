@@ -22,3 +22,6 @@ load_trait('admin/template');
 load_trait('admin/ticket');
 load_trait('admin/user');
 load_trait('admin/brisharks');
+load_trait('admin/halloffame');
+
+

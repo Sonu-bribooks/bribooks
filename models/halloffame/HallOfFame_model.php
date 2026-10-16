@@ -14,26 +14,153 @@ class HallOfFame_model extends CI_Model {
 		return $this->db->get('hall_of_fame_books')->row_array();
 	}
 
+	// public function get_all($data = []) {
+	// 	$this->db->select('
+	// 		hall_of_fame_books.event_id,
+	// 		hall_of_fame_books.location,
+	// 		hall_of_fame_books.country_code,
+	// 		bookstore.*,
+	// 		(SELECT COALESCE(SUM(priority), 5) FROM hall_of_fame_country WHERE country_code = hall_of_fame_books.country_code AND _deleted = 0) AS priority,
+	// 		bookstore.sold AS sold
+	// 	');
+
+	// 	if (isset($data['book_id'])) {
+	// 		$this->db->where('hall_of_fame_books.book_id', (int)$data['book_id']);
+	// 	}
+
+	// 	if (isset($data['country_code'])) {
+	// 		$this->db->where('hall_of_fame_books.country_code', $data['country_code']);
+	// 	}
+
+	// 	$this->db->where('sold >= (SELECT COALESCE(SUM(book_sold), 1) FROM hall_of_fame_country WHERE country_code = hall_of_fame_books.country_code AND _deleted = 0)');
+
+
+	// 	if (!empty($data['search'])) {
+	// 		$this->db->group_start();
+	// 		$this->db->like('bookstore.book_id', $data['search'], 'after');
+	// 		$this->db->or_like('bookstore.name', $data['search'], 'both');
+	// 		$this->db->or_like('bookstore.author_name', $data['search'], 'both');
+	// 		$this->db->or_like('hall_of_fame_books.location', $data['search'], 'after');
+	// 		$this->db->or_like('hall_of_fame_books.country_code', $data['search'], 'after');
+	// 		$this->db->group_end();
+	// 	}
+
+	// 	$this->db->where('hall_of_fame_books._deleted', 0);
+	// 	$this->db->where('bookstore._deleted', 0);
+
+	// 	$this->db->join('bookstore', 'bookstore.book_id = hall_of_fame_books.book_id');
+
+	// 	$this->db->from('hall_of_fame_books');
+
+	// 	$total = $this->db->count_all_results('', FALSE);
+
+	// 	if (isset($data['start']) && isset($data['limit'])) {
+	// 		if ($data['start'] < 0) {
+	// 			$data['start'] = 0;
+	// 		}
+
+	// 		if ($data['limit'] < 1) {
+	// 			$data['limit'] = 10;
+	// 		}
+
+	// 		$this->db->limit($data['limit'], $data['start']);
+	// 	}
+
+	// 	$sort_data = [
+	// 		'priority',
+	// 		'hall_of_fame_books.id',
+	// 		'hall_of_fame_books.book_id',
+	// 		'hall_of_fame_books.date_added',
+	// 		'hall_of_fame_books.date_modified'
+	// 	];
+
+	// 	if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
+	// 		$sort = $data['sort'];
+	// 	} else {
+	// 		$sort = 'hall_of_fame_books.id';
+	// 	}
+
+	// 	if (isset($data['order']) && ($data['order'] == 'ASC')) {
+	// 		$order = 'ASC';
+	// 	} else {
+	// 		$order = 'DESC';
+	// 	}
+
+	// 	$this->db->order_by("{$sort} {$order}, sold DESC");
+
+	// 	$results = $this->db->get()->result_array();
+
+	// 	return ['rows' => $results, 'total' => $total];
+	// }
+
 	public function get_all($data = []) {
 		$this->db->select('
 			hall_of_fame_books.event_id,
 			hall_of_fame_books.location,
 			hall_of_fame_books.country_code,
 			bookstore.*,
-			(SELECT COALESCE(SUM(priority), 5) FROM hall_of_fame_country WHERE country_code = hall_of_fame_books.country_code AND _deleted = 0) AS priority,
-			bookstore.sold AS sold
-		');
+			COALESCE((
+				SELECT hfc.priority
+				FROM hall_of_fame_country hfc
+				WHERE hfc.country_code = hall_of_fame_books.country_code
+				AND hfc.event_id = CASE
+					WHEN EXISTS (
+						SELECT 1
+						FROM hall_of_fame_country ehfc
+						WHERE ehfc.country_code = hall_of_fame_books.country_code
+							AND ehfc.event_id = hall_of_fame_books.event_id
+							AND ehfc.event_id > 0
+							AND ehfc._deleted = 0
+							AND ehfc.status = 1
+					)
+					THEN hall_of_fame_books.event_id
+					ELSE 0
+				END
+				AND hfc._deleted = 0
+				AND hfc.status = 1
+				LIMIT 1
+			), 5) AS priority,
+
+			bookstore.sold AS sold');
 
 		if (isset($data['book_id'])) {
-			$this->db->where('hall_of_fame_books.book_id', (int)$data['book_id']);
+			$this->db->where('hall_of_fame_books.book_id', (int) $data['book_id']);
 		}
 
+		// Country filter: all events within the selected country
 		if (isset($data['country_code'])) {
 			$this->db->where('hall_of_fame_books.country_code', $data['country_code']);
 		}
 
-		$this->db->where('sold >= (SELECT COALESCE(SUM(book_sold), 1) FROM hall_of_fame_country WHERE country_code = hall_of_fame_books.country_code AND _deleted = 0)');
+		// Event filter: only the selected event
+		if (isset($data['event_id'])) {
+			$this->db->where('hall_of_fame_books.event_id', (int) $data['event_id']);
+		}
 
+		// Apply the threshold for this book's exact country + event.
+		$this->db->where('
+			bookstore.sold >= COALESCE((
+				SELECT hfc.book_sold
+				FROM hall_of_fame_country hfc
+				WHERE hfc.country_code = hall_of_fame_books.country_code
+				AND hfc.event_id = CASE
+					WHEN EXISTS (
+						SELECT 1
+						FROM hall_of_fame_country ehfc
+						WHERE ehfc.country_code = hall_of_fame_books.country_code
+							AND ehfc.event_id = hall_of_fame_books.event_id
+							AND ehfc.event_id > 0
+							AND ehfc._deleted = 0
+							AND ehfc.status = 1
+					)
+					THEN hall_of_fame_books.event_id
+					ELSE 0
+				END
+				AND hfc._deleted = 0
+				AND hfc.status = 1
+				LIMIT 1
+			), 1)
+		', null, false);
 
 		if (!empty($data['search'])) {
 			$this->db->group_start();
@@ -52,18 +179,17 @@ class HallOfFame_model extends CI_Model {
 
 		$this->db->from('hall_of_fame_books');
 
-		$total = $this->db->count_all_results('', FALSE);
+		$total = $this->db->count_all_results('', false);
 
 		if (isset($data['start']) && isset($data['limit'])) {
-			if ($data['start'] < 0) {
-				$data['start'] = 0;
+			$start = max(0, (int) $data['start']);
+			$limit = (int) $data['limit'];
+
+			if ($limit < 1) {
+				$limit = 10;
 			}
 
-			if ($data['limit'] < 1) {
-				$data['limit'] = 10;
-			}
-
-			$this->db->limit($data['limit'], $data['start']);
+			$this->db->limit($limit, $start);
 		}
 
 		$sort_data = [
@@ -74,23 +200,23 @@ class HallOfFame_model extends CI_Model {
 			'hall_of_fame_books.date_modified'
 		];
 
-		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-			$sort = $data['sort'];
-		} else {
-			$sort = 'hall_of_fame_books.id';
-		}
+		$sort = isset($data['sort']) && in_array($data['sort'], $sort_data, true)
+			? $data['sort']
+			: 'hall_of_fame_books.id';
 
-		if (isset($data['order']) && ($data['order'] == 'ASC')) {
-			$order = 'ASC';
-		} else {
-			$order = 'DESC';
-		}
+		$order = isset($data['order']) && strtoupper($data['order']) === 'ASC'
+			? 'ASC'
+			: 'DESC';
 
-		$this->db->order_by("{$sort} {$order}, sold DESC");
+		$this->db->order_by($sort, $order);
+		$this->db->order_by('sold', 'DESC');
 
 		$results = $this->db->get()->result_array();
 
-		return ['rows' => $results, 'total' => $total];
+		return [
+			'rows'  => $results,
+			'total' => $total
+		];
 	}
 
 	public function add($data = []) {

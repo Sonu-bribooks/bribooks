@@ -237,7 +237,10 @@ class Admin extends CI_Controller {
 		$this->load->model('broadcast/BroadcastPartnerSlot_model', 'broadcast_partner_slot_model');
 
 		$this->load->model('halloffame/HallOfFame_model', 'hall_of_fame_model');
-
+		$this->load->model('halloffame/HallOfFameCountry_model', 'hall_of_fame_country_model');
+		$this->load->model('halloffame/HallOfFameAsia_model', 'hall_of_fame_asia_model');
+		$this->load->model('halloffame/HallOfFameAsiaCountry_model', 'hall_of_fame_asia_country_model');
+		
 		$this->load->model('address/Address_model', 'address_model');
 
 		$this->load->model('ranking/RankingCountry_model', 'user_rank_country_model');
@@ -411,7 +414,9 @@ class Admin extends CI_Controller {
 		ThirdPartyService,
 		EventChallengeLiteraryLeader,
 		EventChallengeAmazon,
-		AmazonOrder
+		AmazonOrder,
+		GlobalHallOfFame,
+		AsiaHallOfFame
 	;
 
 	public function index() {
