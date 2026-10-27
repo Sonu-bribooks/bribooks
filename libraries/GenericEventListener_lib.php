@@ -165,4 +165,74 @@ final class GenericEventListener_lib {
 			'alert_date'	=> date('Y-m-d H:i:00', strtotime('+1 minutes')),
 		]);
 	}
+
+	public static function eventUpdateSiteGrade(...$params) {
+		list($data) = $params;
+
+		log_kb([
+			'GenericEventListener_lib::eventUpdateSiteGrade' => [$params, $data]
+		]);
+
+		$CI =& get_instance();
+		$CI->load->library('SchoolRanking_lib');
+		$CI->load->model('event/Event_model');
+		$CI->load->model('common/Cron_model');
+
+		if (!empty($data['event_id'])) {
+			$event_info = $CI->event_model->get($data['event_id']);
+		
+			$CI->schoolranking_lib->updateGradeRank([
+				'event_info'	=> $event_info,
+				'book_info'		=> ['user_id' => $data['user_id']],
+			]);
+		} else {
+			// $event_ids = $CI->db
+			// 	->distinct()
+			// 	->select('ecg.event_id, ecg.id AS grade_challenge_id')
+			// 	->from('event_challenge_grade AS ecg')
+			// 	->join(
+			// 		'event_site AS es',
+			// 		'es.event_id = ecg.event_id',
+			// 		'inner'
+			// 	)
+			// 	->where_in('es.site_id', $data['site_ids'])
+			// 	->where('es._deleted', 0)
+			// 	->where('ecg._deleted', 0)
+			// 	->where('ecg.start_date <=', date('Y-m-d H:i:s'))
+			// 	->where('ecg.end_date >=', date('Y-m-d H:i:s'))
+			// 	->get()
+			// 	->result_array();
+			
+			// if (empty($event_ids)) return;
+
+			// foreach ($event_ids as $event) {
+			// 	$code = sprintf('buildRankGrade_%s', (int)$event['grade_challenge_id']);
+
+			// 	$update_data = [
+			// 		'code'      => $code,
+			// 		'site_id'   => 1,
+			// 		'action'    => 'alert_model->buildRankGradeCron',
+			// 		'data'      => [[
+			// 			'event_id'      => (int)$event['event_id'],
+			// 			'challenge_id'  => (int)$event['grade_challenge_id'],
+			// 		]],
+			// 		'status'     => 0,
+			// 		'alert_date' => date('Y-m-d H:i:00', strtotime('+1 minutes')),
+			// 	];
+
+			// 	if (!empty($cron_info = $CI->Cron_model->getByCode($code))) {
+			// 		$CI->Cron_model->edit($cron_info['id'], $update_data);
+			// 	} else {
+			// 		$CI->Cron_model->add($update_data);
+			// 	}
+			// }
+
+			
+			$CI->schoolranking_lib->syncGradeRankAfterProfileUpdate([
+				'user_id' 		=> $data['user_id'],
+				'old_profile' 	=> $data['old_profile'],
+    			'new_profile' 	=> $data['new_profile'],
+			]);
+		}
+	}
 }

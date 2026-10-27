@@ -246,6 +246,10 @@ trait CertificateTemplates {
 					'label'	=> _l('no'),
 					'value'	=> 0,
 				],
+				[
+					'label'	=> _l('participation'),
+					'value'	=> 2,
+				],
 			],
 		];
 
@@ -406,6 +410,11 @@ trait CertificateTemplates {
 		}
 
 		$results = $this->{sprintf('event_challenge_%s_model', $type)}->get_all($filter_data)['rows'] ?? [];
+
+		$json[] = [
+			'id'				=> '',
+			'text'				=> _l('select_challenge'),
+		];
 
 		foreach ($results as $key => $result) {
 			$json[] = [

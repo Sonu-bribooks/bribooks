@@ -34,11 +34,11 @@ class TeacherRankingSchool_model extends CI_Model {
 		}
 
 		if (isset($data['grade'])) {
-			$this->db->where('teacher_rank_daily.grade', (int)$data['grade']);
+			$this->db->where('teacher_rank_school.grade', (int)$data['grade']);
 		}
 
 		if (isset($data['section'])) {
-			$this->db->where('teacher_rank_daily.section', $data['section']);
+			$this->db->where('teacher_rank_school.section', $data['section']);
 		}
 
 		if (isset($data['score_ge'])) {

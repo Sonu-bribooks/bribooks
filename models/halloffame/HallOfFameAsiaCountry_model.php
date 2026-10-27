@@ -35,6 +35,10 @@ class HallOfFameAsiaCountry_model extends CI_Model {
 			$this->db->where('hall_of_fame_asia_country.event_id', 0);
 		}
 
+		if (isset($data['status'])) {
+			$this->db->where('hall_of_fame_asia_country.status', $data['status']);
+		}
+
 		if (!empty($data['search'])) {
 			$this->db->group_start();
 			$this->db->like('hall_of_fame_asia_country.book_sold', $data['search'], 'after');

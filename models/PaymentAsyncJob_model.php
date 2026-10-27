@@ -18,6 +18,7 @@ class PaymentAsyncJob_model extends CI_Model {
 
 		$this->load->library('HallOfFame_lib');
 		$this->halloffame_lib->enrolToHallOfFame($order_id);
+		$this->halloffame_lib->enrolToHallOfFameAsia($order_id);
 
 		$this->load->library('Royalty_lib');
 		$this->royalty_lib->applyRoyalty($order_id);

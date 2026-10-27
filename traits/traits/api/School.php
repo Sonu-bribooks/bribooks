@@ -316,8 +316,11 @@ trait School {
 			$book['section']= $author_info['section'] ?? '';
 		}
 
+		$site_info = $this->site_model->get((int)$data['site_id']);
+
 		$this->json['books'] = $books;
 		$this->json['total'] = $result['total'] ?? 0;
+		$this->json['school_name']	= $site_info['name'] ?? '';
 	}
 
 	private function _validateSchoolTeacherAccess() {

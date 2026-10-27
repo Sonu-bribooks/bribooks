@@ -686,6 +686,13 @@ trait EventConfig {
 			'event_id'	=> $lead_info['event_id'],
 		]);
 
+		CI_Events::trigger('event_update_site_grade', [
+			'type'		=> 'user',
+			'user_id'	=> (int)$user_id,
+			'event_id'	=> (int)$lead_info['event_id'],
+			'site_ids'	=> [$lead_info['site_id']],
+		]);
+
 		self::_parentAcknowledgeMessage($lead_info['id']);
 	}
 

@@ -70,16 +70,21 @@ final class HallOfFame_lib {
 				return;
 			
 			$country_code = $country_info['code'];
-			$min_book_sold = 1;
 			$hall_of_fame_country_info = [];
 
 			if ($event_id > 0) {
 				$hall_of_fame_country_info = $hof_country_model->get_all([
 					'country_code' => $country_code,
 					'event_id'     => $event_id,
+					'status'	   => 1,
 					'start'        => 0,
 					'limit'        => 1
 				])['rows'][0] ?? [];
+			}
+
+			// Asia: Event-specific configuration mandatory hai agar nhi mila to return (temporary based only for event)
+			if ($type === 'asia' && empty($hall_of_fame_country_info)) {
+				return;
 			}
 
 			if (!empty($hall_of_fame_country_info)) {
@@ -98,6 +103,7 @@ final class HallOfFame_lib {
 				$hall_of_fame_country_info = $hof_country_model->get_all([
 					'country_code' => $country_code,
 					'event_id'     => 0,
+					'status'	   => 1,
 					'start'        => 0,
 					'limit'        => 1
 				])['rows'][0] ?? [];
@@ -163,6 +169,22 @@ final class HallOfFame_lib {
 		) {
 			foreach ($order_product_results as $order_product_info) {
 				self::addBookToHallOfFame($order_product_info['product_id']);
+			}
+		}
+	}
+
+	public function enrolToHallOfFameAsia($order_id = false) {
+		log_kb([
+			'enrolToHallOfFameAsia::order_id:: '	=> $order_id
+		]);
+
+		if (
+			$order_id &&
+			!empty($order_info = $this->order_model->get($order_id)) &&
+			!empty($order_product_results = $this->order_product_model->getOrderProductByOrderId($order_id))
+		) {
+			foreach ($order_product_results as $order_product_info) {
+				self::addBookToHallOfFame($order_product_info['product_id'], 'asia');
 			}
 		}
 	}

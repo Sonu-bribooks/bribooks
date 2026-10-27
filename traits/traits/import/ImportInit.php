@@ -46,7 +46,8 @@ trait ImportInit {
 			'event_order_amazon',
 			'live_book_page_data_uat',
 			'diwali_gift_book',
-			'event_book_enrol_update'
+			'event_book_enrol_update',
+			'event_participation_certificate'
 		];
 
 		$this->columns['author'] = [
@@ -373,6 +374,12 @@ trait ImportInit {
 			'event_id',
 			'book_id',
 			'message_alert',
+		];
+
+		$this->columns['event_participation_certificate'] = [
+			'event_id',
+			'book_id',
+			'certificate_template_id',
 		];
 
 		$this->columns['event_literary_leader'] = [
@@ -750,6 +757,12 @@ trait ImportInit {
 			'0(required)',
 			'0(required)',
 			'0(required)',
+		];
+
+		$this->default_values['event_participation_certificate'] = [
+			'0, (id from event)',
+			'0, (id from book)',
+			'0, (id from certificate_template)',
 		];
 
 		$this->default_values['event_literary_leader'] = [

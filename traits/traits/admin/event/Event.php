@@ -153,11 +153,11 @@ trait Event {
 				'name'	=> _l('certificate'),
 				'icon'	=> 'fa-certificate'
 			],
-			[
-				'id'	=> 'ranking',
-				'name'	=> _l('ranking'),
-				'icon'	=> 'fa-trophy'
-			],
+			// [
+			// 	'id'	=> 'ranking',
+			// 	'name'	=> _l('ranking'),
+			// 	'icon'	=> 'fa-trophy'
+			// ],
 			[
 				'id'	=> 'finish',
 				'name'	=> _l('finish'),

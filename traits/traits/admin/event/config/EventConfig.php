@@ -31,7 +31,7 @@ trait EventConfig {
 			'type'		=> 'image',
 			'key'		=> 'event_logo',
 			'label'		=> _l('event_logo'),
-			'required'	=> true,
+			'required'	=> false,
 			'value'		=> $info['event_logo'] ?? '',
 		];
 
@@ -39,7 +39,7 @@ trait EventConfig {
 			'type'		=> 'image',
 			'key'		=> 'logo_dark',
 			'label'		=> _l('event_logo_dark'),
-			'required'	=> true,
+			'required'	=> false,
 			'value'		=> $info['logo_dark'] ?? '',
 		];
 
@@ -47,7 +47,7 @@ trait EventConfig {
 			'type'		=> 'image',
 			'key'		=> 'logo_light',
 			'label'		=> _l('event_logo_light'),
-			'required'	=> true,
+			'required'	=> false,
 			'value'		=> $info['logo_light'] ?? '',
 		];
 

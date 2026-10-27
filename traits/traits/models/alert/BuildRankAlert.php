@@ -167,4 +167,39 @@ trait BuildRankAlert {
 			}
 		}
 	}	
+
+	public function buildRankGradeCron($data = []) {
+		$event_id		= $data['event_id'] ?? 0;
+		$challenge_id	= $data['challenge_id'] ?? 0;
+
+		if (empty($event_id)) return;
+
+		log_kb(['buildRankGradeCron' => [$event_id, $challenge_id]]);
+
+		$this->load->model('event/EventUser_model', 'event_user_model');
+		$this->load->model('event/Event_model', 'event_model');
+		$this->load->library('SchoolRanking_lib', 'schoolranking_lib');
+
+		if (empty($event_info = $this->event_model->get($event_id))) return;
+
+		$event_users = $this->event_user_model->get_all([
+			'event_id' => $event_id
+		])['rows'] ?? [];
+
+		if (empty($event_users)) return;
+
+		$user_ids = !empty($event_users) ? array_values(array_unique(array_column($event_users, 'user_id'))) : [];
+
+		log_kb(['buildRankGradeCron' => [$event_id, $challenge_id, $user_ids]]);
+
+		foreach ($user_ids as $key => $item) {
+			if (!empty($author_info = $this->student_model->get($item))) {
+			
+				$this->schoolranking_lib->updateGradeRank([
+					'event_info'	=> $event_info,
+					'book_info'		=> ['user_id' => $item],
+				]);
+			}
+		}
+	}
 }

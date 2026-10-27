@@ -58,6 +58,8 @@ CI_Events::on('teacher_event_auto_enrol', 'GenericEventListener_lib::teacherEven
 
 // event crm based Listener
 CI_Events::on('event_signup', 'GenericEventListener_lib::eventSignup');
+CI_Events::on('event_update_site_grade', 'GenericEventListener_lib::eventUpdateSiteGrade');
+
 
 CI_Events::on('user_otp', 'MessageTemplateListener_lib::userOtp');
 CI_Events::on('delivered_medallion_order', 'MessageTemplateListener_lib::deliveredMedallionOrder');

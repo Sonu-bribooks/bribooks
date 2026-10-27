@@ -537,7 +537,7 @@ trait BasicInfo {
 					'name' 			=> 'Direct Online Registration',
 					'country_code' 	=> $data['country_code'],
 				])['rows'][0] ?? '';
-				$data['direct_site_id'] = $direct_site_info['id'];
+				$data['direct_site_id'] = $direct_site_info['id'] ?? '';
 				$data['url'] = USER_YAF_URL;
 
 				$event_id = $this->event_model->add($data);

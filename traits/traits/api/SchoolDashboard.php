@@ -14,7 +14,7 @@ trait SchoolDashboard {
 		if (!$this->json) {
 			$active = [];
 
-			$this->json['events'] = array_map(function($item) use(&$active) {
+			$events = array_map(function($item) use(&$active) {
 				$event_info = $this->event_model->get($item['event_id']);
 
 				$is_active = strtotime($event_info['start_date']) < time() && strtotime($event_info['end_date']) > time();
@@ -38,10 +38,15 @@ trait SchoolDashboard {
 				'site_id'	=> (int)$this->input->post('site_id')
 			])['rows'] ?? []);
 
+			usort($events, function ($a, $b) {
+				return strtotime($b['start_date']) <=> strtotime($a['start_date']);
+			});
+
 			CI_Events::trigger('access_log', [
 				'module'	=> 'school_dashboard'
 			]);
 
+			$this->json['events'] = $events;
 			$this->json['active'] = $active;
 		}
 	}

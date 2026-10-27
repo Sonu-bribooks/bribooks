@@ -569,6 +569,26 @@ trait User {
 				'module'	=> 'profile_edit'
 			]);
 
+			$old_profile = [
+				'site_id' 	=> (int) ($user_info['site_id'] ?? 0),
+				'grade'   	=> (int) ($user_info['grade'] ?? 0),
+				'section' 	=> (string) ($user_info['section'] ?? ''),
+			];
+
+			$new_profile = [
+				'site_id' => (int) ($this->input->post('site_id') ?: $old_profile['site_id']),
+				'grade'   => (int) ($this->input->post('grade_id') ?: $old_profile['grade']),
+				'section' => (string) ($this->input->post('section_id') ?? $old_profile['section']),
+			];
+
+			if ($old_profile !== $new_profile) {
+				CI_Events::trigger('event_update_site_grade', [
+					'user_id'		=> $this->session->userdata('user_id'),
+					'old_profile' 	=> $old_profile,
+					'new_profile' 	=> $new_profile,
+				]);
+			}
+
 			$this->json['success'] = _l('profile_updated');
 		}
 	}

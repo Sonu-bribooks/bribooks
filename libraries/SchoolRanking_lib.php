@@ -23,6 +23,7 @@ final class SchoolRanking_lib {
 		$this->load->model('ranking/school/SchoolRankingCountry_model');
 		$this->load->model('ranking/school/SchoolRankingState_model');
 		$this->load->model('ranking/school/SchoolRankingCity_model');
+		$this->load->model('ranking/school/SchoolRankingGrade_model');
 
 		$this->load->model('event/Event_model');
 		$this->load->model('event/EventSite_model');
@@ -32,6 +33,7 @@ final class SchoolRanking_lib {
 		$this->load->model('event/EventChallengeCountry_model');
 		$this->load->model('event/EventChallengeState_model');
 		$this->load->model('event/EventChallengeCity_model');
+		$this->load->model('event/EventChallengeGrade_model');
 
 		$this->load->library('Redis_lib');
 
@@ -50,6 +52,7 @@ final class SchoolRanking_lib {
 		$this->ranking_city_model 		= $this->CI->SchoolRankingCity_model;
 		$this->ranking_state_model 		= $this->CI->SchoolRankingState_model;
 		$this->ranking_country_model 	= $this->CI->SchoolRankingCountry_model;
+		$this->ranking_grade_model 		= $this->CI->SchoolRankingGrade_model;
 
 		$this->event_model 					= $this->CI->Event_model;
 		$this->event_site_model 			= $this->CI->EventSite_model;
@@ -58,6 +61,7 @@ final class SchoolRanking_lib {
 		$this->event_challenge_city_model 	= $this->CI->EventChallengeCity_model;
 		$this->event_challenge_state_model 	= $this->CI->EventChallengeState_model;
 		$this->event_challenge_country_model= $this->CI->EventChallengeCountry_model;
+		$this->event_challenge_grade_model	= $this->CI->EventChallengeGrade_model;
 
 		$this->cron_model 	= $this->CI->Cron_model;
 		$this->cache 		= $this->CI->cache;
@@ -68,7 +72,7 @@ final class SchoolRanking_lib {
 		$this->top_sites 	= [];
 	}
 
-	use StateSchoolRanking, CountrySchoolRanking, CitySchoolRanking, BuildSchoolRanking;
+	use StateSchoolRanking, CountrySchoolRanking, CitySchoolRanking, BuildSchoolRanking, GradeSchoolRanking;
 
 	public function updateCountryRankById($rank_id = 0, $score = 0, $type = 'country') {
 		self::_pushUpdate($rank_id, $score, $type);
@@ -98,6 +102,11 @@ final class SchoolRanking_lib {
 			]);
 
 			self::updateCityRank([
+				'event_info'	=> $event_info,
+				'book_info'		=> $book_info,
+			]);
+
+			self::updateGradeRank([
 				'event_info'	=> $event_info,
 				'book_info'		=> $book_info,
 			]);

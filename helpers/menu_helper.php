@@ -776,6 +776,12 @@ if (!function_exists('get_navigation_menus')) {
 					'name'	=> _l('event_challenges_amazon'),
 					'url'	=> 'admin/event_challenges_amazon',
 				],
+				[
+					'key'	=> 'event_challenge_grade',
+					'name'	=> _l('event_challenge_grade'),
+					'url'	=> 'admin/event_challenges_grade',
+				],
+				 
 			],
 		];
 		$menus[]	= [
