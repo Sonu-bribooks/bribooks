@@ -21,10 +21,14 @@ trait CertificateTemplates {
 		];
 
 		if ($param1 == 'add') {
-			$this->certificate_template_model->add($this->input->post());
+			$data = $this->input->post();
+			$data['design'] = json_encode($data['design']);
+			$this->certificate_template_model->add($data);
 			redirect(base_url('admin/certificate_templates'), 'refresh');
 		} elseif ($param1 == 'edit') {
-			$this->certificate_template_model->edit($param2, $this->input->post());
+			$data = $this->input->post();
+			$data['design'] = json_encode($data['design']);
+			$this->certificate_template_model->edit($param2, $data);
 			redirect(base_url('admin/certificate_templates'), 'refresh');
 		} elseif ($param1 == 'delete') {
 			$this->certificate_template_model->delete($param2);
@@ -71,6 +75,7 @@ trait CertificateTemplates {
 				: [];
 
 			$event_name							 	= ($template_info['event_id'] == 0) ? "Generic" : $event_info['name'];
+			$template_info['design']				= !empty($template_info['design']) ? json_decode($template_info['design'], true) : [];
 		}
 
 		$data['fields'][] = [
@@ -169,30 +174,257 @@ trait CertificateTemplates {
 			'type'		=> 'image',
 			'key'		=> 'image',
 			'label'		=> _l('image'),
-			'required'	=> false,
+			'required'	=> true,
 			'value'		=> $template_info['image'] ?? '',
 		];
 
 		$data['fields'][] = [
-			'type'		=> 'number',
-			'key'		=> 'rank_x_axis',
-			'label'		=> _l('rank_x_axis'),
-			'min'		=> 0,
-			'step'		=> 1,
-			'max'		=> 2048,
-			'required'	=> false,
-			'value'		=> $template_info['rank_x_axis'] ?? '',
+			'type'		=> 'select',
+			'key'		=> 'design[layout]',
+			'label'		=> _l('layout_mode'),
+			'required'	=> true,
+			'value'		=> $template_info['design']['layout'] ?? 'landscape',
+			'options'	=> [
+				[
+					'label'	=> _l('landscape'),
+					'value'	=> 'landscape',
+				],
+				[
+					'label'	=> _l('portrait'),
+					'value'	=> 'portrait',
+				],
+			],
 		];
 
 		$data['fields'][] = [
 			'type'		=> 'number',
-			'key'		=> 'rank_y_axis',
-			'label'		=> _l('rank_y_axis'),
+			'key'		=> 'design[font_size]',
+			'label'		=> _l('font_size'),
+			'required'	=> true,
+			'min'		=> 28,
+			'step'		=> 1,
+			'max'		=> 60,
+			'value'		=> $template_info['design']['font_size'] ?? 28,
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'select',
+			'key'		=> 'design[author_name][align]',
+			'label'		=> _l('author_name_align'),
+			'required'	=> true,
+			'value'		=> $template_info['design']['author_name']['align'] ?? 'left',
+			'options'	=> [
+				[
+					'label'	=> _l('left'),
+					'value'	=> 'left',
+				],
+				[
+					'label'	=> _l('center'),
+					'value'	=> 'center',
+				],
+				[
+					'label'	=> _l('right'),
+					'value'	=> 'right',
+				],
+			],
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'number',
+			'key'		=> 'design[author_name][x]',
+			'label'		=> _l('author_name_x'),
 			'min'		=> 0,
 			'step'		=> 1,
 			'max'		=> 2048,
-			'required'	=> false,
-			'value'		=> $template_info['rank_y_axis'] ?? 0,
+			'required'	=> true,
+			'value'		=> $template_info['design']['author_name']['x'] ?? 120,
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'number',
+			'key'		=> 'design[author_name][y]',
+			'label'		=> _l('author_name_y'),
+			'min'		=> 0,
+			'step'		=> 1,
+			'max'		=> 2048,
+			'required'	=> true,
+			'value'		=> $template_info['design']['author_name']['y'] ?? 610,
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'select',
+			'key'		=> 'design[book_name][align]',
+			'label'		=> _l('book_name_align'),
+			'required'	=> true,
+			'value'		=> $template_info['design']['book_name']['align'] ?? 'left',
+			'options'	=> [
+				[
+					'label'	=> _l('left'),
+					'value'	=> 'left',
+				],
+				[
+					'label'	=> _l('center'),
+					'value'	=> 'center',
+				],
+				[
+					'label'	=> _l('right'),
+					'value'	=> 'right',
+				],
+			],
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'number',
+			'key'		=> 'design[book_name][x]',
+			'label'		=> _l('book_name_x'),
+			'min'		=> 0,
+			'step'		=> 1,
+			'max'		=> 2048,
+			'required'	=> true,
+			'value'		=> $template_info['design']['book_name']['x'] ?? 120,
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'number',
+			'key'		=> 'design[book_name][y]',
+			'label'		=> _l('book_name_y'),
+			'min'		=> 0,
+			'step'		=> 1,
+			'max'		=> 2048,
+			'required'	=> true,
+			'value'		=> $template_info['design']['book_name']['y'] ?? 810,
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'select',
+			'key'		=> 'design[isbn][align]',
+			'label'		=> _l('isbn_align'),
+			'required'	=> true,
+			'value'		=> $template_info['design']['isbn']['align'] ?? 'left',
+			'options'	=> [
+				[
+					'label'	=> _l('left'),
+					'value'	=> 'left',
+				],
+				[
+					'label'	=> _l('center'),
+					'value'	=> 'center',
+				],
+				[
+					'label'	=> _l('right'),
+					'value'	=> 'right',
+				],
+			],
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'number',
+			'key'		=> 'design[isbn][x]',
+			'label'		=> _l('isbn_x'),
+			'min'		=> 0,
+			'step'		=> 1,
+			'max'		=> 2048,
+			'required'	=> true,
+			'value'		=> $template_info['design']['isbn']['x'] ?? 260,
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'number',
+			'key'		=> 'design[isbn][y]',
+			'label'		=> _l('isbn_y'),
+			'min'		=> 0,
+			'step'		=> 1,
+			'max'		=> 2048,
+			'required'	=> true,
+			'value'		=> $template_info['design']['isbn']['y'] ?? 820,
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'number',
+			'key'		=> 'design[rank][x]',
+			'label'		=> _l('rank_x'),
+			'min'		=> 0,
+			'step'		=> 1,
+			'max'		=> 2048,
+			'required'	=> true,
+			'value'		=> $template_info['design']['rank']['x'] ?? 1000,
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'number',
+			'key'		=> 'design[rank][y]',
+			'label'		=> _l('rank_y'),
+			'min'		=> 0,
+			'step'		=> 1,
+			'max'		=> 2048,
+			'required'	=> true,
+			'value'		=> $template_info['design']['rank']['y'] ?? 922,
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'number',
+			'key'		=> 'design[qr][x]',
+			'label'		=> _l('qr_x'),
+			'min'		=> 0,
+			'step'		=> 1,
+			'max'		=> 2048,
+			'required'	=> true,
+			'value'		=> $template_info['design']['qr']['x'] ?? 1440,
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'number',
+			'key'		=> 'design[qr][y]',
+			'label'		=> _l('qr_y'),
+			'min'		=> 0,
+			'step'		=> 1,
+			'max'		=> 2048,
+			'required'	=> true,
+			'value'		=> $template_info['design']['qr']['y'] ?? 870,
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'number',
+			'key'		=> 'design[unique_id][x]',
+			'label'		=> _l('unique_id_x'),
+			'min'		=> 0,
+			'step'		=> 1,
+			'max'		=> 2048,
+			'required'	=> true,
+			'value'		=> $template_info['design']['unique_id']['x'] ?? 1450,
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'number',
+			'key'		=> 'design[unique_id][y]',
+			'label'		=> _l('unique_id_y'),
+			'min'		=> 0,
+			'step'		=> 1,
+			'max'		=> 2048,
+			'required'	=> true,
+			'value'		=> $template_info['design']['unique_id']['y'] ?? 1040,
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'number',
+			'key'		=> 'design[date][x]',
+			'label'		=> _l('date_x'),
+			'min'		=> 0,
+			'step'		=> 1,
+			'max'		=> 2048,
+			'required'	=> true,
+			'value'		=> $template_info['design']['date']['x'] ?? 1450,
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'number',
+			'key'		=> 'design[date][y]',
+			'label'		=> _l('date_y'),
+			'min'		=> 0,
+			'step'		=> 1,
+			'max'		=> 2048,
+			'required'	=> true,
+			'value'		=> $template_info['design']['date']['y'] ?? 1070,
 		];
 
 		$data['fields'][] = [
@@ -279,30 +511,12 @@ trait CertificateTemplates {
 			'value'	 	=> $template_info['is_moved'] ?? 0,
 			'options'	=> [
 				[
-					'label'	=> _l('1'),
+					'label'	=> _l('yes'),
 					'value'	=> 1,
 				],
 				[
-					'label'	=> _l('0'),
+					'label'	=> _l('no'),
 					'value'	=> 0,
-				],
-			],
-		];
-
-		$data['fields'][] = [
-			'type'		=> 'select',
-			'key'		=> 'user_type',
-			'label'		=> _l('user_type'),
-			'required'	=> true,
-			'value'	 	=> $template_info['user_type'] ?? 'user',
-			'options'	=> [
-				[
-					'label'	=> _l('user'),
-					'value'	=> 'user',
-				],
-				[
-					'label'	=> _l('school'),
-					'value'	=> 'school',
 				],
 			],
 		];
@@ -415,7 +629,7 @@ trait CertificateTemplates {
 			'id'				=> '',
 			'text'				=> _l('select_challenge'),
 		];
-
+		
 		foreach ($results as $key => $result) {
 			$json[] = [
 				'id'				=> $result['id'],

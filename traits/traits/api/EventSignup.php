@@ -757,6 +757,10 @@ trait EventSignup {
 
 			$event_info = $this->event_model->get($this->input->post('event_id'));
 
+			$this->load->library('SchoolGenericCertificate_lib');
+			$this->schoolgenericcertificate_lib->createSchoolCertificate((int)$book_info['id'], (int)$this->input->post('event_id'), false);
+
+
 			$this->json['success'] = sprintf(_li('Congratulations! Your book has been successfully enrolled in %s!'), ($event_info['label'] ?? 'event'));
 		}
 	}

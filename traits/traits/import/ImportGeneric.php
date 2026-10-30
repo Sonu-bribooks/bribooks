@@ -213,6 +213,7 @@ trait ImportGeneric {
 
 		$this->load->library('GenericCertificate_lib');
 		$this->load->library('Ranking_lib', 'ranking_lib');
+		$this->load->library('SchoolGenericCertificate_lib');
 
 		$skipped = $uploaded = 0;
 
@@ -351,6 +352,8 @@ trait ImportGeneric {
 					}
 				}
 			}
+			
+			$this->schoolgenericcertificate_lib->createSchoolCertificate((int)$book_info['id'], (int)$event_id, false);
 
 			$uploaded++;
 		}

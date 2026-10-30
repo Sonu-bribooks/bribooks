@@ -692,6 +692,16 @@ if (!function_exists('get_navigation_menus')) {
 					'name'	=> _l('templates'),
 					'url'	=> 'admin/certificate_templates',
 				],
+				[
+					'key'	=> 'school_certificate_template',
+					'name'	=> _l('school_certificate_template'),
+					'url'	=> 'admin/school_certificate_templates',
+				],
+				[
+					'key'	=> 'school_certificate_message_templates',
+					'name'	=> _l('school_message_templates'),
+					'url'	=> 'admin/school_certificate_message_templates',
+				],
 			],
 		];
 		$menus[]	= [

@@ -233,6 +233,8 @@ class Admin extends CI_Controller {
 		$this->load->model('certificate/CertificateMessageTemplate_model', 'certificate_message_template_model');
 		$this->load->model('certificate/CertificateTemplate_model', 'certificate_template_model');
 		$this->load->model('certificate/CertificateType_model', 'certificate_type_model');
+		$this->load->model('certificate/SchoolCertificateTemplate_model', 'school_certificate_template_model');
+		$this->load->model('certificate/SchoolCertificateMessageTemplate_model', 'school_certificate_message_template_model');
 
 		$this->load->model('broadcast/BroadcastPartner_model', 'broadcast_partner_model');
 		$this->load->model('broadcast/BroadcastPartnerSlot_model', 'broadcast_partner_slot_model');
@@ -418,7 +420,9 @@ class Admin extends CI_Controller {
 		AmazonOrder,
 		GlobalHallOfFame,
 		AsiaHallOfFame,
-		EventChallengeGrade
+		EventChallengeGrade,
+		SchoolCertificateTemplate,
+		SchoolCertificateMessageTemplates
 	;
 
 	public function index() {
