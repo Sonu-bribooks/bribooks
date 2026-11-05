@@ -132,6 +132,10 @@ class HallOfFame_model extends CI_Model {
 			$this->db->where('hall_of_fame_books.country_code', $data['country_code']);
 		}
 
+		if (isset($data['type'])) {
+			$this->db->where('hall_of_fame_books.type', $data['type']);
+		}
+
 		// Event filter: only the selected event
 		if (isset($data['event_id'])) {
 			$this->db->where('hall_of_fame_books.event_id', (int) $data['event_id']);
@@ -245,19 +249,85 @@ class HallOfFame_model extends CI_Model {
 		]);
 	}
 
-	public function getByBookId($book_id = 0) {
+	public function getByBookId($book_id = 0, $type = 'global') {
 		$this->db->select('hall_of_fame_books.*');
 		$this->db->where('hall_of_fame_books.book_id', (int)$book_id);
+		$this->db->where('hall_of_fame_books.type', $type);
 		return $this->db->get('hall_of_fame_books')->row_array();
 	}
 
-	public function deleteByBookId($book_id = 0) {
+	public function deleteByBookId($book_id = 0, $type = 'global') {
 		$this->db->where('book_id', (int)$book_id);
+		$this->db->where('type', $type);
 		$this->db->where('_deleted', 0);
 		$this->db->update('hall_of_fame_books',  [
 			'_deleted'			=> 1,
 			'date_deleted'		=> date('Y-m-d H:i:s'),
 			'deleted_manager_id'=> $this->session->userdata('user_id') ?? 0
 		]);
+	}
+
+	public function getExistingHallOfFameBooks($data = []) {
+		$country_code = $data['country_code'] ?? '';
+		$event_id     = (int)($data['event_id'] ?? 0);
+		$type         = $data['type'] ?? 'global';
+		$quantity_le  = (int)$data['quantity_le'] ?? 1;
+
+		if (empty($country_code)) {
+			return [];
+		}
+
+		$this->db->select('hf.id, hf.book_id')
+			->from('hall_of_fame_books hf')
+			->where('hf.country_code', $country_code)
+			->where('hf.type', $type)
+			->where('hf.book_sold <', $quantity_le)
+			->where('hf._deleted', 0);
+
+		if ($event_id > 0) {
+			$this->db->where('hf.event_id', $event_id);
+		} else {
+			$country_code_escaped = $this->db->escape($country_code);
+			$type_escaped = $this->db->escape($type);
+
+			$this->db->where("
+				NOT EXISTS (
+					SELECT 1
+					FROM event_book eb
+					JOIN hall_of_fame_country hfc
+						ON hfc.event_id = eb.event_id
+					WHERE hfc.country_code = {$country_code_escaped}
+						AND hfc.type = {$type_escaped}
+						AND hfc.event_id > 0
+						AND hfc._deleted = 0
+						AND eb._deleted = 0
+						AND eb.book_id = hf.book_id
+				)
+			", null, false);
+		}
+
+		return $this->db->get()->result_array();
+	}
+
+	public function BulkdeleteByBookId($book_ids = [], $type = 'global') {
+		$book_ids = array_unique(
+			array_filter(array_map('intval', (array) $book_ids))
+		);
+
+		if (empty($book_ids)) {
+			return false;
+		}
+
+		$this->db->where_in('book_id', $book_ids);
+		$this->db->where('type', $type);
+		$this->db->where('_deleted', 0);
+
+		$this->db->update('hall_of_fame_books', [
+			'_deleted'            => 1,
+			'date_deleted'        => date('Y-m-d H:i:s'),
+			'deleted_manager_id'  => $this->session->userdata('user_id') ?? 0
+		]);
+
+		return $this->db->affected_rows();
 	}
 }

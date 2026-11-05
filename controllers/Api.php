@@ -263,7 +263,9 @@ class Api extends CI_Controller {
 		EventPreWriting,
 		GokwikNdrOrder,
 		ShortUrl,
-		SchoolCertificate
+		SchoolCertificate,
+		HallOfFame,
+		EventAuthor
 	;
 
 	public function index() {

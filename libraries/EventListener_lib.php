@@ -704,6 +704,52 @@ final class EventListener_lib {
 		]);
 	}
 	
+	public static function orderConfirmationEbook(...$params) {
+		list($data) = $params;
+
+		log_kb([
+			'Event::orderConfirmationEbook' => [$params, $data]
+		]);
+
+		if (empty($data['book_name'])) return;
+		if (empty($data['ebook_url'])) return;
+
+		$CI =& get_instance();
+
+		$CI->load->model('order/Order_model', 'order_model');
+		$CI->load->model('user/User_model', 'user_model');
+
+		$CI->load->model('Alert_model');
+
+		$order_info = $CI->order_model->get($data['order_id']);
+
+		if (empty($order_info)) return;
+
+		$site_id 		= strtolower($order_info['currency_code']) != 'inr' ? 2 : 1;
+		$user_info 		= $CI->user_model->get($order_info['user_id']);
+
+		if (empty($user_info['email']) && empty($user_info['mobile'])) return;
+
+		$formatted_data = [
+			'buyer_name'		=> sprintf('%s %s', $user_info['first_name'], $user_info['last_name']),
+			'order_code'		=> $order_info['order_code'],
+			'order_details' 	=> $data['order_details'],
+			'book_name' 		=> $data['book_name'] ?? '',
+			'ebook_url' 		=> $data['ebook_url'] ?? '',
+		];
+
+		log_kb(['Event::orderConfirmationEbook::data' => $formatted_data]);
+
+		$CI->Alert_model->genericMessageTemplate([
+			'id'			  	=> $order_info['id'],
+			'code'				=> 'order_confirmation_ebook',
+			'site_id'			=> $site_id,
+			'email'		   		=> $user_info['email'],
+			'mobile'		  	=> $user_info['mobile'],
+			'data'				=> $formatted_data,
+		]);
+	}
+	
 	public static function abandonCartAuthor(...$params) {
 		list($data) = $params;
 

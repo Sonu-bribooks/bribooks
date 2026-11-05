@@ -18,8 +18,8 @@ final class HallOfFame_lib {
 		$this->load->model('event/EventOrder_model');
 		$this->load->model('halloffame/HallOfFame_model');
 		$this->load->model('halloffame/HallOfFameCountry_model');
-		$this->load->model('halloffame/HallOfFameAsia_model');
-		$this->load->model('halloffame/HallOfFameAsiaCountry_model');
+		// $this->load->model('halloffame/HallOfFameAsia_model');
+		// $this->load->model('halloffame/HallOfFameAsiaCountry_model');
 
 
 		$this->book_model = $this->CI->Book_model;
@@ -50,13 +50,8 @@ final class HallOfFame_lib {
 			$min_book_sold = 1;
 			$event_id = $hall_of_fame_id = $book_sold = 0;
 
-			if ($type === 'global') {
-				$hof_country_model = $this->hall_of_fame_country_model;
-				$hof_model         = $this->hall_of_fame_model;
-			} else {
-				$hof_country_model = $this->hall_of_fame_asia_country_model;
-				$hof_model         = $this->hall_of_fame_asia_model;
-			}
+			$hof_country_model = $this->hall_of_fame_country_model;
+			$hof_model         = $this->hall_of_fame_model;
 
 			if (!empty($event_book_info = $this->event_book_model->getEventBookByBookId(0, $book_id))) {
 				$event_id = (int)$event_book_info['event_id'];
@@ -76,6 +71,7 @@ final class HallOfFame_lib {
 				$hall_of_fame_country_info = $hof_country_model->get_all([
 					'country_code' => $country_code,
 					'event_id'     => $event_id,
+					'type'		   => $type,
 					'status'	   => 1,
 					'start'        => 0,
 					'limit'        => 1
@@ -103,6 +99,7 @@ final class HallOfFame_lib {
 				$hall_of_fame_country_info = $hof_country_model->get_all([
 					'country_code' => $country_code,
 					'event_id'     => 0,
+					'type'		   => $type,
 					'status'	   => 1,
 					'start'        => 0,
 					'limit'        => 1
@@ -124,10 +121,21 @@ final class HallOfFame_lib {
 			// 	$event_id = $event_book_info['event_id'];
 			// }
 
-			if (empty($hall_of_fame_info = $hof_model->getByBookId($book_id))) {
+			$filter_data = [
+				'book_id'      => $book_id,
+				'country_code' => $country_info['code'] ?? '',
+				'type'         => $type
+			];
+
+			if ((int)$event_id > 0) {
+				$filter_data['event_id'] = (int)$event_id;
+			}
+
+			if (empty($hall_of_fame_info = $hof_model->get_all($filter_data)['rows'][0])) {
 				$hall_of_fame_id = $hof_model->add([
 					'book_id'		=> $book_id,
 					'event_id'		=> $event_id,
+					'type'			=> $type,
 					'user_id'		=> $user_info['id'] ?? 0,
 					'location'		=> $user_info['location'] ?? '',
 					'country_code'	=> $country_info['code'] ?? '',
@@ -168,24 +176,26 @@ final class HallOfFame_lib {
 			!empty($order_product_results = $this->order_product_model->getOrderProductByOrderId($order_id))
 		) {
 			foreach ($order_product_results as $order_product_info) {
-				self::addBookToHallOfFame($order_product_info['product_id']);
-			}
-		}
-	}
+				self::addBookToHallOfFame($order_product_info['product_id'], 'global');
 
-	public function enrolToHallOfFameAsia($order_id = false) {
-		log_kb([
-			'enrolToHallOfFameAsia::order_id:: '	=> $order_id
-		]);
-
-		if (
-			$order_id &&
-			!empty($order_info = $this->order_model->get($order_id)) &&
-			!empty($order_product_results = $this->order_product_model->getOrderProductByOrderId($order_id))
-		) {
-			foreach ($order_product_results as $order_product_info) {
 				self::addBookToHallOfFame($order_product_info['product_id'], 'asia');
 			}
 		}
 	}
+
+	// public function enrolToHallOfFameAsia($order_id = false) {
+	// 	log_kb([
+	// 		'enrolToHallOfFameAsia::order_id:: '	=> $order_id
+	// 	]);
+
+	// 	if (
+	// 		$order_id &&
+	// 		!empty($order_info = $this->order_model->get($order_id)) &&
+	// 		!empty($order_product_results = $this->order_product_model->getOrderProductByOrderId($order_id))
+	// 	) {
+	// 		foreach ($order_product_results as $order_product_info) {
+	// 			self::addBookToHallOfFame($order_product_info['product_id'], 'asia');
+	// 		}
+	// 	}
+	// }
 }

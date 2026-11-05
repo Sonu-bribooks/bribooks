@@ -260,17 +260,11 @@ if (!function_exists('get_navigation_menus')) {
 			'roles'	=> [],
 			'childs'=> [
 				[
-					'key'	=> 'global_hall_of_fame',
-					'name'	=> _l('global_hall_of_fame'),
-					'url'	=> 'admin/global_fame_country',
-					'regex'	=> 'admin/(global_fame_country|global_fame_event)'
-				],
-				[
-					'key'	=> 'asia_hall_of_fame',
-					'name'	=> _l('asia_hall_of_fame'),
-					'url'	=> 'admin/asia_fame_country',
-					'regex'	=> 'admin/(asia_fame_country|asia_fame_event)'
-				],
+					'key'	=> 'hall_of_fames',
+					'name'	=> _l('hall_of_fames'),
+					'url'	=> 'admin/hall_of_fame_country',
+					'regex'	=> 'admin/(hall_of_fame_country|hall_of_fame_event)'
+				]
 			],
 		];
 

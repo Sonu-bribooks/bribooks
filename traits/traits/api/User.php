@@ -818,7 +818,7 @@ trait User {
 
 			if (
 				$this->input->post('eid') &&
-				($user_details_guest_info = $this->db->get_where('user_details_nyaf_guest', [
+				($user_details_guest_info = $this->db->get_where('user_details_event_guest', [
 					'user_id' 	=> (int)$this->input->post('uid'),
 					'event_id' 	=> (int)$this->input->post('eid')
 				])->row_array())
@@ -827,7 +827,7 @@ trait User {
 				return;
 			} elseif (
 				$this->input->post('uid') &&
-				!empty($this->db->get_where('user_details_nyaf_invites', [
+				!empty($this->db->get_where('user_details_event_invites', [
 					'user_id' 	=> (int)$this->input->post('uid'),
 					'book_id' 	=> (int)$this->input->post('bid'),
 					'event_id' 	=> (int)$this->input->post('eid'),

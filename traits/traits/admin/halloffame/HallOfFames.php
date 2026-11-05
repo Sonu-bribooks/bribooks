@@ -1,10 +1,11 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed');
 
-trait GlobalHallOfFame {
-    public function global_fame_country($param1 = NULL, $param2 = NULL) {
+trait HallOfFames {
+    public function hall_of_fame_country($param1 = NULL, $param2 = NULL) {
         $data['fields'] = [
 			'sn',
 			'id',
+			'type',
 			'country_code',
             'country_name',
 			'book_sold',
@@ -17,22 +18,23 @@ trait GlobalHallOfFame {
 
            if (!empty($country_fame_info = $this->hall_of_fame_country_model->get_all([
                 'country_code'  => $data['country_code'],
+				'type'			=> $data['type'],
                 'is_country'    => 1,
                 'start'         => 0,
                 'limit'         => 1
             ])['rows'][0] ?? [])) {
-                $this->session->set_flashdata('error_message', _li('Global_fame_already_exist_for_this_country.'));
-                redirect(base_url('admin/global_fame_country'), 'refresh');
+                $this->session->set_flashdata('error_message', _li('hall_of_fame_already_exist_for_this_country.'));
+                redirect(base_url('admin/hall_of_fame_country'), 'refresh');
             }
 
 			$this->hall_of_fame_country_model->add($data);
-            redirect(base_url('admin/global_fame_country'), 'refresh');
+            redirect(base_url('admin/hall_of_fame_country'), 'refresh');
         } else if ($param1 == 'edit') {
 			$country_fame_info = $this->hall_of_fame_country_model->get($param2);
 
             if (empty($country_fame_info)) {
-                $this->session->set_flashdata('error_message', _li('invalid_global_fame_id.'));
-                redirect(base_url('admin/global_fame_country'), 'refresh');
+                $this->session->set_flashdata('error_message', _li('invalid_hall_of_fame_id.'));
+                redirect(base_url('admin/hall_of_fame_country'), 'refresh');
             }
 
 			$data 			= $this->input->post();
@@ -42,39 +44,38 @@ trait GlobalHallOfFame {
 			$this->hall_of_fame_country_model->edit($param2, $data);
 
             if ($old_book_sold !== $new_book_sold) {
-                $this->alert_model->enrolBookToHallOfFameAlert($param2, 'global');
+                $this->alert_model->enrolBookToHallOfFameAlert($param2, $data['type']);
             }
 
-			redirect(base_url('admin/global_fame_country'), 'refresh');
+			redirect(base_url('admin/hall_of_fame_country'), 'refresh');
 		} else if ($param1 == 'delete') {
 
-			$global_fame_info 	= $this->hall_of_fame_country_model->delete($param2);
-			redirect(base_url('admin/global_fame_country'), 'refresh');
+			$hall_of_fame_info 	= $this->hall_of_fame_country_model->delete($param2);
+			redirect(base_url('admin/hall_of_fame_country'), 'refresh');
 		} 
 
 		$data['page_name'] 		= 'hall_of_fame/index';
-		$data['page_title'] 	= _l('global_fame');
-        $data['action_add'] 	= base_url('admin/global_fame_form/add');
-		$data['action_ajax'] 	= base_url('admin/ajax_global_fame_country');
+		$data['page_title'] 	= _l('hall_of_fame');
+        $data['action_add'] 	= base_url('admin/hall_of_fame_form/add');
+		$data['action_ajax'] 	= base_url('admin/ajax_hall_of_fame_country');
 		$data['active_tab']		= 'country';
-		$data['fame_type']		= 'global';
 
         $data['actions'] 		= [
 			[
 				'key'	=> 'edit',
-				'url'	=> 'admin/global_fame_form/edit/',
+				'url'	=> 'admin/hall_of_fame_form/edit/',
 			],
 			[
 				'key'	=> 'delete',
 				'type' 	=> 'confirm',
-				'url'	=> 'admin/global_fame_country/delete/',
+				'url'	=> 'admin/hall_of_fame_country/delete/',
 			],
 		];
 
 		$this->load->view('backend/index', $data);
 	}
 
-    public function ajax_global_fame_country() {
+    public function ajax_hall_of_fame_country() {
         $json['data'] = [];
 
 		$columns = $this->input->get('columns');
@@ -92,6 +93,10 @@ trait GlobalHallOfFame {
 			$filter_data['search'] = $this->input->get('search_value');
 		}
 
+		if (!empty($this->input->get('type'))) {
+			$filter_data['type'] = $this->input->get('type');
+		}
+
         $results = $this->hall_of_fame_country_model->get_all($filter_data);
 
 		$json['recordsTotal'] 		= $results['total'];
@@ -102,6 +107,7 @@ trait GlobalHallOfFame {
 			$json['data'][] = [
 				'sn'				=> $filter_data['start'] + 1 + $key,
 				'id'				=> $result['id'],
+				'type'				=> $result['type'] ?? '',
 				'country_code'		=> $result['country_code'],
                 'country_name'      => $country_info['name'] ?? '',
 				'book_sold'			=> $result['book_sold'] ?? '',
@@ -116,17 +122,17 @@ trait GlobalHallOfFame {
 		output_json($json);
     }
 
-    public function global_fame_form($param1 = NULL, $param2 = NULL) {
+    public function hall_of_fame_form($param1 = NULL, $param2 = NULL) {
 
         if ($param1 == 'add') {
 			$data['page_name'] 						= 'hall_of_fame/form';
-			$data['page_title'] 					= _l('add_global_hall_of_fame');
-			$data['action'] 						= base_url('admin/global_fame_country/add');
+			$data['page_title'] 					= _l('add_hall_of_fame');
+			$data['action'] 						= base_url('admin/hall_of_fame_country/add');
             $data['country_info']                   = $this->country_model->get_all()['rows'] ?? [];
 		} elseif ($param1 == 'edit') {
 			$data['page_name'] 						= 'hall_of_fame/form';
-			$data['page_title'] 					= _l('edit_global_hall_of_fame');
-			$data['action'] 						= base_url('admin/global_fame_country/edit/' . (int)$param2);
+			$data['page_title'] 					= _l('edit_hall_of_fame');
+			$data['action'] 						= base_url('admin/hall_of_fame_country/edit/' . (int)$param2);
 
 			$data['id'] 							= (int)$param2;
 			$data['info'] 						    = $this->hall_of_fame_country_model->get($param2);
@@ -137,12 +143,13 @@ trait GlobalHallOfFame {
 		$this->load->view('backend/index', $data);
 	}
 
-    public function global_fame_event($param1 = NULL, $param2 = NULL) {
+    public function hall_of_fame_event($param1 = NULL, $param2 = NULL) {
         $data['fields'] = [
 			'sn',
 			'id',
             'event_id',
             'event_name',
+			'type',
 			'country_code',
             'country_name',
 			'book_sold',
@@ -156,23 +163,24 @@ trait GlobalHallOfFame {
             if (!empty($country_fame_info = $this->hall_of_fame_country_model->get_all([
                 'country_code'  => $data['country_code'],
                 'event_id'      => $data['event_id'],
+				'type'			=> $data['type'],
                 'is_event'      => 1,
                 'start'         => 0,
                 'limit'         => 1
             ])['rows'][0] ?? [])) {
-                $this->session->set_flashdata('error_message', _li('Global_fame_already_exist_for_this_event.'));
-                redirect(base_url('admin/global_fame_event'), 'refresh');
+                $this->session->set_flashdata('error_message', _li('hall_of_fame_already_exist_for_this_event.'));
+                redirect(base_url('admin/hall_of_fame_event'), 'refresh');
             }
 
 			$this->hall_of_fame_country_model->add($data);
 
-            redirect(base_url('admin/global_fame_event'), 'refresh');
+            redirect(base_url('admin/hall_of_fame_event'), 'refresh');
         } else if ($param1 == 'edit') {
 			$event_fame_info = $this->hall_of_fame_country_model->get($param2);
             
             if (empty($event_fame_info)) {
-                $this->session->set_flashdata('error_message', _li('invalid_global_fame_id.'));
-                redirect(base_url('admin/global_fame_event'), 'refresh');
+                $this->session->set_flashdata('error_message', _li('invalid_hall_of_fame_id.'));
+                redirect(base_url('admin/hall_of_fame_event'), 'refresh');
             }
 
 			$data 			= $this->input->post();
@@ -182,39 +190,38 @@ trait GlobalHallOfFame {
 			$this->hall_of_fame_country_model->edit($param2, $data);
 
             if ($old_book_sold !== $new_book_sold) {
-                $this->alert_model->enrolBookToHallOfFameAlert($param2, 'global');
+                $this->alert_model->enrolBookToHallOfFameAlert($param2, $data['type']);
             }
 
-			redirect(base_url('admin/global_fame_event'), 'refresh');
+			redirect(base_url('admin/hall_of_fame_event'), 'refresh');
 		} else if ($param1 == 'delete') {
 
-			$global_fame_info 	= $this->hall_of_fame_country_model->delete($param2);
-			redirect(base_url('admin/global_fame_event'), 'refresh');
+			$hall_of_fame_info 	= $this->hall_of_fame_country_model->delete($param2);
+			redirect(base_url('admin/hall_of_fame_event'), 'refresh');
 		} 
 
 		$data['page_name'] 		= 'hall_of_fame/index';
-		$data['page_title'] 	= _l('global_fame');
-        $data['action_add'] 	= base_url('admin/global_fame_event_form/add');
-		$data['action_ajax'] 	= base_url('admin/ajax_global_fame_event');
+		$data['page_title'] 	= _l('hall_of_fame');
+        $data['action_add'] 	= base_url('admin/hall_of_fame_event_form/add');
+		$data['action_ajax'] 	= base_url('admin/ajax_hall_of_fame_event');
 		$data['active_tab']		= 'event';
-		$data['fame_type']		= 'global';
 
         $data['actions'] 		= [
 			[
 				'key'	=> 'edit',
-				'url'	=> 'admin/global_fame_event_form/edit/',
+				'url'	=> 'admin/hall_of_fame_event_form/edit/',
 			],
 			[
 				'key'	=> 'delete',
 				'type' 	=> 'confirm',
-				'url'	=> 'admin/global_fame_event/delete/',
+				'url'	=> 'admin/hall_of_fame_event/delete/',
 			],
 		];
 
 		$this->load->view('backend/index', $data);
 	}
 
-    public function ajax_global_fame_event() {
+    public function ajax_hall_of_fame_event() {
         $json['data'] = [];
 
 		$columns = $this->input->get('columns');
@@ -232,6 +239,10 @@ trait GlobalHallOfFame {
 			$filter_data['search'] = $this->input->get('search_value');
 		}
 
+		if (!empty($this->input->get('type'))) {
+			$filter_data['type'] = $this->input->get('type');
+		}
+
         $results = $this->hall_of_fame_country_model->get_all($filter_data);
 
 		$json['recordsTotal'] 		= $results['total'];
@@ -245,6 +256,7 @@ trait GlobalHallOfFame {
 				'id'				=> $result['id'],
                 'event_id'          => $result['event_id'] ?? '',
                 'event_name'        => !empty($event_info) ? $event_info['name'] : '',
+				'type'				=> $result['type'] ?? '',
 				'country_code'		=> $result['country_code'],
                 'country_name'      => $country_info['name'] ?? '',
 				'book_sold'			=> $result['book_sold'] ?? '',
@@ -259,18 +271,18 @@ trait GlobalHallOfFame {
 		output_json($json);
     }
 
-    public function global_fame_event_form($param1 = NULL, $param2 = NULL) {
+    public function hall_of_fame_event_form($param1 = NULL, $param2 = NULL) {
 
         if ($param1 == 'add') {
 			$data['page_name'] 						= 'hall_of_fame/form';
-			$data['page_title'] 					= _l('add_global_hall_of_fame');
-			$data['action'] 						= base_url('admin/global_fame_event/add');
+			$data['page_title'] 					= _l('add_hall_of_fame');
+			$data['action'] 						= base_url('admin/hall_of_fame_event/add');
             $data['event_info'] 					= $this->event_model->get_all()['rows'] ?? [];
             $data['country_info']                   = $this->country_model->get_all()['rows'] ?? [];
 		} elseif ($param1 == 'edit') {
 			$data['page_name'] 						= 'hall_of_fame/form';
-			$data['page_title'] 					= _l('edit_global_hall_of_fame');
-			$data['action'] 						= base_url('admin/global_fame_event/edit/' . (int)$param2);
+			$data['page_title'] 					= _l('edit_hall_of_fame');
+			$data['action'] 						= base_url('admin/hall_of_fame_event/edit/' . (int)$param2);
 
 			$data['id'] 							= (int)$param2;
 			$data['info'] 						    = $this->hall_of_fame_country_model->get($param2);

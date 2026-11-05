@@ -614,7 +614,7 @@ trait EventTaskAlert {
 			}
 
 			if (!empty($data['invite_user_entry'])) {
-				if (empty($this->db->get_where('school_details_nyaf_invites', [
+				if (empty($this->db->get_where('school_details_event_invites', [
 					'event_id' 	=> $template_info['event_id'],
 					'user_id' 	=> $author_info['id'],
 					'_deleted' 	=> 0,
@@ -956,7 +956,7 @@ trait EventTaskAlert {
 		}
 
 		$rows = $this->db->query("SELECT *
-		FROM `user_details_nyaf_guest`
+		FROM `user_details_event_guest`
 		WHERE `event_id` = '" . $event_id . "' AND `_deleted` = '0' AND `book_id` != '0'")->result_array();
 
 		foreach ($rows as $row) {
@@ -988,7 +988,7 @@ trait EventTaskAlert {
 		if (empty($event_info = $this->event_model->get($event_id))) return;
 
 		$rows = $this->db->query("SELECT *
-		FROM `school_details_nyaf_guest`
+		FROM `school_details_event_guest`
 		WHERE `event_id` = '" . $event_id . "'")->result_array();
 
 		foreach ($rows as $row) {
@@ -1032,7 +1032,7 @@ trait EventTaskAlert {
 		if (empty($event_info = $this->event_model->get($event_id))) return;
 
 		$rows = $this->db->query("SELECT *
-		FROM `user_details_nyaf_guest`
+		FROM `user_details_event_guest`
 		WHERE `event_id` = '" . $event_id . "' AND `_deleted` = '0' AND `book_id` = '0'")->result_array();
 
 		foreach ($rows as $row) {

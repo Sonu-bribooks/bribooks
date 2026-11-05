@@ -27,6 +27,10 @@ class HallOfFameCountry_model extends CI_Model {
 			$this->db->where('hall_of_fame_country.event_id', $data['event_id']);
 		}
 
+		if (isset($data['type'])) {
+			$this->db->where('hall_of_fame_country.type', $data['type']);
+		}
+
 		if (isset($data['is_event'])) {
 			$this->db->where('hall_of_fame_country.event_id >', 0);
 		}
@@ -44,6 +48,7 @@ class HallOfFameCountry_model extends CI_Model {
 			$this->db->like('hall_of_fame_country.book_sold', $data['search'], 'after');
 			$this->db->or_like('hall_of_fame_country.country_code', $data['search'], 'after');
 			$this->db->or_like('hall_of_fame_country.event_id', $data['search'], 'after');
+			$this->db->or_like('hall_of_fame_country.type', $data['search'], 'after');
 			$this->db->group_end();
 		}
 
@@ -101,7 +106,7 @@ class HallOfFameCountry_model extends CI_Model {
 
 		$id = $this->db->insert_id();
 
-		$this->alert_model->enrolBookToHallOfFameAlert($id, 'global');
+		$this->alert_model->enrolBookToHallOfFameAlert($id, $data['type']);
 
 		return $id;
 	}

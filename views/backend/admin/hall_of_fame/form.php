@@ -27,21 +27,30 @@
 
 					<form class="required-form" action="<?php echo $action; ?>" method="post" enctype="multipart/form-data">
 						
-                        <?php if ($active_tab == 'event') { ?>
-                            <div class="form-group">
-                                <label for="event_id"><?php echo _l('event'); ?><span class="required">*</span></label>
-                                <select class="form-control select2" data-toggle="select2" name="event_id" id="event_id" required>
-                                    <?php foreach ($event_info as $event) { ?>
-                                    <?php if (($info['event_id'] ?? '') === $event['id']) { ?>
-                                    <option value="<?php echo $event['id']; ?>" selected><?php echo $event['name']; ?></option>
-                                    <?php } else { ?>
-                                    <option value="<?php echo $event['id'] ?? ''; ?>"><?php echo $event['name'] ?? ''; ?></option>
-                                    <?php } ?>
-                                    <?php } ?>
-                                </select>
-                            </div>
+                       <?php if ($active_tab == 'event') { ?>
+							<div class="form-group">
+								<label for="event_id">
+									<?php echo _l('event'); ?><span class="required">*</span>
+								</label>
 
-                        <?php } ?>
+								<select class="form-control select2"
+										data-toggle="select2"
+										name="event_id"
+										id="event_id"
+										required>
+
+									<option value="">Select Event</option>
+
+									<?php foreach ($event_info as $event) { ?>
+										<option value="<?php echo $event['id']; ?>"
+											<?php echo (isset($info['event_id']) && $info['event_id'] == $event['id']) ? 'selected' : ''; ?>>
+											<?php echo $event['name']; ?>
+										</option>
+									<?php } ?>
+
+								</select>
+							</div>
+						<?php } ?>
                      
                         <div class="form-group">
 							<label for="country_code"><?php echo _l('country'); ?><span class="required">*</span></label>
@@ -53,6 +62,14 @@
 								<option value="<?php echo $country['code'] ?? ''; ?>"><?php echo $country['name'] ?? ''; ?></option>
 								<?php } ?>
 								<?php } ?>
+							</select>
+						</div>
+
+						<div class="form-group">
+							<label for="type"><?php echo _l('type'); ?></label>
+							<select class="form-control select2" data-toggle="select2" name="type" id="type">	
+								<option value="global" <?= ($info['type'] ?? '') === 'global' ? 'selected' : '' ?> ><?php echo _l('global'); ?></option>
+								<option value="asia" <?= ($info['type'] ?? '') === 'asia' ? 'selected' : '' ?>><?php echo _l('asia'); ?></option>
 							</select>
 						</div>
 

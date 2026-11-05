@@ -183,9 +183,15 @@ trait InvoiceAlert {
 				return (in_array(mb_strtolower($option['name']), ['audio book']));
 			});
 
+			$has_ebook_copies = array_filter($products, function($item) {
+				$option = json_decode($item['option'], true);
+				return (mb_strtolower($option['name'] ?? '') === 'ebook');
+			});
+
 			log_kb([
-				'invoiceOrderCron::has_printed_copies' => $has_printed_copies,
+				'invoiceOrderCron::has_printed_copies' 	 => $has_printed_copies,
 				'invoiceOrderCron::has_audiobook_copies' => $has_audiobook_copies,
+				'invoiceOrderCron::has_ebook_copies' 	 => $has_ebook_copies,
 			]);
 
 			$has_printed_copies && self::cron($id, 'orderProcessingAlertCron');
@@ -208,7 +214,7 @@ trait InvoiceAlert {
 				'order_details' => $data['content'],
 			]);
 
-			if (!empty($has_audiobook_copies)) {
+			if (!empty($has_audiobook_copies) && $email) {
 				foreach ($has_audiobook_copies as $value) {
 					if (!empty($book_info = $this->book_model->get($value['product_id']))) {
 
@@ -220,6 +226,21 @@ trait InvoiceAlert {
 							'audiobook_url' 	=> USER_URL . 'audiobookpreview/' . $book_info['slug'],
 						]);
 
+					}
+				}
+			}
+
+			if (!empty($has_ebook_copies) && $email) {
+				foreach ($has_ebook_copies as $value) {
+					if (!empty($book_info = $this->book_model->get($value['product_id']))) {
+						log_kb(['order_confirmation_ebook::book_info' => $book_info]);
+
+						CI_Events::trigger('order_confirmation_ebook', [
+							'order_id' 		=> $info['id'],
+							'order_details' => $data['content'],
+							'book_name' 	=> $book_info['name'],
+							'ebook_url' 	=> USER_URL . 'ebookpreview/' . $book_info['slug'],
+						]);
 					}
 				}
 			}

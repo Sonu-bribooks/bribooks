@@ -341,4 +341,59 @@ class OrderProduct_model extends CI_Model {
 
 		return ['rows' => $this->db->get()->result_array(), 'total' => $total];
 	}
+
+	public function getOrderProductQuantityByCountry($data = []) {
+
+		if (empty($data['country_name'])) {
+			return [];
+		}
+
+		$quantity_ge 				= (int)($data['quantity_ge'] ?? 1);
+		$exclude_hfc_event_books 	= $data['exclude_hfc_event_books'] ?? false;
+
+		$this->db
+			->select('
+				order_product.product_id AS book_id,
+				SUM(order_product.quantity) AS quantity
+			')
+			->from('order_product')
+			->join('order', 'order.id=order_product.order_id', 'left')
+			->join('book', 'book.id=order_product.product_id', 'left')
+			->join('users', 'users.id=book.user_id', 'left')
+			->where('order_product._deleted', 0)
+			->where('order._deleted', 0)
+			->where_not_in('order.status', [0, 91, 92])
+			->where('book._deleted', 0)
+			->where('book.archived', 0)
+			->where('book.status', 1)
+			->where('users._deleted', 0)
+			->where('users.location', $data['country_name']);
+
+		if (
+			$exclude_hfc_event_books &&
+			!empty($data['country_code']) &&
+			!empty($data['type'])
+		) {
+			$this->db->where("
+				NOT EXISTS (
+					SELECT 1
+					FROM event_book eb
+					JOIN hall_of_fame_country hfc
+						ON hfc.event_id = eb.event_id
+					WHERE hfc.country_code = " . $this->db->escape($data['country_code']) . "
+					AND hfc.type = " . $this->db->escape($data['type']) . "
+					AND hfc.event_id > 0
+					AND hfc._deleted = 0
+					AND eb._deleted = 0
+					AND eb.book_id = order_product.product_id
+				)
+			", null, false);
+		}
+
+		return $this->db
+			->group_by('order_product.product_id')
+			->having('SUM(order_product.quantity) >=', $quantity_ge)
+			->get()
+			->result_array();
+	}
 }

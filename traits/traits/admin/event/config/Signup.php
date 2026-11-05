@@ -47,12 +47,12 @@ trait Signup {
 			$info['school_landing_page'] = json_decode($info['school_landing_page'], true);
 		}
 
-		if (!empty($info['country_otp_validation'])) {
-			$info['country_otp_validation'] = json_decode($info['country_otp_validation'], true);
+		if (isset($info['country_otp_validation']) && !empty($info['country_otp_validation'])) {
+			$info['country_otp_validation'] = json_decode($info['country_otp_validation'] ?? [], true);
 		}
 
 		log_kb([
-			'country_otp_validation' => $info['country_otp_validation']
+			'country_otp_validation' => $info['country_otp_validation'] ?? []
 		]);
 
 		$data['fields'][] = [
@@ -384,6 +384,22 @@ trait Signup {
 			],
 		];
 
+		$data['fields'][] = [
+			'type'		=> 'text',
+			'key'		=> 'user_form[username]',
+			'label'		=> _l('username'),
+			'required'	=> false,
+			'value'		=> $info['user_form']['username'] ?? _l('username'),
+		];
+
+		$data['fields'][] = [
+			'type'		=> 'text',
+			'key'		=> 'user_form[password]',
+			'label'		=> _l('password'),
+			'required'	=> false,
+			'value'		=> $info['user_form']['password'] ?? _l('password'),
+		];
+
 		$data['signup_fields']['user_form'] = $this->load->view('backend/admin/event/stage/generic', $data, true);
 
 		unset($data['fields']);
@@ -614,12 +630,12 @@ trait Signup {
 				[
 					'key' 	=> 'title',
 					'label' => _li('title'),
-					'value' => $info['school_landing_page']['title'],
+					'value' => $info['school_landing_page']['title'] ?? '',
 				],
 				[
 					'key' 	=> 'sub_title',
 					'label' => _li('sub_title'),
-					'value' => $info['school_landing_page']['sub_title'],
+					'value' => $info['school_landing_page']['sub_title'] ?? '',
 				]
 			],
 		];

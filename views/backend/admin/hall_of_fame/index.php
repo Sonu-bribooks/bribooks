@@ -15,7 +15,25 @@
 	<div class="col-xl-12">
 		<div class="card">
 			<div class="card-body">
-				<h4 class="mb-3 header-title"><?= $page_title . (($active_tab === 'event') ? ' '. _l('event_list') : ' ' . _l('country_list')); ?></h4>
+				<div class="row">
+					<div class="col-sm-9">
+						<h4 class="mb-3 header-title"><?= $page_title . (($active_tab === 'event') ? ' '. _l('event_list') : ' ' . _l('country_list')); ?></h4>
+					</div>
+					<div class="col-sm-3">
+						<div class="form-group mb-2">
+							<select
+								class="form-control input-filter select2"
+								data-toggle="select2"
+								name="type"
+							>
+								<option value=""><?=_l('select_type')?></option>
+								<option value="global"><?=_l('global')?></option>
+								<option value="asia"><?=_l('asia')?></option>
+							</select>
+						</div>
+					</div>
+				</div>
+				
 				<?php include('nav.php'); ?>
 				<div class="tab-content">
 					<div class="tab-pane active" id="home" role="tabpanel">
@@ -29,6 +47,7 @@
                                             <th><?php echo _l('event_id'); ?></th>
 										    <th><?php echo _l('event_name'); ?></th>
                                         <?php } ?>
+										<th><?php echo _l('type'); ?></th>
 										<th><?php echo _l('country_code'); ?></th>
 										<th><?php echo _l('country_name'); ?></th>
 										<th><?php echo _l('book_sold'); ?></th>
@@ -86,6 +105,13 @@ $(function() {
 				$(row).css('background-color', '#fde0dc');
 			}
 		}
+	})
+});
+
+$(function() {
+	$(document).on('change', '.input-filter', function() {
+		$el = $(this);
+		table.ajax.url('<?= $action_ajax ?>?type=' + $el.val()).load();
 	})
 });
 

@@ -418,8 +418,7 @@ class Admin extends CI_Controller {
 		EventChallengeLiteraryLeader,
 		EventChallengeAmazon,
 		AmazonOrder,
-		GlobalHallOfFame,
-		AsiaHallOfFame,
+		HallOfFames,
 		EventChallengeGrade,
 		SchoolCertificateTemplate,
 		SchoolCertificateMessageTemplates

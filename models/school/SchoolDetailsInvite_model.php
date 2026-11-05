@@ -12,11 +12,11 @@ class SchoolDetailsInvite_model extends CI_Model {
 		$this->db->select('*');
 		$this->db->where('id', (int)$id);
 
-		return $this->db->get('school_details_nyaf_invites')->row_array();
+		return $this->db->get('school_details_event_invites')->row_array();
 	}
 
 	public function add($data = []) {
-		$this->db->insert('school_details_nyaf_invites', $data + [
+		$this->db->insert('school_details_event_invites', $data + [
 			'date_added'	=> date('Y-m-d H:i:s'),
 			'date_modified'	=> date('Y-m-d H:i:s'),
 		]);
@@ -27,24 +27,24 @@ class SchoolDetailsInvite_model extends CI_Model {
 
 	public function edit($id = 0, $data = []) {
 		$this->db->where('id', (int)$id);
-		$this->db->update('school_details_nyaf_invites', $data + [
+		$this->db->update('school_details_event_invites', $data + [
 			'date_modified'	=> date('Y-m-d H:i:s'),
 		]);
 	}
 
 	public function getNyafSchoolInvite($data = []) {
-		$this->db->select('*, school_details_nyaf_invites.status AS invite_status, school_details_nyaf_invites.date_modified AS invite_date_added');
+		$this->db->select('*, school_details_event_invites.status AS invite_status, school_details_event_invites.date_modified AS invite_date_added');
 
 		if (isset($data['event_id'])) {
-			$this->db->where('school_details_nyaf_invites.event_id', (int)$data['event_id']);
+			$this->db->where('school_details_event_invites.event_id', (int)$data['event_id']);
 		}
 
 		if (isset($data['status'])) {
-			$this->db->where('school_details_nyaf_invites.status', (int)$data['status']);
+			$this->db->where('school_details_event_invites.status', (int)$data['status']);
 		}
 
 		if (isset($data['verified'])) {
-			$this->db->where(sprintf('school_details_nyaf_invites.site_id IN (SELECT school_details_nyaf_guest.site_id from school_details_nyaf_guest WHERE school_details_nyaf_guest.event_id = school_details_nyaf_invites.event_id AND school_details_nyaf_guest.site_id = school_details_nyaf_invites.site_id AND school_details_nyaf_guest.verified = %s)', (int)$data['verified']));
+			$this->db->where(sprintf('school_details_event_invites.site_id IN (SELECT school_details_nyaf_guest.site_id from school_details_nyaf_guest WHERE school_details_nyaf_guest.event_id = school_details_event_invites.event_id AND school_details_nyaf_guest.site_id = school_details_event_invites.site_id AND school_details_nyaf_guest.verified = %s)', (int)$data['verified']));
 		}
 
 		if (!empty($data['search'])) {
@@ -54,8 +54,8 @@ class SchoolDetailsInvite_model extends CI_Model {
 			$this->db->or_like('site.site_code', $data['search'], 'after');
 		}
 
-		$this->db->join('site', 'site.id = school_details_nyaf_invites.site_id', 'left');
-		$this->db->from('school_details_nyaf_invites');
+		$this->db->join('site', 'site.id = school_details_event_invites.site_id', 'left');
+		$this->db->from('school_details_event_invites');
 
 		$total = $this->db->count_all_results('', FALSE);
 
@@ -74,14 +74,14 @@ class SchoolDetailsInvite_model extends CI_Model {
 		$sort_data = [
 			'site.id',
 			'site.name',
-			'school_details_nyaf_invites.date_added',
-			'school_details_nyaf_invites.date_modified',
+			'school_details_event_invites.date_added',
+			'school_details_event_invites.date_modified',
 		];
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
 			$sort = $data['sort'];
 		} else {
-			$sort = 'school_details_nyaf_invites.id';
+			$sort = 'school_details_event_invites.id';
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'ASC')) {
