@@ -641,7 +641,7 @@ final class EventListener_lib {
 		if (empty($user_info['email']) && empty($user_info['mobile'])) return;
 
 		$formatted_data = [
-			'buyer_name'		=> sprintf('%s %s', $user_info['first_name'], $user_info['last_name']),
+			'name'		=> sprintf('%s %s', $user_info['first_name'], $user_info['last_name']),
 			'order_code'		=> $order_info['order_code'],
 			'order_details' 	=> $data['order_details'],
 		];
@@ -685,7 +685,7 @@ final class EventListener_lib {
 		if (empty($user_info['email']) && empty($user_info['mobile'])) return;
 
 		$formatted_data = [
-			'buyer_name'		=> sprintf('%s %s', $user_info['first_name'], $user_info['last_name']),
+			'name'				=> sprintf('%s %s', $user_info['first_name'], $user_info['last_name']),
 			'order_code'		=> $order_info['order_code'],
 			'order_details' 	=> $data['order_details'],
 			'book_name' 		=> $data['book_name'] ?? '',
@@ -731,7 +731,7 @@ final class EventListener_lib {
 		if (empty($user_info['email']) && empty($user_info['mobile'])) return;
 
 		$formatted_data = [
-			'buyer_name'		=> sprintf('%s %s', $user_info['first_name'], $user_info['last_name']),
+			'name'				=> sprintf('%s %s', $user_info['first_name'], $user_info['last_name']),
 			'order_code'		=> $order_info['order_code'],
 			'order_details' 	=> $data['order_details'],
 			'book_name' 		=> $data['book_name'] ?? '',

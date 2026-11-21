@@ -71,7 +71,8 @@ class Admin extends CI_Controller {
 		$this->load->model('common/MessageTemplateType_model', 'message_template_type_model');
 		$this->load->model('common/MessageTemplate_model', 'message_template_model');
 		$this->load->model('common/LeagueTemplate_model', 'league_template_model');
-
+		$this->load->model('common/Consent_model', 'consent_model');
+		
 		// localisation
 		$this->load->model('localisation/Country_model', 'country_model');
 		$this->load->model('localisation/State_model', 'state_model');
@@ -421,7 +422,8 @@ class Admin extends CI_Controller {
 		HallOfFames,
 		EventChallengeGrade,
 		SchoolCertificateTemplate,
-		SchoolCertificateMessageTemplates
+		SchoolCertificateMessageTemplates,
+		Consents
 	;
 
 	public function index() {

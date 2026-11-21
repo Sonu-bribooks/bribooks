@@ -98,6 +98,7 @@ class HallOfFame_model extends CI_Model {
 			hall_of_fame_books.event_id,
 			hall_of_fame_books.location,
 			hall_of_fame_books.country_code,
+			hall_of_fame_books.id AS hall_of_fame_id,
 			bookstore.*,
 			COALESCE((
 				SELECT hfc.priority
@@ -329,5 +330,43 @@ class HallOfFame_model extends CI_Model {
 		]);
 
 		return $this->db->affected_rows();
+	}
+
+	public function checkExistingHallOfFameBooks($data = []) {
+		$this->db->select('hall_of_fame_books.*');
+
+		if (isset($data['country_code'])) {
+			$this->db->where('hall_of_fame_books.country_code', $data['country_code']);
+		}
+
+		if (isset($data['book_id'])) {
+			$this->db->where('hall_of_fame_books.book_id', (int)$data['book_id']);
+		}
+
+		if (isset($data['type'])) {
+			$this->db->where('hall_of_fame_books.type', $data['type']);
+		}
+
+		if (isset($data['event_id'])) {
+			$this->db->where('hall_of_fame_books.event_id', $data['event_id']);
+		}
+
+		if (isset($data['is_event'])) {
+			$this->db->where('hall_of_fame_books.event_id >', 0);
+		}
+
+		if (isset($data['status'])) {
+            $this->db->where('hall_of_fame_books.status', $data['status']);
+        }
+
+		if (isset($data['is_country'])) {
+			$this->db->where('hall_of_fame_books.event_id', 0);
+		}
+
+		$this->db->where('hall_of_fame_books._deleted', 0);
+
+		$this->db->from('hall_of_fame_books');
+
+		return $this->db->get('hall_of_fame_books')->row_array();
 	}
 }

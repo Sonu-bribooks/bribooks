@@ -55,6 +55,7 @@ CI_Events::on('referral_student_signup', 'NYAFEventListener_lib::referralStudent
 
 CI_Events::on('school_event_auto_enrol', 'GenericEventListener_lib::schoolEventAutoEnrol');
 CI_Events::on('teacher_event_auto_enrol', 'GenericEventListener_lib::teacherEventAutoEnrol');
+CI_Events::on('user_consent_audit_log', 'GenericEventListener_lib::userConsentAuditLog');
 
 // event crm based Listener
 CI_Events::on('event_signup', 'GenericEventListener_lib::eventSignup');

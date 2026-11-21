@@ -448,6 +448,27 @@ trait Localisation {
 		output_json($json);
 	}
 
+	public function ajax_search_country_code() {
+		$json = [];
+
+		$filter_data = [
+			'start'				=> 0,
+			'limit'				=> 10,
+			'search'			=> $this->input->get('search'),
+		];
+
+		$results = $this->country_model->get_all($filter_data)['rows'] ?? [];
+
+		foreach ($results as $key => $result) {
+			$json[] = [
+				'id'				=> $result['code'],
+				'text'				=> $result['name'],
+			];
+		}
+
+		output_json($json);
+	}
+
 	public function ajax_search_state() {
 		$json = [];
 

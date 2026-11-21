@@ -26,6 +26,8 @@ class Api extends CI_Controller {
 		$this->load->model('common/Online_model', 'online_model');
 		$this->load->model('common/Notification_model', 'notification_model');
 		$this->load->model('common/SearchLog_model', 'search_log_model');
+		$this->load->model('common/Consent_model', 'consent_model');
+		$this->load->model('common/ConsentAuditLog_model', 'consent_audit_log_model');
 
 		$this->load->model('user/User_model', 'user_model');
 		$this->load->model('user/Student_model', 'student_model');
@@ -265,7 +267,8 @@ class Api extends CI_Controller {
 		ShortUrl,
 		SchoolCertificate,
 		HallOfFame,
-		EventAuthor
+		EventAuthor,
+		Consent
 	;
 
 	public function index() {

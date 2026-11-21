@@ -101,6 +101,10 @@ trait Signup {
 					'module'	=> 'user_signup'
 				]);
 
+				CI_Events::trigger('user_consent_audit_log', [
+					'user_id'	=> (int)$user_id
+				]);
+
 				// add to event
 				if (
 					!empty($lead_info['event_id']) &&

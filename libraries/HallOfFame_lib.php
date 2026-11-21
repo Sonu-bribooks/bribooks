@@ -131,7 +131,7 @@ final class HallOfFame_lib {
 				$filter_data['event_id'] = (int)$event_id;
 			}
 
-			if (empty($hall_of_fame_info = $hof_model->get_all($filter_data)['rows'][0])) {
+			if (empty($hall_of_fame_info = $hof_model->checkExistingHallOfFameBooks($filter_data))) {
 				$hall_of_fame_id = $hof_model->add([
 					'book_id'		=> $book_id,
 					'event_id'		=> $event_id,

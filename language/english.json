@@ -1840,5 +1840,9 @@
     "%s_%s_%s_%s": "%s %s %s %s",
     "best_seller": "Best seller",
     "guests": "Guests",
-    "%s_<br>%s_<br>%s_<br>%s<br>": "%s <br>%s <br>%s <br>%s<br>"
+    "%s_<br>%s_<br>%s_<br>%s<br>": "%s <br>%s <br>%s <br>%s<br>",
+    "consent": "Consent",
+    "consents": "Consents",
+    "consent_add": "Consent add",
+    "consent_edit": "Consent edit"
 }

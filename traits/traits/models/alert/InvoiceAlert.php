@@ -184,8 +184,7 @@ trait InvoiceAlert {
 			});
 
 			$has_ebook_copies = array_filter($products, function($item) {
-				$option = json_decode($item['option'], true);
-				return (mb_strtolower($option['name'] ?? '') === 'ebook');
+				return (in_array(mb_strtolower($item['option']), ['ebook']));
 			});
 
 			log_kb([
@@ -230,7 +229,7 @@ trait InvoiceAlert {
 				}
 			}
 
-			if (!empty($has_ebook_copies) && $email) {
+			if (!empty($has_ebook_copies)) {
 				foreach ($has_ebook_copies as $value) {
 					if (!empty($book_info = $this->book_model->get($value['product_id']))) {
 						log_kb(['order_confirmation_ebook::book_info' => $book_info]);

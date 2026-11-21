@@ -79,6 +79,19 @@
 		<div class="card">
 			<div class="card-body">
 				<h4 class="mb-3 header-title"><?=$page_title ?></h4>
+
+				<?php if (!empty($navs)) { ?>
+				<ul class="nav nav-tabs" role="tablist">
+					<?php foreach ($navs as $key => $item) { ?>
+						<li class="nav-item">
+							<a class="nav-link <?= $nav == $item['key'] ? 'active' : '' ?>" data-bs-toggle="tab" href="<?=base_url($item['url']) ?>" role="tab">
+								<span class="d-block d-sm-none"><i class="far fa-envelope"></i></span>
+								<span class="d-none d-sm-block"><?=$item['name'] ?></span>
+							</a>
+						</li>
+					<?php } ?>
+				</ul>
+				<?php } ?>
 				<div class="table-responsive mt-4">
 					<table id="ajax-datatable" class="table table-striped table-centered mb-0">
 						<thead>

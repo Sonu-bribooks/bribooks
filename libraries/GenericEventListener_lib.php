@@ -235,4 +235,35 @@ final class GenericEventListener_lib {
 			]);
 		}
 	}
+
+	public static function userConsentAuditLog(...$params) {
+		list($data) = $params;
+
+		log_kb([
+			'GenericEventListener_lib::userConsentAuditLog' => [$params, $data]
+		]);
+
+		if (empty($data['user_id'])) return;
+
+		$CI =& get_instance();
+		$CI->load->library('user_agent');
+		$CI->load->model('common/ConsentAuditLog_model', 'consent_audit_log_model');
+
+		$user_consent_info = $CI->consent_audit_log_model->get_all([
+				'user_id' => $data['user_id'],
+				'start' 	=> 0,
+				'limit' 	=> 1
+			])['rows'][0] ?? [];
+
+		if (empty($user_consent_info)) {
+			$CI->consent_audit_log_model->add([
+				'user_id' 		=> $data['user_id'] ?? 0,
+				'consent_id' 	=> $data['consent_id'] ?? 0,
+				'version'		=> $data['version'] ?? 0,
+				'ip'			=> $CI->input->ip_address(),
+				'platform'		=> $CI->agent->platform() ?: 'unknown',
+				'agent'			=> $CI->agent->agent_string() ?: 'unknown',
+			]);
+		}
+	}
 }

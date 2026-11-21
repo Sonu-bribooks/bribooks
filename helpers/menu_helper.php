@@ -1094,6 +1094,11 @@ if (!function_exists('get_navigation_menus')) {
 					'name'	=> _l('notification'),
 					'url'	=> 'admin/notification',
 				],
+				[
+					'key'	=> 'consents',
+					'name'	=> _l('consents'),
+					'url'	=> 'admin/consent',
+				],
 			],
 		];
 
