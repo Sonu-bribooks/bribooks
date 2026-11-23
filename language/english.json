@@ -1844,5 +1844,6 @@
     "consent": "Consent",
     "consents": "Consents",
     "consent_add": "Consent add",
-    "consent_edit": "Consent edit"
+    "consent_edit": "Consent edit",
+    "add_event_challenge_general": "Add event challenge general"
 }

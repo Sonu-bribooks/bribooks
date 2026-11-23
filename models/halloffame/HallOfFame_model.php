@@ -369,4 +369,50 @@ class HallOfFame_model extends CI_Model {
 
 		return $this->db->get('hall_of_fame_books')->row_array();
 	}
+
+	public function getCountryWiseData($type = 'global') {
+		$this->db->select("
+			hall_of_fame_books.country_code,
+			MAX(hall_of_fame_books.location) AS country,
+			COUNT(hall_of_fame_books.id) AS total
+		", false);
+
+		$this->db->from('hall_of_fame_books');
+		$this->db->join('bookstore', 'bookstore.book_id = hall_of_fame_books.book_id');
+
+		$this->db->where('hall_of_fame_books.type', $type);
+		$this->db->where('hall_of_fame_books._deleted', 0);
+		$this->db->where('bookstore._deleted', 0);
+
+		$this->db->where("
+			bookstore.sold >= COALESCE((
+				SELECT hfc.book_sold
+				FROM hall_of_fame_country hfc
+				WHERE hfc.country_code = hall_of_fame_books.country_code
+				AND hfc.event_id = CASE
+					WHEN EXISTS (
+						SELECT 1
+						FROM hall_of_fame_country ehfc
+						WHERE ehfc.country_code = hall_of_fame_books.country_code
+						AND ehfc.event_id = hall_of_fame_books.event_id
+						AND ehfc.event_id > 0
+						AND ehfc.type = " . $this->db->escape($type) . "
+						AND ehfc._deleted = 0
+						AND ehfc.status = 1
+					)
+					THEN hall_of_fame_books.event_id
+					ELSE 0
+				END
+				AND hfc._deleted = 0
+				AND hfc.status = 1
+				AND hfc.type = " . $this->db->escape($type) . "
+				LIMIT 1
+			), 1)
+		", null, false);
+
+		$this->db->group_by('hall_of_fame_books.country_code');
+		$this->db->order_by('country', 'ASC');
+
+		return $this->db->get()->result_array();
+	}
 }
