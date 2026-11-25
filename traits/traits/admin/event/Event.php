@@ -40,7 +40,8 @@ trait Event {
 		EventInviteTemplate,
 		EventInvite,
 		AuthorWall,
-		EventExhibition
+		EventExhibition,
+		LeagueAward
 	;
 
 	public function event($action = NULL, $id = NULL) {

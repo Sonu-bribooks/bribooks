@@ -193,6 +193,7 @@ class Admin extends CI_Controller {
 		$this->load->model('event/EventChallengeJury_model', 'event_challenge_jury_model');
 		$this->load->model('event/EventPdf_model', 'event_pdf_model');
 		$this->load->model('event/MasterClass_model', 'master_class_model');
+		$this->load->model('event/LeagueAward_model', 'league_award_model');
 
 		//subscription
 		$this->load->model('subscription/SubscriptionPlan_model', 'subscription_plan_model');

@@ -785,6 +785,11 @@ if (!function_exists('get_navigation_menus')) {
 					'name'	=> _l('event_challenge_grade'),
 					'url'	=> 'admin/event_challenges_grade',
 				],
+				[
+					'key'	=> 'league_award',
+					'name'	=> _l('league_award'),
+					'url'	=> 'admin/league_award',
+				],
 				 
 			],
 		];

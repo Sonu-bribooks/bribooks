@@ -268,7 +268,8 @@ class Api extends CI_Controller {
 		SchoolCertificate,
 		HallOfFame,
 		EventAuthor,
-		Consent
+		Consent,
+		LeagueAward
 	;
 
 	public function index() {

@@ -134,7 +134,7 @@ trait EventAward {
 		$json['recordsFiltered'] 	= $results['total'];
 
 		foreach ($results['rows'] ?? [] as $key => $result) {
-			$user_info = $this->user_model->get($result['user_id']);
+			$user_info = $this->user_model->get($result['user_id'] ?? '');
 
 			$json['data'][] = [
 				'sn'					=> $filter_data['start'] + 1 + $key,

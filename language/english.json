@@ -1845,5 +1845,22 @@
     "consents": "Consents",
     "consent_add": "Consent add",
     "consent_edit": "Consent edit",
-    "add_event_challenge_general": "Add event challenge general"
+    "add_event_challenge_general": "Add event challenge general",
+    "league_award": "League award",
+    "event_award_add": "Event award add",
+    "event_award_group_add": "Event award group add",
+    "sub_user": "Sub user",
+    "reference_id": "Reference id",
+    "award": "Award",
+    "add_league_award": "Add league award",
+    "sold_count": "Sold count",
+    "display_order": "Display order",
+    "rank_name": "Rank name",
+    "edit_league_award": "Edit league award",
+    "select_award_type": "Select award type",
+    "book_rank": "Book rank",
+    "order_privy": "Order privy",
+    "confirmed": "Confirmed",
+    "option": "Option",
+    "confirm_date": "Confirm date"
 }
